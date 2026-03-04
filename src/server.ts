@@ -5,6 +5,7 @@ import { verifyRoute } from "./routes/verify.js"
 import { healthRoute } from "./routes/health.js"
 import { payRoute } from "./routes/pay.js"
 import { createRateLimiter } from "./middleware/rateLimit.js"
+import { wellKnownRoute } from "./routes/wellKnown.js"
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
@@ -50,6 +51,7 @@ async function start() {
   await healthRoute(app)
   await quoteRoute(app)
   await verifyRoute(app)
+  await wellKnownRoute(app)
 
   // Solo habilitamos /pay/confirm en file mode
   if (PAYMENT_MODE === "file") {
