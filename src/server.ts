@@ -1,39 +1,43 @@
-// src/server.ts
 import Fastify from "fastify"
-import { quoteRoute } from "./routes/quote.js"
-import { verifyRoute } from "./routes/verify.js"
-import { healthRoute } from "./routes/health.js"
-import { payRoute } from "./routes/pay.js"
-import { createRateLimiter } from "./middleware/rateLimit.js"
-import { wellKnownRoute } from "./routes/wellKnown.js"
-import { openApiRoute } from "./routes/openapi.js"
+
+import { healthRoute } from "./routes/health"
+import { quoteRoute } from "./routes/quote"
+import { verifyRoute } from "./routes/verify"
+import { payRoute } from "./routes/pay"
+import { wellKnownRoute } from "./routes/wellKnown"
+import { openApiRoute } from "./routes/openapi"
+
+import { createRateLimiter } from "./middleware/rateLimit"
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
 
-// Hard limits (seguridad)
-const BODY_LIMIT_BYTES = Number(process.env.BODY_LIMIT_BYTES || 32_000) // 32KB
-const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 6_000) // 6s
+const BODY_LIMIT_BYTES = Number(process.env.BODY_LIMIT_BYTES || 32_000)
+const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 6_000)
 
-// Rate limit (por IP)
-const RL_CAPACITY = Number(process.env.RL_CAPACITY || 120)     // 120 tokens
-const RL_REFILL_PER_SEC = Number(process.env.RL_REFILL_PER_SEC || 2) // 2 tokens/sec (~120/min)
+const RL_CAPACITY = Number(process.env.RL_CAPACITY || 120)
+const RL_REFILL_PER_SEC = Number(process.env.RL_REFILL_PER_SEC || 2)
 
+// Si estás en modo file (simulación), dejamos /pay/confirm.
+// Si querés desactivarlo en prod, setear PAYMENT_MODE=onchain.
 const PAYMENT_MODE = (process.env.PAYMENT_MODE || "file") as "file" | "onchain"
 
 const app = Fastify({
-  logger: false,
+  logger: true,
   bodyLimit: BODY_LIMIT_BYTES
 })
 
-// Timeout simple: si una request excede REQUEST_TIMEOUT_MS, devolvemos 503
-app.addHook("onRequest", async (req, reply) => {
+// Timeout seguro (evita doble respuesta)
+app.addHook("onRequest", async (_req, reply) => {
   const t = setTimeout(() => {
     if (!reply.sent) {
+      ;(reply as any).__timedOut = true
       reply.code(503).send({ error: "timeout", hint: "Request took too long" })
     }
   }, REQUEST_TIMEOUT_MS)
+
   ;(reply as any).__timeout = t
+  ;(reply as any).__timedOut = false
 })
 
 app.addHook("onResponse", async (_req, reply) => {
@@ -41,7 +45,7 @@ app.addHook("onResponse", async (_req, reply) => {
   if (t) clearTimeout(t)
 })
 
-// Rate limit hook (global)
+// Rate limit global
 const rateLimiter = createRateLimiter({
   capacity: RL_CAPACITY,
   refillPerSec: RL_REFILL_PER_SEC
@@ -49,18 +53,21 @@ const rateLimiter = createRateLimiter({
 app.addHook("preHandler", rateLimiter)
 
 async function start() {
-  await healthRoute(app)
+  // Registrar rutas como plugins (Fastify correcto)
+  await app.register(healthRoute)
   await app.register(quoteRoute)
   await app.register(verifyRoute)
-  await wellKnownRoute(app)
-  await openApiRoute(app)
-  
-  // Solo habilitamos /pay/confirm en file mode
-  if (process.env.ADMIN_TOKEN) {
-  await app.register(payRoute)
-}
+  await app.register(wellKnownRoute)
+  await app.register(openApiRoute)
+
+  if (PAYMENT_MODE === "file") {
+    await app.register(payRoute)
+  }
 
   await app.listen({ port: PORT, host: HOST })
 }
 
-start()
+start().catch((err) => {
+  app.log.error(err, "Fatal startup error")
+  process.exit(1)
+})
