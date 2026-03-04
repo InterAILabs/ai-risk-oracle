@@ -50,15 +50,15 @@ app.addHook("preHandler", rateLimiter)
 
 async function start() {
   await healthRoute(app)
-  await quoteRoute(app)
-  await verifyRoute(app)
+  await app.register(quoteRoute)
+  await app.register(verifyRoute)
   await wellKnownRoute(app)
   await openApiRoute(app)
   
   // Solo habilitamos /pay/confirm en file mode
-  if (PAYMENT_MODE === "file") {
-    await payRoute(app)
-  }
+  if (process.env.ADMIN_TOKEN) {
+  await app.register(payRoute)
+}
 
   await app.listen({ port: PORT, host: HOST })
 }
