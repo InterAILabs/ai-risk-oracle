@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node --experimental-specifier-resolution=node dist/server.js"
   },
   "dependencies": {
     "fastify": "^4.25.0"
