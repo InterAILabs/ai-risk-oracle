@@ -9,7 +9,7 @@ import { openApiRoute } from "./routes/openapi"
 
 import { createRateLimiter } from "./middleware/rateLimit"
 
-const PORT = Number(process.env.PORT || 8080)
+const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
 
 const BODY_LIMIT_BYTES = Number(process.env.BODY_LIMIT_BYTES || 32_000)
