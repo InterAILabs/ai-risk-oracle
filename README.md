@@ -1,0 +1,183 @@
+# InterAI Risk Oracle
+
+AI-to-AI infrastructure service for **response consistency and hallucination risk detection**.
+
+This API allows agents, applications, and LLM pipelines to **verify the reliability of an AI-generated response** before trusting it.
+
+The service is **payment-gated** using a machine-to-machine micropayment model.
+
+---
+
+# Live API
+
+
+https://ai-risk-oracle.fly.dev
+
+
+Health check:
+
+
+GET /health
+
+
+---
+
+# Core Concept
+
+Agents can call this API to ask:
+
+> "Is this response internally consistent and reliable?"
+
+The API returns a **risk score** and recommendation.
+
+Example output:
+
+```json
+{
+"consistency_score": 0.83,
+"hallucination_risk": 0.17,
+"risk_level": "low",
+"recommended_action": "accept"
+}
+Payment Model
+
+The API uses a 402-style payment flow.
+
+Workflow:
+
+
+Agent
+│
+▼
+POST /quote
+│
+▼
+receive payment_reference
+│
+▼
+pay
+│
+▼
+POST /verify
+Header: X-Payment-Ref
+
+Quickstart (2 minutes)
+1 Request a quote
+curl https://ai-risk-oracle.fly.dev/quote \
+-X POST \
+-H "Content-Type: application/json" \
+-d '{
+"prompt": "What is the capital of France?",
+"response": "Paris is the capital of France.",
+"mode": "fast"
+}'
+
+Example response:
+
+{
+"payment_reference": "abc123",
+"amount": "0.0006",
+"currency": "USDC"
+}
+2 Verify response
+curl https://ai-risk-oracle.fly.dev/verify \
+-X POST \
+-H "Content-Type: application/json" \
+-H "X-Payment-Ref: abc123" \
+-d '{
+"prompt": "What is the capital of France?",
+"response": "Paris is the capital of France."
+}'
+
+Response:
+
+{
+"consistency_score": 0.83,
+"hallucination_risk": 0.17,
+"risk_level": "low",
+"recommended_action": "accept"
+}
+Endpoints
+Health
+GET /health
+
+Returns service status.
+
+Quote
+POST /quote
+
+Request:
+
+{
+"prompt": "...",
+"response": "...",
+"mode": "fast"
+}
+
+Returns payment quote.
+
+Verify
+POST /verify
+
+Headers:
+
+X-Payment-Ref: <payment_reference>
+
+Request:
+
+{
+"prompt": "...",
+"response": "...",
+"domain": "general"
+}
+OpenAPI
+
+Machine-readable API specification:
+
+/.well-known/openapi.json
+AI Service Discovery
+
+Agents can discover this service via:
+
+/.well-known/ai-service.json
+SDK Example (TypeScript)
+import { quote, verify } from "./sdk/interai-risk-oracle"
+
+const base = "https://ai-risk-oracle.fly.dev"
+
+const q = await quote(base, prompt, response)
+
+const result = await verify(base, q.payment_reference, prompt, response)
+
+console.log(result)
+Use Cases
+
+LLM output validation
+
+hallucination detection
+
+AI agent self-checking
+
+multi-agent verification
+
+safety guardrails
+
+Performance
+
+Load tests (local benchmark):
+
+~900 requests/sec
+p95 latency ~125ms
+Architecture
+
+Client / Agent
+│
+▼
+AI Risk Oracle API
+│
+▼
+Heuristic engine
+
+License
+
+MIT
