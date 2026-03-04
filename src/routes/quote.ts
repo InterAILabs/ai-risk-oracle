@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { randomUUID } from "crypto"
-import { createQuote } from "../payments/fileStore"
+import { createQuote } from "../payments/fileStore.js"
 
 const PRICING: Record<string, string> = {
   fast: "0.0006"

@@ -1,4 +1,4 @@
-import { markPaid } from "../payments/fileStore";
+import { markPaid } from "../payments/fileStore.js";
 export const payRoute = async (app) => {
     app.post("/pay/confirm", async (req, reply) => {
         const admin = req.headers["x-admin-token"];

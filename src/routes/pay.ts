@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify"
-import { markPaid } from "../payments/fileStore"
+import { markPaid } from "../payments/fileStore.js"
 
 export const payRoute: FastifyPluginAsync = async (app) => {
   app.post("/pay/confirm", async (req, reply) => {

@@ -1,5 +1,5 @@
-import { getPayment, consume } from "../payments/fileStore";
-import { scoreResponse } from "../engine/score";
+import { getPayment, consume } from "../payments/fileStore.js";
+import { scoreResponse } from "../engine/score.js";
 export const verifyRoute = async (app) => {
     app.post("/verify", async (req, reply) => {
         const ref = req.headers["x-payment-ref"];

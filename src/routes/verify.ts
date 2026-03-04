@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
-import { getPayment, consume } from "../payments/fileStore"
-import { scoreResponse } from "../engine/score"
+import { getPayment, consume } from "../payments/fileStore.js"
+import { scoreResponse } from "../engine/score.js"
 
 export const verifyRoute: FastifyPluginAsync = async (app) => {
   app.post("/verify", async (req, reply) => {

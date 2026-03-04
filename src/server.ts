@@ -1,11 +1,11 @@
 import Fastify from "fastify"
 
-import { healthRoute } from "./routes/health"
-import { quoteRoute } from "./routes/quote"
-import { verifyRoute } from "./routes/verify"
-import { payRoute } from "./routes/pay"
-import { wellKnownRoute } from "./routes/wellKnown"
-import { openApiRoute } from "./routes/openapi"
+import { healthRoute } from "./routes/health.js"
+import { quoteRoute } from "./routes/quote.js"
+import { verifyRoute } from "./routes/verify.js"
+import { payRoute } from "./routes/pay.js"
+import { wellKnownRoute } from "./routes/wellKnown.js"
+import { openApiRoute } from "./routes/openapi.js"
 
 import { createRateLimiter } from "./middleware/rateLimit"
 
