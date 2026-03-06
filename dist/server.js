@@ -5,6 +5,7 @@ import { verifyRoute } from "./routes/verify.js";
 import { payRoute } from "./routes/pay.js";
 import { wellKnownRoute } from "./routes/wellKnown.js";
 import { openApiRoute } from "./routes/openapi.js";
+import { verifyBatchRoute } from "./routes/verifyBatch.js";
 import { createRateLimiter } from "./middleware/rateLimit.js";
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
@@ -47,6 +48,7 @@ async function start() {
     await app.register(healthRoute);
     await app.register(quoteRoute);
     await app.register(verifyRoute);
+    await app.register(verifyBatchRoute);
     await app.register(wellKnownRoute);
     await app.register(openApiRoute);
     if (PAYMENT_MODE === "file") {
