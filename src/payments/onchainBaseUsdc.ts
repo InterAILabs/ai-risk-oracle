@@ -1,94 +1,63 @@
-// src/payments/onchainBaseUsdcRpc.ts
+import { createPublicClient, http, parseAbiItem, decodeEventLog } from "viem"
+import { base } from "viem/chains"
 
-type Hex = `0x${string}`
+const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
 
-export interface OnchainRpcVerifyInput {
+export type OnchainRpcVerifyInput = {
+  txHash: `0x${string}`
+  payTo: `0x${string}`
+  amount: string
   rpcUrl: string
-  txHash: Hex
-  usdcAddress: Hex
-  payTo: Hex
-  minAmountDecimal: string // "0.0006"
 }
 
-export interface OnchainRpcVerifyResult {
-  ok: boolean
-  reason?: string
-  paidAmountUnits?: bigint
-}
-
-// keccak256("Transfer(address,address,uint256)") topic0
-const TRANSFER_TOPIC0 =
-  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
-
-function toLowerHex(x: string): string {
-  return x.toLowerCase()
-}
-
-function padTopicAddress(addr: Hex): string {
-  // topic is 32 bytes; addresses are right-aligned (last 20 bytes)
-  // remove 0x then pad left to 64 hex chars
-  const a = addr.slice(2).toLowerCase()
-  return "0x" + a.padStart(64, "0")
-}
-
-function parseUsdcUnits(decimal: string, decimals = 6): bigint {
-  const [i, f = ""] = decimal.split(".")
-  const frac = (f + "0".repeat(decimals)).slice(0, decimals)
-  const intPart = BigInt(i || "0")
-  const fracPart = BigInt(frac || "0")
-  return intPart * BigInt(10 ** decimals) + fracPart
-}
-
-async function rpc(rpcUrl: string, method: string, params: any[]) {
-  const res = await fetch(rpcUrl, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params })
+export async function verifyUsdcPaymentOnBaseRpc(args: OnchainRpcVerifyInput) {
+  const client = createPublicClient({
+    chain: base,
+    transport: http(args.rpcUrl)
   })
-  if (!res.ok) throw new Error(`RPC HTTP ${res.status}`)
-  const json = await res.json()
-  if (json.error) throw new Error(`RPC error: ${json.error.message || "unknown"}`)
-  return json.result
-}
 
-export async function verifyUsdcPaymentOnBaseRpc(
-  input: OnchainRpcVerifyInput
-): Promise<OnchainRpcVerifyResult> {
-  const minUnits = parseUsdcUnits(input.minAmountDecimal, 6)
+  const receipt = await client.getTransactionReceipt({
+    hash: args.txHash
+  })
 
-  let receipt: any
-  try {
-    receipt = await rpc(input.rpcUrl, "eth_getTransactionReceipt", [input.txHash])
-  } catch (e) {
-    return { ok: false, reason: `rpc_failed: ${String(e)}` }
+  if (receipt.status !== "success") {
+    return { ok: false as const, error: "tx_failed" }
   }
 
-  if (!receipt) return { ok: false, reason: "tx_not_found" }
-  if (receipt.status !== "0x1") return { ok: false, reason: "tx_failed" }
+  const transferEvent = parseAbiItem(
+    "event Transfer(address indexed from,address indexed to,uint256 value)"
+  )
 
-  const usdc = toLowerHex(input.usdcAddress)
-  const payToTopic = padTopicAddress(input.payTo)
+  const logs = receipt.logs
+    .filter((l: any) => l.address.toLowerCase() === USDC_BASE.toLowerCase())
+    .map((l: any) => {
+      try {
+        return decodeEventLog({
+          abi: [transferEvent],
+          data: l.data,
+          topics: l.topics
+        })
+      } catch {
+        return null
+      }
+    })
+    .filter(Boolean)
 
-  const logs: any[] = receipt.logs || []
+  const payToLower = args.payTo.toLowerCase()
 
-  for (const log of logs) {
-    if (!log?.address || toLowerHex(log.address) !== usdc) continue
-    const topics: string[] = log.topics || []
-    if (topics.length < 3) continue
-    if (toLowerHex(topics[0]) !== TRANSFER_TOPIC0) continue
+  const minUnits = BigInt(
+    Math.round(Number(args.amount) * 1_000_000)
+  )
 
-    // topics[2] = to
-    if (toLowerHex(topics[2]) !== toLowerHex(payToTopic)) continue
+  const paid = logs.some((ev: any) => {
+    const toOk = ev.args.to.toLowerCase() === payToLower
+    const valOk = ev.args.value >= minUnits
+    return toOk && valOk
+  })
 
-    // data = value (uint256)
-    const data: string = log.data
-    if (!data || !data.startsWith("0x")) continue
-
-    const value = BigInt(data)
-    if (value >= minUnits) {
-      return { ok: true, paidAmountUnits: value }
-    }
+  if (!paid) {
+    return { ok: false as const, error: "no_usdc_transfer_to_payto" }
   }
 
-  return { ok: false, reason: "no_matching_usdc_transfer" }
+  return { ok: true as const }
 }
