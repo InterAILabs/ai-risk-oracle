@@ -25,12 +25,22 @@ export const verifyRoute = async (app) => {
             if (!rpcUrl)
                 return reply.code(500).send({ error: "missing_BASE_RPC_URL" });
             const payTo = payment.pay_to;
-            const ok = await verifyUsdcPaymentOnBaseRpc({
-                txHash: tx,
-                payTo,
-                amount: payment.amount,
-                rpcUrl
-            });
+            let ok;
+            try {
+                ok = await verifyUsdcPaymentOnBaseRpc({
+                    txHash: tx,
+                    payTo,
+                    amount: payment.amount,
+                    rpcUrl
+                });
+            }
+            catch (err) {
+                const msg = String(err?.message || "");
+                if (msg.includes("could not be found")) {
+                    return reply.code(402).send({ error: "payment_tx_not_found" });
+                }
+                return reply.code(500).send({ error: "onchain_verification_failed" });
+            }
             if (!ok.ok)
                 return reply.code(402).send({ error: ok.error });
             markTxUsed(tx, ref);

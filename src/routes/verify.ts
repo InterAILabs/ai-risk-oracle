@@ -26,12 +26,26 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
 
       const payTo = payment.pay_to as `0x${string}`
 
-      const ok = await verifyUsdcPaymentOnBaseRpc({
-      txHash: tx as `0x${string}`,
-      payTo,
-      amount: payment.amount,
-      rpcUrl
-    })
+      let ok:
+  | { ok: true }
+  | { ok: false; error: string }
+
+try {
+  ok = await verifyUsdcPaymentOnBaseRpc({
+    txHash: tx as `0x${string}`,
+    payTo,
+    amount: payment.amount,
+    rpcUrl
+  })
+} catch (err: any) {
+  const msg = String(err?.message || "")
+
+  if (msg.includes("could not be found")) {
+    return reply.code(402).send({ error: "payment_tx_not_found" })
+  }
+
+  return reply.code(500).send({ error: "onchain_verification_failed" })
+}
 
       if (!ok.ok) return reply.code(402).send({ error: ok.error })
 
