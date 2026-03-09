@@ -1,5 +1,7 @@
 # InterAI Risk Oracle
 
+Payment-gated AI response verification API for agents and LLM pipelines.
+
 AI-to-AI infrastructure service for **response consistency and hallucination risk detection**.
 
 This API allows agents, applications, and LLM pipelines to **verify the reliability of an AI-generated response** before trusting it.
