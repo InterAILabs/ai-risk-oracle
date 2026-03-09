@@ -61,6 +61,41 @@ pay
 POST /verify
 Header: X-Payment-Ref
 
+### Payment
+
+The API uses USDC on Base.
+
+Token:
+
+USDC  
+0x833589fcd6edb6e08f4c7c32d4f71b54bda02913
+
+Network:
+
+Base  
+chain_id: 8453
+
+The client must transfer the quoted amount to the address returned by `/quote`.
+
+After payment, call `/verify` using the `payment_reference`.
+
+## Pricing
+
+| Mode | Price |
+|-----|------|
+| fast | 0.0006 USDC |
+| batch | 0.0004 USDC per item |
+
+Stats
+
+GET /stats
+
+Returns basic service metrics:
+
+- quotes issued
+- payments confirmed
+- verifications executed
+
 Quickstart (2 minutes)
 1 Request a quote
 curl https://ai-risk-oracle.fly.dev/quote \
