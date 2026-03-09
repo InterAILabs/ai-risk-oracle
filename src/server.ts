@@ -3,10 +3,11 @@ import Fastify from "fastify"
 import { healthRoute } from "./routes/health.js"
 import { quoteRoute } from "./routes/quote.js"
 import { verifyRoute } from "./routes/verify.js"
+import { verifyBatchRoute } from "./routes/verifyBatch.js"
 import { payRoute } from "./routes/pay.js"
 import { wellKnownRoute } from "./routes/wellKnown.js"
 import { openApiRoute } from "./routes/openapi.js"
-import { verifyBatchRoute } from "./routes/verifyBatch.js"
+import { statsRoute } from "./routes/stats.js"
 import { createRateLimiter } from "./middleware/rateLimit.js"
 
 const PORT = Number(process.env.PORT || 3000)
@@ -18,8 +19,6 @@ const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 6_000)
 const RL_CAPACITY = Number(process.env.RL_CAPACITY || 120)
 const RL_REFILL_PER_SEC = Number(process.env.RL_REFILL_PER_SEC || 2)
 
-// Si estás en modo file (simulación), dejamos /pay/confirm.
-// Si querés desactivarlo en prod, setear PAYMENT_MODE=onchain.
 const PAYMENT_MODE = (process.env.PAYMENT_MODE || "file") as "file" | "onchain"
 
 const app = Fastify({
@@ -27,7 +26,6 @@ const app = Fastify({
   bodyLimit: BODY_LIMIT_BYTES
 })
 
-// Timeout seguro (evita doble respuesta)
 app.addHook("onRequest", async (_req, reply) => {
   const t = setTimeout(() => {
     if (!reply.sent) {
@@ -45,16 +43,16 @@ app.addHook("onResponse", async (_req, reply) => {
   if (t) clearTimeout(t)
 })
 
-// Rate limit global
 const rateLimiter = createRateLimiter({
   capacity: RL_CAPACITY,
   refillPerSec: RL_REFILL_PER_SEC
 })
+
 app.addHook("preHandler", rateLimiter)
 
 async function start() {
-  // Registrar rutas como plugins (Fastify correcto)
   await app.register(healthRoute)
+  await app.register(statsRoute)
   await app.register(quoteRoute)
   await app.register(verifyRoute)
   await app.register(verifyBatchRoute)

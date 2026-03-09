@@ -1,6 +1,7 @@
 import { getPayment, consume, markPaid, isTxUsed, markTxUsed } from "../payments/fileStore.js";
 import { scoreResponse } from "../engine/score.js";
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js";
+const ENGINE_VERSION = process.env.ORACLE_ENGINE_VERSION || "0.0.1";
 export const verifyRoute = async (app) => {
     app.post("/verify", async (req, reply) => {
         const ref = req.headers["x-payment-ref"];
@@ -13,7 +14,6 @@ export const verifyRoute = async (app) => {
             return reply.code(402).send({ error: "payment_expired" });
         if (payment.status === "consumed")
             return reply.code(402).send({ error: "payment_already_used" });
-        // --- ONCHAIN MODE (tx hash) ---
         const tx = req.headers["x-payment-tx"];
         const paymentMode = (process.env.PAYMENT_MODE || "file");
         if (paymentMode === "onchain") {
@@ -46,7 +46,6 @@ export const verifyRoute = async (app) => {
             markTxUsed(tx, ref);
             markPaid(ref, tx);
         }
-        // --- FILE MODE (admin confirm) ---
         if (payment.status !== "paid" && paymentMode === "file") {
             return reply.code(402).send({ error: "payment_not_confirmed" });
         }
@@ -56,10 +55,13 @@ export const verifyRoute = async (app) => {
             response: body?.response ?? "",
             domain: body?.domain ?? "general"
         });
-        // consume (1 pago = 1 verify)
         const consumed = consume(ref);
         if (!consumed)
             return reply.code(402).send({ error: "payment_not_confirmed" });
+        reply.header("X-Oracle-Cost", payment.amount);
+        reply.header("X-Oracle-Currency", "USDC");
+        reply.header("X-Oracle-Engine-Version", ENGINE_VERSION);
+        reply.header("X-Oracle-Latency-Ms", String(result.analysis.total_latency_ms ?? result.analysis.engine_latency_ms ?? 0));
         return result;
     });
 };

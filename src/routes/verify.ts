@@ -1,7 +1,15 @@
 import { FastifyPluginAsync } from "fastify"
-import { getPayment, consume, markPaid, isTxUsed, markTxUsed } from "../payments/fileStore.js"
+import {
+  getPayment,
+  consume,
+  markPaid,
+  isTxUsed,
+  markTxUsed
+} from "../payments/fileStore.js"
 import { scoreResponse } from "../engine/score.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
+
+const ENGINE_VERSION = process.env.ORACLE_ENGINE_VERSION || "0.0.1"
 
 export const verifyRoute: FastifyPluginAsync = async (app) => {
   app.post("/verify", async (req, reply) => {
@@ -13,7 +21,6 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
     if (payment.status === "expired") return reply.code(402).send({ error: "payment_expired" })
     if (payment.status === "consumed") return reply.code(402).send({ error: "payment_already_used" })
 
-    // --- ONCHAIN MODE (tx hash) ---
     const tx = req.headers["x-payment-tx"] as string | undefined
     const paymentMode = (process.env.PAYMENT_MODE || "file") as "file" | "onchain"
 
@@ -26,26 +33,22 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
 
       const payTo = payment.pay_to as `0x${string}`
 
-      let ok:
-  | { ok: true }
-  | { ok: false; error: string }
+      let ok: { ok: true } | { ok: false; error: string }
 
-try {
-  ok = await verifyUsdcPaymentOnBaseRpc({
-    txHash: tx as `0x${string}`,
-    payTo,
-    amount: payment.amount,
-    rpcUrl
-  })
-} catch (err: any) {
-  const msg = String(err?.message || "")
-
-  if (msg.includes("could not be found")) {
-    return reply.code(402).send({ error: "payment_tx_not_found" })
-  }
-
-  return reply.code(500).send({ error: "onchain_verification_failed" })
-}
+      try {
+        ok = await verifyUsdcPaymentOnBaseRpc({
+          txHash: tx as `0x${string}`,
+          payTo,
+          amount: payment.amount,
+          rpcUrl
+        })
+      } catch (err: any) {
+        const msg = String(err?.message || "")
+        if (msg.includes("could not be found")) {
+          return reply.code(402).send({ error: "payment_tx_not_found" })
+        }
+        return reply.code(500).send({ error: "onchain_verification_failed" })
+      }
 
       if (!ok.ok) return reply.code(402).send({ error: ok.error })
 
@@ -53,7 +56,6 @@ try {
       markPaid(ref, tx)
     }
 
-    // --- FILE MODE (admin confirm) ---
     if (payment.status !== "paid" && paymentMode === "file") {
       return reply.code(402).send({ error: "payment_not_confirmed" })
     }
@@ -65,9 +67,16 @@ try {
       domain: body?.domain ?? "general"
     })
 
-    // consume (1 pago = 1 verify)
     const consumed = consume(ref)
     if (!consumed) return reply.code(402).send({ error: "payment_not_confirmed" })
+
+    reply.header("X-Oracle-Cost", payment.amount)
+    reply.header("X-Oracle-Currency", "USDC")
+    reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
+    reply.header(
+      "X-Oracle-Latency-Ms",
+      String(result.analysis.total_latency_ms ?? result.analysis.engine_latency_ms ?? 0)
+    )
 
     return result
   })

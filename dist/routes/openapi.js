@@ -19,6 +19,13 @@ export async function openApiRoute(app) {
                         }
                     }
                 },
+                "/stats": {
+                    get: {
+                        responses: {
+                            "200": { description: "Service stats" }
+                        }
+                    }
+                },
                 "/quote": {
                     post: {
                         requestBody: {
@@ -30,21 +37,17 @@ export async function openApiRoute(app) {
                                         properties: {
                                             prompt: { type: "string" },
                                             response: { type: "string" },
-                                            mode: { type: "string", enum: ["fast"] }
+                                            mode: { type: "string", enum: ["fast", "batch"] },
+                                            items_count: { type: "integer" }
                                         },
-                                        required: ["prompt", "response", "mode"]
+                                        required: ["mode"]
                                     }
                                 }
                             }
                         },
                         responses: {
                             "200": {
-                                description: "Quote created",
-                                content: {
-                                    "application/json": {
-                                        schema: { type: "object" }
-                                    }
-                                }
+                                description: "Quote created"
                             }
                         }
                     }
@@ -56,6 +59,12 @@ export async function openApiRoute(app) {
                                 name: "X-Payment-Ref",
                                 in: "header",
                                 required: true,
+                                schema: { type: "string" }
+                            },
+                            {
+                                name: "X-Payment-Tx",
+                                in: "header",
+                                required: false,
                                 schema: { type: "string" }
                             }
                         ],
@@ -77,6 +86,53 @@ export async function openApiRoute(app) {
                         },
                         responses: {
                             "200": { description: "Verification result" },
+                            "402": { description: "Payment required" }
+                        }
+                    }
+                },
+                "/verify/batch": {
+                    post: {
+                        parameters: [
+                            {
+                                name: "X-Payment-Ref",
+                                in: "header",
+                                required: true,
+                                schema: { type: "string" }
+                            },
+                            {
+                                name: "X-Payment-Tx",
+                                in: "header",
+                                required: false,
+                                schema: { type: "string" }
+                            }
+                        ],
+                        requestBody: {
+                            required: true,
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            items: {
+                                                type: "array",
+                                                items: {
+                                                    type: "object",
+                                                    properties: {
+                                                        prompt: { type: "string" },
+                                                        response: { type: "string" },
+                                                        domain: { type: "string" }
+                                                    },
+                                                    required: ["prompt", "response"]
+                                                }
+                                            }
+                                        },
+                                        required: ["items"]
+                                    }
+                                }
+                            }
+                        },
+                        responses: {
+                            "200": { description: "Batch verification result" },
                             "402": { description: "Payment required" }
                         }
                     }

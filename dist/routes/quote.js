@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { createQuote } from "../payments/fileStore.js";
-const PRICING = { fast: "0.0006" };
+import { PRICING, getBatchAmount } from "../config/pricing.js";
 const TTL_MS = 10 * 60 * 1000;
 const CHAIN = "base";
 const CHAIN_ID = 8453;
@@ -13,21 +13,36 @@ export const quoteRoute = async (app) => {
     app.post("/quote", async (req, reply) => {
         const body = req.body;
         const mode = body?.mode ?? "fast";
-        if (!(mode in PRICING))
-            return reply.code(400).send({ error: "invalid_mode" });
-        const ref = randomUUID();
         const pay_to = (process.env.PAY_TO ||
             "0x0000000000000000000000000000000000000000");
-        createQuote(ref, PRICING[mode], pay_to, TTL_MS);
+        let amount = PRICING.fast.amount;
+        let items_count;
+        if (mode === "batch") {
+            items_count = Number(body?.items_count ?? 0);
+            if (!Number.isInteger(items_count) || items_count <= 0) {
+                return reply.code(400).send({ error: "invalid_items_count" });
+            }
+            if (items_count > PRICING.batch.max_items) {
+                return reply.code(400).send({ error: "batch_limit_exceeded" });
+            }
+            amount = getBatchAmount(items_count);
+        }
+        else if (mode !== "fast") {
+            return reply.code(400).send({ error: "invalid_mode" });
+        }
+        const ref = randomUUID();
+        createQuote(ref, amount, pay_to, TTL_MS);
         return {
             payment_reference: ref,
-            amount: PRICING[mode],
+            mode,
+            amount,
             currency: "USDC",
             chain: CHAIN,
             chain_id: CHAIN_ID,
             token: TOKEN,
             pay_to,
-            expires_at_ms: Date.now() + TTL_MS
+            expires_at_ms: Date.now() + TTL_MS,
+            ...(mode === "batch" ? { items_count } : {})
         };
     });
 };

@@ -62,13 +62,43 @@ export function consume(ref) {
     flush();
     return true;
 }
-// tx dedupe (para que no reutilicen el mismo pago en múltiples refs)
 export function isTxUsed(txHash) {
     return Boolean(store.__used_txs?.[txHash]);
 }
 export function markTxUsed(txHash, ref) {
     if (!store.__used_txs)
         store.__used_txs = {};
-    store.__used_txs[txHash] = { ref, used_at: Date.now() };
+    store.__used_txs[txHash] = {
+        ref,
+        used_at: Date.now()
+    };
     flush();
+}
+export function getPaymentStats() {
+    let quoted = 0;
+    let paid = 0;
+    let consumed = 0;
+    let expired = 0;
+    for (const [key, value] of Object.entries(store)) {
+        if (key.startsWith("__"))
+            continue;
+        const rec = value;
+        if (rec.status === "quoted")
+            quoted++;
+        else if (rec.status === "paid")
+            paid++;
+        else if (rec.status === "consumed")
+            consumed++;
+        else if (rec.status === "expired")
+            expired++;
+    }
+    const used_txs = Object.keys(store.__used_txs || {}).length;
+    return {
+        quoted,
+        paid,
+        consumed,
+        expired,
+        used_txs,
+        total_payment_references: quoted + paid + consumed + expired
+    };
 }

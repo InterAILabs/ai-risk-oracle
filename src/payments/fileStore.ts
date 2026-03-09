@@ -34,6 +34,7 @@ ensureStore()
 
 export function createQuote(ref: string, amount: string, pay_to: string, ttl_ms: number) {
   const now = Date.now()
+
   store[ref] = {
     ref,
     amount,
@@ -42,6 +43,7 @@ export function createQuote(ref: string, amount: string, pay_to: string, ttl_ms:
     expires_at: now + ttl_ms,
     status: "quoted"
   } satisfies PaymentRecord
+
   flush()
 }
 
@@ -54,14 +56,17 @@ export function getPayment(ref: string): PaymentRecord | null {
     store[ref] = rec
     flush()
   }
+
   return rec
 }
 
 export function markPaid(ref: string, txHash?: string) {
   const rec = store[ref] as PaymentRecord | undefined
   if (!rec) return false
+
   rec.status = "paid"
   if (txHash) rec.tx_hash = txHash
+
   store[ref] = rec
   flush()
   return true
@@ -71,19 +76,51 @@ export function consume(ref: string) {
   const rec = store[ref] as PaymentRecord | undefined
   if (!rec) return false
   if (rec.status !== "paid") return false
+
   rec.status = "consumed"
   store[ref] = rec
   flush()
   return true
 }
 
-// tx dedupe (para que no reutilicen el mismo pago en múltiples refs)
 export function isTxUsed(txHash: string) {
   return Boolean(store.__used_txs?.[txHash])
 }
 
 export function markTxUsed(txHash: string, ref: string) {
   if (!store.__used_txs) store.__used_txs = {}
-  store.__used_txs[txHash] = { ref, used_at: Date.now() }
+  store.__used_txs[txHash] = {
+    ref,
+    used_at: Date.now()
+  }
   flush()
+}
+
+export function getPaymentStats() {
+  let quoted = 0
+  let paid = 0
+  let consumed = 0
+  let expired = 0
+
+  for (const [key, value] of Object.entries(store)) {
+    if (key.startsWith("__")) continue
+
+    const rec = value as PaymentRecord
+
+    if (rec.status === "quoted") quoted++
+    else if (rec.status === "paid") paid++
+    else if (rec.status === "consumed") consumed++
+    else if (rec.status === "expired") expired++
+  }
+
+  const used_txs = Object.keys(store.__used_txs || {}).length
+
+  return {
+    quoted,
+    paid,
+    consumed,
+    expired,
+    used_txs,
+    total_payment_references: quoted + paid + consumed + expired
+  }
 }
