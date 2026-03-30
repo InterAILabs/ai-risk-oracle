@@ -17,6 +17,11 @@ export const quoteRoute: FastifyPluginAsync = async (app) => {
   app.post("/quote", async (req, reply) => {
     const body = req.body as any
 
+    const service = String(body?.service ?? "verify")
+    if (service !== "verify") {
+      return reply.code(400).send({ error: "invalid_service" })
+    }
+
     const mode: string = body?.mode ?? "fast"
     const pay_to = (process.env.PAY_TO ||
       "0x0000000000000000000000000000000000000000") as string
@@ -41,11 +46,13 @@ export const quoteRoute: FastifyPluginAsync = async (app) => {
     }
 
     const ref = randomUUID()
+    const expiresAt = Date.now() + TTL_MS
 
-    createQuote(ref, amount, pay_to, TTL_MS)
+    await createQuote(ref, amount, pay_to, TTL_MS)
 
     return {
       payment_reference: ref,
+      service,
       mode,
       amount,
       currency: "USDC",
@@ -53,7 +60,7 @@ export const quoteRoute: FastifyPluginAsync = async (app) => {
       chain_id: CHAIN_ID,
       token: TOKEN,
       pay_to,
-      expires_at_ms: Date.now() + TTL_MS,
+      expires_at_ms: expiresAt,
       ...(mode === "batch" ? { items_count } : {})
     }
   })

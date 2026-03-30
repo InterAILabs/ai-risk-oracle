@@ -3,17 +3,19 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-  "dev": "tsx watch src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "smoke": "node ./scripts/smoke-test.js",
-  "example": "node ./examples/test.js"
-},
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "smoke": "node ./scripts/smoke-test.js",
+    "example": "node ./examples/test.js"
+  },
   "dependencies": {
+    "better-sqlite3": "^11.10.0",
     "fastify": "^4.25.0",
     "viem": "^2.47.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20.0.0",
     "ts-node": "^10.9.1",
     "tsx": "^4.21.0",

@@ -1,5 +1,4 @@
 import Fastify from "fastify"
-
 import { healthRoute } from "./routes/health.js"
 import { quoteRoute } from "./routes/quote.js"
 import { verifyRoute } from "./routes/verify.js"
@@ -9,6 +8,9 @@ import { wellKnownRoute } from "./routes/wellKnown.js"
 import { openApiRoute } from "./routes/openapi.js"
 import { statsRoute } from "./routes/stats.js"
 import { createRateLimiter } from "./middleware/rateLimit.js"
+import { accountsRoute } from "./routes/accounts.js"
+import { balanceRoute } from "./routes/balance.js"
+import { apiKeysRoute } from "./routes/apiKeys.js"
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
@@ -56,9 +58,12 @@ async function start() {
   await app.register(quoteRoute)
   await app.register(verifyRoute)
   await app.register(verifyBatchRoute)
+  await app.register(accountsRoute)
+  await app.register(balanceRoute)
+  await app.register(apiKeysRoute)
   await app.register(wellKnownRoute)
   await app.register(openApiRoute)
-
+  
   if (PAYMENT_MODE === "file") {
     await app.register(payRoute)
   }

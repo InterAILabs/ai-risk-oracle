@@ -39,12 +39,11 @@ export async function openApiRoute(app: FastifyInstance) {
                   schema: {
                     type: "object",
                     properties: {
-                      prompt: { type: "string" },
-                      response: { type: "string" },
+                      service: { type: "string", enum: ["verify"] },
                       mode: { type: "string", enum: ["fast", "batch"] },
                       items_count: { type: "integer" }
                     },
-                    required: ["mode"]
+                    required: ["service", "mode"]
                   }
                 }
               }

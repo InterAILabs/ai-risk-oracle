@@ -1,4 +1,3 @@
-// src/routes/wellKnown.ts
 import { FastifyInstance } from "fastify"
 
 export async function wellKnownRoute(app: FastifyInstance) {
@@ -14,7 +13,8 @@ export async function wellKnownRoute(app: FastifyInstance) {
       version: "0.0.1",
       endpoints: {
         quote: `${baseUrl}/quote`,
-        verify: `${baseUrl}/verify`
+        verify: `${baseUrl}/verify`,
+        verify_batch: `${baseUrl}/verify/batch`
       },
       auth: {
         payments_required: process.env.PAYMENTS_REQUIRED === "true",
@@ -30,8 +30,9 @@ export async function wellKnownRoute(app: FastifyInstance) {
         target_p95_ms: 250
       },
       notes: [
-        "Call POST /quote to receive payment_reference, then pay/confirm in file-mode or onchain in future.",
-        "Then call POST /verify with header X-Payment-Ref."
+        "Call POST /quote with { service, mode, items_count? } to receive a payment_reference.",
+        "In file mode, confirm via POST /pay/confirm. In onchain mode, call the verify endpoint with X-Payment-Tx.",
+        "Then call POST /verify or POST /verify/batch with header X-Payment-Ref."
       ]
     }
   })

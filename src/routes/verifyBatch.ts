@@ -1,11 +1,5 @@
 import { FastifyPluginAsync } from "fastify"
-import {
-  getPayment,
-  consume,
-  markPaid,
-  isTxUsed,
-  markTxUsed
-} from "../payments/fileStore.js"
+import { getPayment, consume, confirmOnchainPayment } from "../payments/fileStore.js"
 import { scoreResponse } from "../engine/score.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 
@@ -22,7 +16,7 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     const ref = req.headers["x-payment-ref"] as string | undefined
     if (!ref) return reply.code(402).send({ error: "payment_required" })
 
-    const payment = getPayment(ref)
+    const payment = await getPayment(ref)
     if (!payment) return reply.code(402).send({ error: "invalid_payment_reference" })
     if (payment.status === "expired") return reply.code(402).send({ error: "payment_expired" })
     if (payment.status === "consumed") return reply.code(402).send({ error: "payment_already_used" })
@@ -30,9 +24,10 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     const tx = req.headers["x-payment-tx"] as string | undefined
     const paymentMode = (process.env.PAYMENT_MODE || "file") as "file" | "onchain"
 
+    let finalPayment = payment
+
     if (paymentMode === "onchain") {
       if (!tx) return reply.code(402).send({ error: "payment_tx_required" })
-      if (isTxUsed(tx)) return reply.code(402).send({ error: "payment_tx_already_used" })
 
       const rpcUrl = process.env.BASE_RPC_URL
       if (!rpcUrl) return reply.code(500).send({ error: "missing_BASE_RPC_URL" })
@@ -58,11 +53,15 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
 
       if (!ok.ok) return reply.code(402).send({ error: ok.error })
 
-      markTxUsed(tx, ref)
-      markPaid(ref, tx)
+      const confirmed = await confirmOnchainPayment(ref, tx)
+      if (!confirmed.ok) {
+        return reply.code(402).send({ error: confirmed.error })
+      }
+
+      finalPayment = confirmed.payment
     }
 
-    if (payment.status !== "paid" && paymentMode === "file") {
+    if (paymentMode === "file" && finalPayment.status !== "paid") {
       return reply.code(402).send({ error: "payment_not_confirmed" })
     }
 
@@ -93,10 +92,10 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
 
     const highRiskCount = results.filter((item) => item.risk_level === "high").length
 
-    const consumed = consume(ref)
-    if (!consumed) return reply.code(402).send({ error: "payment_not_confirmed" })
+    const consumed = await consume(ref)
+    if (!consumed) return reply.code(402).send({ error: "payment_already_used" })
 
-    reply.header("X-Oracle-Cost", payment.amount)
+    reply.header("X-Oracle-Cost", finalPayment.amount)
     reply.header("X-Oracle-Currency", "USDC")
     reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
 
