@@ -12,9 +12,18 @@ export async function openApiRoute(app: FastifyInstance) {
       info: {
         title: "InterAI Risk Oracle",
         version: "0.0.1",
-        description: "AI response risk/consistency oracle with payment-gated verification."
+        description:
+          "AI response risk/consistency oracle with prepaid balance billing for autonomous agents."
       },
       servers: [{ url: baseUrl }],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer"
+          }
+        }
+      },
       paths: {
         "/health": {
           get: {
@@ -23,10 +32,119 @@ export async function openApiRoute(app: FastifyInstance) {
             }
           }
         },
-        "/stats": {
+        "/me": {
           get: {
+            security: [{ bearerAuth: [] }],
             responses: {
-              "200": { description: "Service stats" }
+              "200": { description: "Authenticated account profile and balance" },
+              "401": { description: "Missing or invalid API key" }
+            }
+          }
+        },
+        "/verify": {
+          post: {
+            security: [{ bearerAuth: [] }],
+            parameters: [
+              {
+                name: "X-Idempotency-Key",
+                in: "header",
+                required: false,
+                schema: { type: "string" }
+              },
+              {
+                name: "X-Payment-Ref",
+                in: "header",
+                required: false,
+                schema: { type: "string" },
+                description: "Legacy compatibility mode only"
+              },
+              {
+                name: "X-Payment-Tx",
+                in: "header",
+                required: false,
+                schema: { type: "string" },
+                description: "Legacy compatibility mode only"
+              }
+            ],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      prompt: { type: "string" },
+                      response: { type: "string" },
+                      domain: { type: "string" }
+                    },
+                    required: ["prompt", "response"]
+                  }
+                }
+              }
+            },
+            responses: {
+              "200": { description: "Verification result" },
+              "401": { description: "Invalid API key" },
+              "402": { description: "Insufficient balance or payment required" }
+            }
+          }
+        },
+        "/verify/batch": {
+          post: {
+            security: [{ bearerAuth: [] }],
+            parameters: [
+              {
+                name: "X-Idempotency-Key",
+                in: "header",
+                required: false,
+                schema: { type: "string" }
+              },
+              {
+                name: "X-Payment-Ref",
+                in: "header",
+                required: false,
+                schema: { type: "string" },
+                description: "Legacy compatibility mode only"
+              },
+              {
+                name: "X-Payment-Tx",
+                in: "header",
+                required: false,
+                schema: { type: "string" },
+                description: "Legacy compatibility mode only"
+              }
+            ],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      items: {
+                        type: "array",
+                        minItems: 1,
+                        maxItems: 100,
+                        items: {
+                          type: "object",
+                          properties: {
+                            prompt: { type: "string" },
+                            response: { type: "string" },
+                            domain: { type: "string" }
+                          },
+                          required: ["prompt", "response"]
+                        }
+                      }
+                    },
+                    required: ["items"]
+                  }
+                }
+              }
+            },
+            responses: {
+              "200": { description: "Batch verification result" },
+              "401": { description: "Invalid API key" },
+              "402": { description: "Insufficient balance or payment required" }
             }
           }
         },
@@ -50,93 +168,8 @@ export async function openApiRoute(app: FastifyInstance) {
             },
             responses: {
               "200": {
-                description: "Quote created"
+                description: "Legacy compatibility quote created"
               }
-            }
-          }
-        },
-        "/verify": {
-          post: {
-            parameters: [
-              {
-                name: "X-Payment-Ref",
-                in: "header",
-                required: true,
-                schema: { type: "string" }
-              },
-              {
-                name: "X-Payment-Tx",
-                in: "header",
-                required: false,
-                schema: { type: "string" }
-              }
-            ],
-            requestBody: {
-              required: true,
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      prompt: { type: "string" },
-                      response: { type: "string" },
-                      domain: { type: "string" }
-                    },
-                    required: ["prompt", "response"]
-                  }
-                }
-              }
-            },
-            responses: {
-              "200": { description: "Verification result" },
-              "402": { description: "Payment required" }
-            }
-          }
-        },
-        "/verify/batch": {
-          post: {
-            parameters: [
-              {
-                name: "X-Payment-Ref",
-                in: "header",
-                required: true,
-                schema: { type: "string" }
-              },
-              {
-                name: "X-Payment-Tx",
-                in: "header",
-                required: false,
-                schema: { type: "string" }
-              }
-            ],
-            requestBody: {
-              required: true,
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      items: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            prompt: { type: "string" },
-                            response: { type: "string" },
-                            domain: { type: "string" }
-                          },
-                          required: ["prompt", "response"]
-                        }
-                      }
-                    },
-                    required: ["items"]
-                  }
-                }
-              }
-            },
-            responses: {
-              "200": { description: "Batch verification result" },
-              "402": { description: "Payment required" }
             }
           }
         }

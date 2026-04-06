@@ -1,4 +1,4 @@
-// src/middleware/rateLimit.ts
+import { createHash } from "crypto"
 import { FastifyReply, FastifyRequest } from "fastify"
 
 type Bucket = {
@@ -6,19 +6,35 @@ type Bucket = {
   lastRefillMs: number
 }
 
+function hashValue(value: string) {
+  return createHash("sha256").update(value).digest("hex")
+}
+
+function defaultKeyFn(req: FastifyRequest) {
+  const authHeader = req.headers["authorization"]
+  if (typeof authHeader === "string" && authHeader.trim()) {
+    return `auth:${hashValue(authHeader.trim())}`
+  }
+
+  const paymentRef = req.headers["x-payment-ref"]
+  if (typeof paymentRef === "string" && paymentRef.trim()) {
+    return `payref:${hashValue(paymentRef.trim())}`
+  }
+
+  return `ip:${req.ip || "unknown"}`
+}
+
 export function createRateLimiter(opts: {
-  capacity: number        // tokens máximos
-  refillPerSec: number    // tokens que se recargan por segundo
+  capacity: number
+  refillPerSec: number
   keyFn?: (req: FastifyRequest) => string
 }) {
   const buckets = new Map<string, Bucket>()
-  const keyFn = opts.keyFn ?? ((req) => (req.ip || "unknown"))
+  const keyFn = opts.keyFn ?? defaultKeyFn
 
-  // Limpieza simple para no crecer infinito
   setInterval(() => {
     const now = Date.now()
     for (const [k, b] of buckets) {
-      // si no se usó hace 10 min, borramos
       if (now - b.lastRefillMs > 10 * 60 * 1000) buckets.delete(k)
     }
   }, 60 * 1000).unref?.()
@@ -32,7 +48,6 @@ export function createRateLimiter(opts: {
       lastRefillMs: now
     }
 
-    // refill
     const elapsedSec = (now - b.lastRefillMs) / 1000
     if (elapsedSec > 0) {
       b.tokens = Math.min(opts.capacity, b.tokens + elapsedSec * opts.refillPerSec)

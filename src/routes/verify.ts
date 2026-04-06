@@ -6,8 +6,6 @@ import {
   confirmOnchainPayment,
   debitAccountForUsage,
   getAccount,
-  getAccountBalance,
-  hasUsageReference,
   resolveAccountByApiKey
 } from "../payments/fileStore.js"
 import { scoreResponse } from "../engine/score.js"
@@ -34,48 +32,32 @@ function extractBearerToken(authHeader: string | undefined) {
 export const verifyRoute: FastifyPluginAsync = async (app) => {
   app.post("/verify", async (req, reply) => {
     const paymentRef = req.headers["x-payment-ref"] as string | undefined
-    const accountIdHeader = req.headers["x-account-id"] as string | undefined
     const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined
     const authHeader = req.headers["authorization"] as string | undefined
     const bearerToken = extractBearerToken(authHeader)
 
-    let resolvedAccountId: string | undefined
+    if (!paymentRef && !bearerToken) {
+      return reply.code(402).send({
+        error: "payment_required",
+        hint: "Provide Authorization: Bearer <api_key> or x-payment-ref"
+      })
+    }
+
+    if (paymentRef && bearerToken) {
+      return reply.code(400).send({
+        error: "ambiguous_payment_mode",
+        hint: "Use Bearer account auth or x-payment-ref, not both"
+      })
+    }
 
     if (bearerToken) {
       const resolved = resolveAccountByApiKey(bearerToken)
+
       if (!resolved) {
         return reply.code(401).send({ error: "invalid_api_key" })
       }
-      resolvedAccountId = resolved.account_id
-      reply.header("X-Oracle-Auth-Mode", "bearer")
-    } else if (accountIdHeader) {
-      resolvedAccountId = accountIdHeader
-      reply.header("X-Oracle-Auth-Mode", "x-account-id")
-    }
 
-    if (!paymentRef && !resolvedAccountId) {
-      return reply.code(402).send({
-        error: "payment_required",
-        hint: "Provide Authorization Bearer token, x-account-id, or x-payment-ref"
-      })
-    }
-
-    if (paymentRef && resolvedAccountId) {
-      return reply.code(400).send({
-        error: "ambiguous_payment_mode",
-        hint: "Use account auth or x-payment-ref, not both"
-      })
-    }
-
-    const body = req.body as any
-    const result = scoreResponse({
-      prompt: body?.prompt ?? "",
-      response: body?.response ?? "",
-      domain: body?.domain ?? "general"
-    })
-
-    if (resolvedAccountId) {
-      const account = getAccount(resolvedAccountId)
+      const account = getAccount(resolved.account_id)
       if (!account) {
         return reply.code(402).send({ error: "account_not_found" })
       }
@@ -84,36 +66,12 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         return reply.code(402).send({ error: "account_not_active" })
       }
 
-      if (idempotencyKey) {
-        const existingUsage = hasUsageReference(resolvedAccountId, idempotencyKey)
-        if (existingUsage) {
-          const balance = getAccountBalance(resolvedAccountId)
-
-          reply.header("X-Oracle-Billing-Mode", "account")
-          reply.header("X-Oracle-Idempotent-Replay", "true")
-          reply.header("X-Oracle-Cost", PRICING.fast.amount)
-          reply.header("X-Oracle-Cost-MicroUSDC", String(existingUsage.cost_microusdc))
-          reply.header("X-Oracle-Currency", "USDC")
-          reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
-          reply.header(
-            "X-Oracle-Latency-Ms",
-            String(result.analysis.total_latency_ms ?? result.analysis.engine_latency_ms ?? 0)
-          )
-          if (balance) {
-            reply.header("X-Oracle-Remaining-Balance-MicroUSDC", String(balance.balance_microusdc))
-            reply.header("X-Oracle-Remaining-Balance-USDC", balance.balance_usdc)
-          }
-
-          return result
-        }
-      }
-
       const costMicrousdc = usdcAmountToMicrousdc(PRICING.fast.amount)
 
       const debit = debitAccountForUsage({
         ledgerId: randomUUID(),
         usageId: randomUUID(),
-        accountId: resolvedAccountId,
+        accountId: resolved.account_id,
         service: "verify",
         costMicrousdc,
         reference: idempotencyKey
@@ -130,9 +88,18 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         return reply.code(402).send({ error: debit.error })
       }
 
+      const body = req.body as any
+
+      const result = scoreResponse({
+        prompt: body?.prompt ?? "",
+        response: body?.response ?? "",
+        domain: body?.domain ?? "general"
+      })
+
+      reply.header("X-Oracle-Auth-Mode", "bearer")
       reply.header("X-Oracle-Billing-Mode", "account")
       reply.header("X-Oracle-Cost", PRICING.fast.amount)
-      reply.header("X-Oracle-Cost-MicroUSDC", String(costMicrousdc))
+      reply.header("X-Oracle-Cost-MicroUSDC", String(debit.billed_cost_microusdc))
       reply.header("X-Oracle-Currency", "USDC")
       reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
       reply.header(
@@ -145,11 +112,16 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
       )
       reply.header("X-Oracle-Remaining-Balance-USDC", debit.remaining_balance_usdc)
 
+      if (debit.idempotent_replay) {
+        reply.header("X-Oracle-Idempotent-Replay", "true")
+      }
+
       return result
     }
 
     const ref = paymentRef as string
     const payment = getPayment(ref)
+
     if (!payment) return reply.code(402).send({ error: "invalid_payment_reference" })
     if (payment.status === "expired") return reply.code(402).send({ error: "payment_expired" })
     if (payment.status === "consumed") return reply.code(402).send({ error: "payment_already_used" })
@@ -198,8 +170,16 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
       return reply.code(402).send({ error: "payment_not_confirmed" })
     }
 
-    const consumed = consume(ref)
-    if (!consumed) return reply.code(402).send({ error: "payment_already_used" })
+    const consumedOk = consume(ref)
+    if (!consumedOk) return reply.code(402).send({ error: "payment_already_used" })
+
+    const body = req.body as any
+
+    const result = scoreResponse({
+      prompt: body?.prompt ?? "",
+      response: body?.response ?? "",
+      domain: body?.domain ?? "general"
+    })
 
     reply.header("X-Oracle-Billing-Mode", "payment_reference")
     reply.header("X-Oracle-Cost", finalPayment.amount)

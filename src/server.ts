@@ -53,27 +53,33 @@ const rateLimiter = createRateLimiter({
 
 app.addHook("preHandler", rateLimiter)
 
-app.get("/", async (req, reply) => {
+app.get("/", async () => {
   return {
     name: "AI Risk Oracle",
     status: "ok",
     version: "0.0.1",
-    description: "AI-to-AI risk scoring and verification API with usage-based billing",
 
     auth: {
-      type: "Bearer API key",
-      header: "Authorization: Bearer <api_key>"
+      primary: {
+        type: "Bearer API key",
+        header: "Authorization: Bearer <api_key>"
+      },
+      legacy: {
+        type: "X-Payment-Ref"
+      }
     },
 
     endpoints: {
       verify: "POST /verify",
+      verify_batch: "POST /verify/batch",
       me: "GET /me",
       health: "GET /health"
     },
 
-    pricing: {
-      model: "per-request",
-      default_cost_usdc: "0.0006"
+    billing: {
+      model: "prepaid_balance_per_request",
+      default_cost_usdc: "0.0006",
+      idempotency_header: "X-Idempotency-Key"
     },
 
     docs: {

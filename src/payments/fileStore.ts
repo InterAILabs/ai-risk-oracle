@@ -95,7 +95,10 @@ function ensureSchema() {
     CREATE INDEX IF NOT EXISTS idx_accounts_status ON accounts(status);
     CREATE INDEX IF NOT EXISTS idx_ledger_account_created ON ledger(account_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_usage_account_created ON usage(account_id, created_at DESC);
-      
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_usage_account_reference_unique
+    ON usage(account_id, reference)
+    WHERE reference IS NOT NULL;
+    
     CREATE TABLE IF NOT EXISTS api_keys (
       id TEXT PRIMARY KEY,
       account_id TEXT NOT NULL,
@@ -675,7 +678,7 @@ export function debitAccountForUsage(params: {
     throw new Error("invalid_debit_amount")
   }
 
-  return db.transaction(() => {
+  const runDebit = db.transaction(() => {
     const account = normalizeAccountRecord(selectAccountStmt.get(accountId))
     if (!account) {
       return { ok: false as const, error: "account_not_found" }
@@ -691,6 +694,22 @@ export function debitAccountForUsage(params: {
 
     const current = Number(balanceRow?.balance_microusdc ?? 0)
 
+    if (reference) {
+      const existing = hasUsageReference(accountId, reference)
+
+      if (existing) {
+        return {
+          ok: true as const,
+          account_id: accountId,
+          remaining_balance_microusdc: current,
+          remaining_balance_usdc: (current / 1_000_000).toFixed(6),
+          debited_microusdc: 0,
+          billed_cost_microusdc: existing.cost_microusdc,
+          idempotent_replay: true as const
+        }
+      }
+    }
+
     if (current < costMicrousdc) {
       return {
         ok: false as const,
@@ -701,6 +720,16 @@ export function debitAccountForUsage(params: {
 
     const next = current - costMicrousdc
     const now = Date.now()
+
+    insertUsageStmt.run({
+      id: usageId,
+      account_id: accountId,
+      service,
+      units: 1,
+      cost_microusdc: costMicrousdc,
+      reference: reference ?? null,
+      created_at: now
+    })
 
     updateBalanceStmt.run(next, now, accountId)
 
@@ -714,24 +743,45 @@ export function debitAccountForUsage(params: {
       created_at: now
     })
 
-    insertUsageStmt.run({
-      id: usageId,
-      account_id: accountId,
-      service,
-      units: 1,
-      cost_microusdc: costMicrousdc,
-      reference: reference ?? null,
-      created_at: now
-    })
-
     return {
       ok: true as const,
       account_id: accountId,
       remaining_balance_microusdc: next,
       remaining_balance_usdc: (next / 1_000_000).toFixed(6),
-      debited_microusdc: costMicrousdc
+      debited_microusdc: costMicrousdc,
+      billed_cost_microusdc: costMicrousdc,
+      idempotent_replay: false as const
     }
-  })()
+  })
+
+  try {
+    return runDebit()
+  } catch (error: any) {
+    const msg = String(error?.message || "")
+
+    if (
+      reference &&
+      (msg.includes("UNIQUE constraint failed: usage.account_id, usage.reference") ||
+        msg.includes("idx_usage_account_reference_unique"))
+    ) {
+      const existing = hasUsageReference(accountId, reference)
+      const balance = getAccountBalance(accountId)
+
+      if (existing && balance) {
+        return {
+          ok: true as const,
+          account_id: accountId,
+          remaining_balance_microusdc: balance.balance_microusdc,
+          remaining_balance_usdc: balance.balance_usdc,
+          debited_microusdc: 0,
+          billed_cost_microusdc: existing.cost_microusdc,
+          idempotent_replay: true as const
+        }
+      }
+    }
+
+    throw error
+  }
 }
 
 export function getPaymentStats() {
