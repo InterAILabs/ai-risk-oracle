@@ -244,6 +244,22 @@ const touchApiKeyLastUsedStmt = db.prepare(`
   WHERE id = ?
 `)
 
+const selectApiKeyByIdForAccountStmt = db.prepare(`
+  SELECT id, account_id, name, key_prefix, status, created_at, last_used_at
+  FROM api_keys
+  WHERE id = ?
+    AND account_id = ?
+  LIMIT 1
+`)
+
+const revokeApiKeyStmt = db.prepare(`
+  UPDATE api_keys
+  SET status = 'revoked'
+  WHERE id = ?
+    AND account_id = ?
+    AND status = 'active'
+`)
+
 const countApiKeysStmt = db.prepare(`
   SELECT COUNT(*) AS count
   FROM api_keys
@@ -500,6 +516,65 @@ export function createApiKey(params: {
     status: "active" as const,
     created_at: now
   }
+}
+
+export function getApiKeyByIdForAccount(accountId: string, apiKeyId: string) {
+  const row = selectApiKeyByIdForAccountStmt.get(apiKeyId, accountId) as
+    | {
+        id: string
+        account_id: string
+        name: string | null
+        key_prefix: string
+        status: "active" | "revoked"
+        created_at: number
+        last_used_at: number | null
+      }
+    | undefined
+
+  if (!row) return null
+
+  return {
+    id: String(row.id),
+    account_id: String(row.account_id),
+    name: row.name ? String(row.name) : undefined,
+    key_prefix: String(row.key_prefix),
+    status: row.status,
+    created_at: Number(row.created_at),
+    last_used_at: row.last_used_at == null ? null : Number(row.last_used_at)
+  }
+}
+
+export function revokeApiKey(accountId: string, apiKeyId: string) {
+  return db.transaction(() => {
+    const existing = getApiKeyByIdForAccount(accountId, apiKeyId)
+
+    if (!existing) {
+      throw new Error("api_key_not_found")
+    }
+
+    if (existing.status === "revoked") {
+      return {
+        ...existing,
+        already_revoked: true as const
+      }
+    }
+
+    const result = revokeApiKeyStmt.run(apiKeyId, accountId)
+
+    if (result.changes === 0) {
+      throw new Error("api_key_revoke_failed")
+    }
+
+    const updated = getApiKeyByIdForAccount(accountId, apiKeyId)
+    if (!updated) {
+      throw new Error("api_key_not_found")
+    }
+
+    return {
+      ...updated,
+      already_revoked: false as const
+    }
+  })()
 }
 
 export function resolveAccountByApiKey(rawKey: string) {

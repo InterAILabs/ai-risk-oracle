@@ -1,6 +1,10 @@
 import { FastifyPluginAsync } from "fastify"
 import { randomUUID, randomBytes } from "crypto"
-import { createApiKey, getAccount } from "../payments/fileStore.js"
+import {
+  createApiKey,
+  getAccount,
+  revokeApiKey
+} from "../payments/fileStore.js"
 
 function generateRawApiKey() {
   return `iao_live_${randomBytes(24).toString("hex")}`
@@ -56,6 +60,47 @@ export const apiKeysRoute: FastifyPluginAsync = async (app) => {
       }
 
       return reply.code(500).send({ error: "api_key_creation_failed" })
+    }
+  })
+
+  app.post("/accounts/:accountId/api-keys/:apiKeyId/revoke", async (req, reply) => {
+    const expectedAdminToken = process.env.ADMIN_TOKEN
+
+    if (!expectedAdminToken) {
+      return reply.code(500).send({ error: "admin_token_not_configured" })
+    }
+
+    const admin = req.headers["x-admin-token"]
+
+    if (admin !== expectedAdminToken) {
+      return reply.code(403).send({ error: "forbidden" })
+    }
+
+    const params = req.params as any
+    const accountId = String(params.accountId)
+    const apiKeyId = String(params.apiKeyId)
+
+    const account = getAccount(accountId)
+
+    if (!account) {
+      return reply.code(404).send({ error: "account_not_found" })
+    }
+
+    try {
+      const record = revokeApiKey(accountId, apiKeyId)
+
+      return {
+        ok: true,
+        record
+      }
+    } catch (error: any) {
+      const msg = String(error?.message || "unknown_error")
+
+      if (msg === "api_key_not_found") {
+        return reply.code(404).send({ error: msg })
+      }
+
+      return reply.code(500).send({ error: "api_key_revoke_failed" })
     }
   })
 }

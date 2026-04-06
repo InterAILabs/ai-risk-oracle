@@ -11,6 +11,7 @@ import { createRateLimiter } from "./middleware/rateLimit.js"
 import { accountsRoute } from "./routes/accounts.js"
 import { balanceRoute } from "./routes/balance.js"
 import { apiKeysRoute } from "./routes/apiKeys.js"
+import { meRoute } from "./routes/me.js"
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
@@ -52,6 +53,36 @@ const rateLimiter = createRateLimiter({
 
 app.addHook("preHandler", rateLimiter)
 
+app.get("/", async (req, reply) => {
+  return {
+    name: "AI Risk Oracle",
+    status: "ok",
+    version: "0.0.1",
+    description: "AI-to-AI risk scoring and verification API with usage-based billing",
+
+    auth: {
+      type: "Bearer API key",
+      header: "Authorization: Bearer <api_key>"
+    },
+
+    endpoints: {
+      verify: "POST /verify",
+      me: "GET /me",
+      health: "GET /health"
+    },
+
+    pricing: {
+      model: "per-request",
+      default_cost_usdc: "0.0006"
+    },
+
+    docs: {
+      openapi: "/.well-known/openapi.json",
+      service: "/.well-known/ai-service.json"
+    }
+  }
+})
+
 async function start() {
   await app.register(healthRoute)
   await app.register(statsRoute)
@@ -61,6 +92,7 @@ async function start() {
   await app.register(accountsRoute)
   await app.register(balanceRoute)
   await app.register(apiKeysRoute)
+  await app.register(meRoute)
   await app.register(wellKnownRoute)
   await app.register(openApiRoute)
   
