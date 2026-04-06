@@ -1,9 +1,11 @@
 import { FastifyPluginAsync } from "fastify"
 import { randomUUID } from "crypto"
 import { creditAccount, getAccount, getAccountBalance } from "../payments/fileStore.js"
+import { requireAdmin } from "../lib/adminauth.js"
 
 export const balanceRoute: FastifyPluginAsync = async (app) => {
   app.get("/accounts/:accountId/balance", async (req, reply) => {
+  if (!requireAdmin(req, reply)) return
     const params = req.params as any
     const accountId = String(params.accountId)
 

@@ -1,9 +1,11 @@
 import { FastifyPluginAsync } from "fastify"
 import { randomUUID } from "crypto"
 import { createAccount } from "../payments/fileStore.js"
+import { requireAdmin } from "../lib/adminauth.js"
 
 export const accountsRoute: FastifyPluginAsync = async (app) => {
   app.post("/accounts/create", async (req, reply) => {
+  if (!requireAdmin(req, reply)) return
     const body = req.body as any
     const accountId = String(body?.account_id ?? randomUUID())
     const name = body?.name ? String(body.name) : undefined
