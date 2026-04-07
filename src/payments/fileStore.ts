@@ -300,6 +300,22 @@ const usageCountStmt = db.prepare(`
   FROM usage
 `)
 
+const selectLedgerForAccountStmt = db.prepare(`
+  SELECT id, account_id, entry_type, amount_microusdc, reference, metadata_json, created_at
+  FROM ledger
+  WHERE account_id = ?
+  ORDER BY created_at DESC
+  LIMIT ?
+`)
+
+const selectUsageForAccountStmt = db.prepare(`
+  SELECT id, account_id, service, units, cost_microusdc, reference, created_at
+  FROM usage
+  WHERE account_id = ?
+  ORDER BY created_at DESC
+  LIMIT ?
+`)
+
 function normalizePaymentRecord(row: any): PaymentRecord | null {
   if (!row) return null
 
@@ -873,5 +889,55 @@ export function confirmTopup(id: string, tx_hash: string) {
     SET status = 'confirmed', tx_hash = ?
     WHERE id = ?
   `).run(tx_hash, id)
+}
+
+export function listLedgerForAccount(accountId: string, limit = 20) {
+  const safeLimit = Math.max(1, Math.min(100, Number(limit || 20)))
+
+  const rows = selectLedgerForAccountStmt.all(accountId, safeLimit) as Array<{
+    id: string
+    account_id: string
+    entry_type: "credit" | "debit"
+    amount_microusdc: number
+    reference: string | null
+    metadata_json: string | null
+    created_at: number
+  }>
+
+  return rows.map((row) => ({
+    id: String(row.id),
+    account_id: String(row.account_id),
+    entry_type: row.entry_type,
+    amount_microusdc: Number(row.amount_microusdc),
+    amount_usdc: (Number(row.amount_microusdc) / 1_000_000).toFixed(6),
+    reference: row.reference ? String(row.reference) : null,
+    metadata: row.metadata_json ? JSON.parse(row.metadata_json) : null,
+    created_at: Number(row.created_at)
+  }))
+}
+
+export function listUsageForAccount(accountId: string, limit = 20) {
+  const safeLimit = Math.max(1, Math.min(100, Number(limit || 20)))
+
+  const rows = selectUsageForAccountStmt.all(accountId, safeLimit) as Array<{
+    id: string
+    account_id: string
+    service: string
+    units: number
+    cost_microusdc: number
+    reference: string | null
+    created_at: number
+  }>
+
+  return rows.map((row) => ({
+    id: String(row.id),
+    account_id: String(row.account_id),
+    service: String(row.service),
+    units: Number(row.units),
+    cost_microusdc: Number(row.cost_microusdc),
+    cost_usdc: (Number(row.cost_microusdc) / 1_000_000).toFixed(6),
+    reference: row.reference ? String(row.reference) : null,
+    created_at: Number(row.created_at)
+  }))
 }
 

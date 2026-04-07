@@ -87,14 +87,16 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
       const batchAmount = getBatchAmount(body.items.length)
       const costMicrousdc = usdcAmountToMicrousdc(batchAmount)
 
-      const debit = debitAccountForUsage({
-        ledgerId: randomUUID(),
-        usageId: randomUUID(),
-        accountId: resolved.account_id,
-        service: "verify_batch",
-        costMicrousdc,
-        reference: idempotencyKey
-      })
+      const usageId = randomUUID()
+
+const debit = debitAccountForUsage({
+  ledgerId: randomUUID(),
+  usageId,
+  accountId: resolved.account_id,
+  service: "verify_batch",
+  costMicrousdc,
+  reference: idempotencyKey
+})
 
       if (!debit.ok) {
         if (debit.error === "insufficient_balance") {
@@ -152,11 +154,26 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
       reply.header("X-Oracle-Remaining-Balance-USDC", debit.remaining_balance_usdc)
 
       if (debit.idempotent_replay) {
-        reply.header("X-Oracle-Idempotent-Replay", "true")
-      }
+  reply.header("X-Oracle-Idempotent-Replay", "true")
+}
 
-      return {
-        ok: true,
+req.log.info({
+  event: "verify_batch_billed",
+  auth_mode: "bearer",
+  account_id: resolved.account_id,
+  api_key_id: resolved.api_key_id,
+  usage_id: usageId,
+  service: "verify_batch",
+  batch_size: body.items.length,
+  cost_microusdc: debit.billed_cost_microusdc,
+  remaining_balance_microusdc: debit.remaining_balance_microusdc,
+  remaining_balance_usdc: debit.remaining_balance_usdc,
+  idempotency_key: idempotencyKey ?? null,
+  idempotent_replay: debit.idempotent_replay ?? false
+})
+
+return {
+  ok: true,
         batch_size: results.length,
         billed: {
           mode: "account",

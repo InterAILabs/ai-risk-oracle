@@ -65,6 +65,40 @@ export async function openApiRoute(app: FastifyInstance) {
             }
           }
         },
+"/ledger": {
+  get: {
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "limit",
+        in: "query",
+        required: false,
+        schema: { type: "integer", minimum: 1, maximum: 100 }
+      }
+    ],
+    responses: {
+      "200": { description: "Ledger entries for authenticated account" },
+      "401": { description: "Missing or invalid API key" }
+    }
+  }
+},
+"/usage": {
+  get: {
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "limit",
+        in: "query",
+        required: false,
+        schema: { type: "integer", minimum: 1, maximum: 100 }
+      }
+    ],
+    responses: {
+      "200": { description: "Usage events for authenticated account" },
+      "401": { description: "Missing or invalid API key" }
+    }
+  }
+},
         "/topup/create": {
           post: {
             security: [{ bearerAuth: [] }],

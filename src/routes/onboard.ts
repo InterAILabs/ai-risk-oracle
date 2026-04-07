@@ -75,8 +75,12 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
     const balance = getAccountBalance(account.id)
 
     const host = String(req.headers.host || "localhost:3000")
-    const proto = req.headers["x-forwarded-proto"]
-      ? String(req.headers["x-forwarded-proto"])
+    const forwardedProto = req.headers["x-forwarded-proto"]
+    const proto =
+     forwardedProto
+      ? String(forwardedProto)
+      : host.includes("localhost") || host.startsWith("127.0.0.1")
+      ? "http"
       : "https"
     const baseUrl = `${proto}://${host}`
 

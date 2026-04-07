@@ -18,6 +18,8 @@ import { topupConfirmRoute } from "./routes/topupConfirm.js"
 import { onboardRoute } from "./routes/onboard.js"
 import { topupStatusRoute } from "./routes/topupStatus.js"
 import { topupDevRoute } from "./routes/topupDev.js"
+import { ledgerRoute } from "./routes/ledger.js"
+import { usageRoute } from "./routes/usage.js"
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
@@ -110,6 +112,8 @@ async function start() {
   await app.register(balanceRoute)
   await app.register(apiKeysRoute)
   await app.register(meRoute)
+  await app.register(ledgerRoute)
+  await app.register(usageRoute)
   await app.register(wellKnownRoute)
   await app.register(openApiRoute)
   await app.register(onboardRoute)

@@ -16,14 +16,16 @@ export async function wellKnownRoute(app: FastifyInstance) {
         "AI response risk and consistency oracle with prepaid per-request billing, designed for autonomous agents.",
 
       endpoints: {
-        onboard: `${baseUrl}/onboard`,
-        me: `${baseUrl}/me`,
-        verify: `${baseUrl}/verify`,
-        verify_batch: `${baseUrl}/verify/batch`,
-        topup_create: `${baseUrl}/topup/create`,
-        topup_confirm: `${baseUrl}/topup/confirm`,
-        topup_dev_credit: `${baseUrl}/topup/dev/credit`
-      },
+  onboard: `${baseUrl}/onboard`,
+  me: `${baseUrl}/me`,
+  ledger: `${baseUrl}/ledger`,
+  usage: `${baseUrl}/usage`,
+  verify: `${baseUrl}/verify`,
+  verify_batch: `${baseUrl}/verify/batch`,
+  topup_create: `${baseUrl}/topup/create`,
+  topup_confirm: `${baseUrl}/topup/confirm`,
+  topup_dev_credit: `${baseUrl}/topup/dev/credit`
+},
 
       auth: {
         primary: {
@@ -61,10 +63,11 @@ export async function wellKnownRoute(app: FastifyInstance) {
       },
 
       integration_flow: [
-        "1. POST /onboard to obtain an API key",
-        "2. Optionally fund account via /topup/dev/credit (dev) or /topup/create + /topup/confirm (onchain)",
-        "3. Call /verify or /verify/batch with Authorization: Bearer <api_key>"
-      ],
+  "1. POST /onboard to obtain an API key",
+  "2. Optionally fund account via /topup/dev/credit (dev) or /topup/create + /topup/confirm (onchain)",
+  "3. Call /verify or /verify/batch with Authorization: Bearer <api_key>",
+  "4. Inspect /me, /ledger, and /usage for account state and economic activity"
+],
 
       quickstart: {
         onboard: {
