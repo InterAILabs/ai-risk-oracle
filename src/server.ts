@@ -12,6 +12,8 @@ import { accountsRoute } from "./routes/accounts.js"
 import { balanceRoute } from "./routes/balance.js"
 import { apiKeysRoute } from "./routes/apiKeys.js"
 import { meRoute } from "./routes/me.js"
+import { topupCreateRoute } from "./routes/topupCreate.js"
+import { topupConfirmRoute } from "./routes/topupConfirm.js"
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
@@ -101,6 +103,8 @@ async function start() {
   await app.register(meRoute)
   await app.register(wellKnownRoute)
   await app.register(openApiRoute)
+  await app.register(topupCreateRoute)
+  await app.register(topupConfirmRoute)
   
   if (PAYMENT_MODE === "file") {
     await app.register(payRoute)

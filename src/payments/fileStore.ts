@@ -22,6 +22,17 @@ type AccountRecord = {
   created_at: number
 }
 
+type TopupRecord = {
+  id: string
+  account_id: string
+  amount: string
+  pay_to: string
+  status: string
+  tx_hash: string | null
+  created_at: number
+  expires_at: number
+}
+
 const DATA_DIR = path.join(process.cwd(), "data")
 const DB_FILE = path.join(DATA_DIR, "payments.db")
 
@@ -36,6 +47,17 @@ db.pragma("foreign_keys = ON")
 
 function ensureSchema() {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS topups (
+      id TEXT PRIMARY KEY,
+      account_id TEXT NOT NULL,
+      amount TEXT NOT NULL,
+      pay_to TEXT NOT NULL,
+      status TEXT NOT NULL,
+      tx_hash TEXT,
+      created_at INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL
+    );
+    
     CREATE TABLE IF NOT EXISTS payments (
       ref TEXT PRIMARY KEY,
       amount TEXT NOT NULL,
@@ -818,3 +840,38 @@ export function getPaymentStats() {
     total_payment_references: quoted + paid + consumed + expired
   }
 }
+
+ export function createTopup(params: {
+  id: string
+  account_id: string
+  amount: string
+  pay_to: string
+  expires_at: number
+}) {
+  db.prepare(`
+    INSERT INTO topups (id, account_id, amount, pay_to, status, created_at, expires_at)
+    VALUES (?, ?, ?, ?, 'pending', ?, ?)
+  `).run(
+    params.id,
+    params.account_id,
+    params.amount,
+    params.pay_to,
+    Date.now(),
+    params.expires_at
+  )
+}
+
+export function getTopup(id: string): TopupRecord | undefined {
+  return db
+    .prepare(`SELECT * FROM topups WHERE id = ?`)
+    .get(id) as TopupRecord | undefined
+}
+
+export function confirmTopup(id: string, tx_hash: string) {
+  db.prepare(`
+    UPDATE topups
+    SET status = 'confirmed', tx_hash = ?
+    WHERE id = ?
+  `).run(tx_hash, id)
+}
+
