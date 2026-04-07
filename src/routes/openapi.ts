@@ -32,12 +32,99 @@ export async function openApiRoute(app: FastifyInstance) {
             }
           }
         },
+        "/onboard": {
+          post: {
+            requestBody: {
+              required: false,
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      account_id: { type: "string" },
+                      name: { type: "string" },
+                      api_key_name: { type: "string" },
+                      recommended_topup_usdc: { type: "string" }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              "200": { description: "Account and API key created" },
+              "404": { description: "Onboarding disabled" }
+            }
+          }
+        },
         "/me": {
           get: {
             security: [{ bearerAuth: [] }],
             responses: {
               "200": { description: "Authenticated account profile and balance" },
               "401": { description: "Missing or invalid API key" }
+            }
+          }
+        },
+        "/topup/create": {
+          post: {
+            security: [{ bearerAuth: [] }],
+            requestBody: {
+              required: false,
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      account_id: { type: "string" },
+                      amount_usdc: { type: "string" }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              "200": { description: "Top-up intent created" },
+              "400": { description: "Missing account context" },
+              "401": { description: "Invalid API key" }
+            }
+          }
+        },
+        "/topup/confirm": {
+          post: {
+            parameters: [
+              {
+                name: "X-Topup-Id",
+                in: "header",
+                required: true,
+                schema: { type: "string" }
+              },
+              {
+                name: "X-Tx-Hash",
+                in: "header",
+                required: true,
+                schema: { type: "string" }
+              }
+            ],
+            responses: {
+              "200": { description: "Top-up confirmed and credited" },
+              "400": { description: "Invalid or expired top-up" },
+              "402": { description: "Transaction verification failed" }
+            }
+          }
+        },
+        "/topup/{topupId}": {
+          get: {
+            parameters: [
+              {
+                name: "topupId",
+                in: "path",
+                required: true,
+                schema: { type: "string" }
+              }
+            ],
+            responses: {
+              "200": { description: "Top-up status" },
+              "404": { description: "Top-up not found" }
             }
           }
         },

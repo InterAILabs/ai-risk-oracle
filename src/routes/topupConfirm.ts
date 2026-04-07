@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { randomUUID } from "crypto"
-import { getTopup, confirmTopup, creditAccount } from "../payments/fileStore.js"
+import { getTopup, confirmTopup, creditAccount, getAccountBalance } from "../payments/fileStore.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 
 type TopupRecord = {
@@ -34,7 +34,15 @@ export const topupConfirmRoute: FastifyPluginAsync = async (app) => {
     }
 
     if (topup.status === "confirmed") {
-      return reply.code(400).send({ error: "already_confirmed" })
+      const balance = getAccountBalance(topup.account_id)
+      return {
+        ok: true,
+        already_confirmed: true,
+        topup_id: topup.id,
+        account_id: topup.account_id,
+        tx_hash: topup.tx_hash,
+        balance
+      }
     }
 
     if (topup.status === "expired") {
@@ -76,6 +84,17 @@ export const topupConfirmRoute: FastifyPluginAsync = async (app) => {
       }
     })
 
-    return { ok: true }
+    const balance = getAccountBalance(topup.account_id)
+
+    return {
+      ok: true,
+      already_confirmed: false,
+      topup_id: topup.id,
+      account_id: topup.account_id,
+      credited_microusdc: microusdc,
+      credited_usdc: topup.amount,
+      tx_hash: tx,
+      balance
+    }
   })
 }

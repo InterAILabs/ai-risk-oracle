@@ -11,6 +11,7 @@ import {
 import { scoreResponse } from "../engine/score.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 import { PRICING } from "../config/pricing.js"
+import { extractBearerToken } from "../lib/auth.js"
 
 const ENGINE_VERSION = process.env.ORACLE_ENGINE_VERSION || "0.0.1"
 
@@ -20,13 +21,6 @@ function usdcAmountToMicrousdc(amount: string) {
     throw new Error("invalid_usdc_amount")
   }
   return Math.round(num * 1_000_000)
-}
-
-function extractBearerToken(authHeader: string | undefined) {
-  if (!authHeader) return null
-  const match = authHeader.match(/^Bearer\s+(.+)$/i)
-  if (!match) return null
-  return match[1]?.trim() || null
 }
 
 export const verifyRoute: FastifyPluginAsync = async (app) => {
@@ -39,7 +33,11 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
     if (!paymentRef && !bearerToken) {
       return reply.code(402).send({
         error: "payment_required",
-        hint: "Provide Authorization: Bearer <api_key> or x-payment-ref"
+        hint: "Provide Authorization: Bearer <api_key> or x-payment-ref",
+        onboarding: {
+          create_account_url: "/onboard",
+          topup_create_url: "/topup/create"
+        }
       })
     }
 
@@ -79,9 +77,24 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
 
       if (!debit.ok) {
         if (debit.error === "insufficient_balance") {
+          const balanceMicrousdc = Number(debit.balance_microusdc ?? 0)
+          const shortfallMicrousdc = Math.max(costMicrousdc - balanceMicrousdc, 0)
+          const recommendedTopupUsdc = String(process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01")
+
           return reply.code(402).send({
             error: debit.error,
-            balance_microusdc: debit.balance_microusdc
+            service: "verify",
+            cost_microusdc: costMicrousdc,
+            cost_usdc: PRICING.fast.amount,
+            balance_microusdc: balanceMicrousdc,
+            balance_usdc: (balanceMicrousdc / 1_000_000).toFixed(6),
+            shortfall_microusdc: shortfallMicrousdc,
+            shortfall_usdc: (shortfallMicrousdc / 1_000_000).toFixed(6),
+            topup: {
+              create_url: "/topup/create",
+              receive_address: process.env.TOPUP_RECEIVE_ADDRESS || null,
+              recommended_amount_usdc: recommendedTopupUsdc
+            }
           })
         }
 

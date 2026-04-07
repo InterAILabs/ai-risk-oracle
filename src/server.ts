@@ -1,3 +1,4 @@
+import "dotenv/config"
 import Fastify from "fastify"
 import { healthRoute } from "./routes/health.js"
 import { quoteRoute } from "./routes/quote.js"
@@ -14,6 +15,9 @@ import { apiKeysRoute } from "./routes/apiKeys.js"
 import { meRoute } from "./routes/me.js"
 import { topupCreateRoute } from "./routes/topupCreate.js"
 import { topupConfirmRoute } from "./routes/topupConfirm.js"
+import { onboardRoute } from "./routes/onboard.js"
+import { topupStatusRoute } from "./routes/topupStatus.js"
+import { topupDevRoute } from "./routes/topupDev.js"
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
@@ -72,15 +76,20 @@ app.get("/", async () => {
     },
 
     endpoints: {
+      onboard: "POST /onboard",
       verify: "POST /verify",
       verify_batch: "POST /verify/batch",
       me: "GET /me",
+      topup_create: "POST /topup/create",
+      topup_confirm: "POST /topup/confirm",
+      topup_status: "GET /topup/:topupId",
       health: "GET /health"
     },
 
     billing: {
       model: "prepaid_balance_per_request",
       default_cost_usdc: "0.0006",
+      recommended_topup_usdc: process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01",
       idempotency_header: "X-Idempotency-Key"
     },
 
@@ -103,9 +112,12 @@ async function start() {
   await app.register(meRoute)
   await app.register(wellKnownRoute)
   await app.register(openApiRoute)
+  await app.register(onboardRoute)
   await app.register(topupCreateRoute)
   await app.register(topupConfirmRoute)
-  
+  await app.register(topupStatusRoute)
+  await app.register(topupDevRoute)
+
   if (PAYMENT_MODE === "file") {
     await app.register(payRoute)
   }

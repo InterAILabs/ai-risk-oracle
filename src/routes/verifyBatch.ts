@@ -11,6 +11,7 @@ import {
 import { scoreResponse } from "../engine/score.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 import { getBatchAmount } from "../config/pricing.js"
+import { extractBearerToken } from "../lib/auth.js"
 
 type BatchItem = {
   prompt: string
@@ -28,13 +29,6 @@ function usdcAmountToMicrousdc(amount: string) {
   return Math.round(num * 1_000_000)
 }
 
-function extractBearerToken(authHeader: string | undefined) {
-  if (!authHeader) return null
-  const match = authHeader.match(/^Bearer\s+(.+)$/i)
-  if (!match) return null
-  return match[1]?.trim() || null
-}
-
 export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
   app.post("/verify/batch", async (req, reply) => {
     const paymentRef = req.headers["x-payment-ref"] as string | undefined
@@ -45,7 +39,11 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     if (!paymentRef && !bearerToken) {
       return reply.code(402).send({
         error: "payment_required",
-        hint: "Provide Authorization: Bearer <api_key> or x-payment-ref"
+        hint: "Provide Authorization: Bearer <api_key> or x-payment-ref",
+        onboarding: {
+          create_account_url: "/onboard",
+          topup_create_url: "/topup/create"
+        }
       })
     }
 
@@ -67,7 +65,7 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     }
 
     if (body.items.length > 100) {
-      return reply.code(400).send({ error: "batch_limit_exceeded" })
+      return reply.code(400).send({ error: "batch_limit_exceeded", max_items: 100 })
     }
 
     if (bearerToken) {
@@ -100,9 +98,26 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
 
       if (!debit.ok) {
         if (debit.error === "insufficient_balance") {
+          const balanceMicrousdc = Number(debit.balance_microusdc ?? 0)
+          const shortfallMicrousdc = Math.max(costMicrousdc - balanceMicrousdc, 0)
+          const recommendedTopupUsdc = String(process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01")
+
           return reply.code(402).send({
             error: debit.error,
-            balance_microusdc: debit.balance_microusdc
+            service: "verify_batch",
+            batch_size: body.items.length,
+            cost_microusdc: costMicrousdc,
+            cost_usdc: batchAmount,
+            balance_microusdc: balanceMicrousdc,
+            balance_usdc: (balanceMicrousdc / 1_000_000).toFixed(6),
+            shortfall_microusdc: shortfallMicrousdc,
+            shortfall_usdc: (shortfallMicrousdc / 1_000_000).toFixed(6),
+            topup: {
+              create_url: "/topup/create",
+              dev_credit_url: "/topup/dev/credit",
+              receive_address: process.env.TOPUP_RECEIVE_ADDRESS || null,
+              recommended_amount_usdc: recommendedTopupUsdc
+            }
           })
         }
 
@@ -133,10 +148,7 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
       reply.header("X-Oracle-Currency", "USDC")
       reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
       reply.header("X-Oracle-Latency-Ms", String(maxLatencyMs))
-      reply.header(
-        "X-Oracle-Remaining-Balance-MicroUSDC",
-        String(debit.remaining_balance_microusdc)
-      )
+      reply.header("X-Oracle-Remaining-Balance-MicroUSDC", String(debit.remaining_balance_microusdc))
       reply.header("X-Oracle-Remaining-Balance-USDC", debit.remaining_balance_usdc)
 
       if (debit.idempotent_replay) {
@@ -144,7 +156,15 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
       }
 
       return {
+        ok: true,
         batch_size: results.length,
+        billed: {
+          mode: "account",
+          cost_usdc: batchAmount,
+          cost_microusdc: debit.billed_cost_microusdc,
+          remaining_balance_usdc: debit.remaining_balance_usdc,
+          remaining_balance_microusdc: debit.remaining_balance_microusdc
+        },
         results,
         summary: {
           count: results.length,
@@ -218,12 +238,12 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
 
     const highRiskCount = results.filter((item) => item.risk_level === "high").length
 
-    const consumedOk = consume(ref)
-    if (!consumedOk) return reply.code(402).send({ error: "payment_already_used" })
-
     const maxLatencyMs = Math.max(
       ...results.map((item) => item.analysis.total_latency_ms ?? item.analysis.engine_latency_ms ?? 0)
     )
+
+    const consumedOk = consume(ref)
+    if (!consumedOk) return reply.code(402).send({ error: "payment_already_used" })
 
     reply.header("X-Oracle-Billing-Mode", "payment_reference")
     reply.header("X-Oracle-Cost", finalPayment.amount)
@@ -232,7 +252,12 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     reply.header("X-Oracle-Latency-Ms", String(maxLatencyMs))
 
     return {
+      ok: true,
       batch_size: results.length,
+      billed: {
+        mode: "payment_reference",
+        cost_usdc: finalPayment.amount
+      },
       results,
       summary: {
         count: results.length,

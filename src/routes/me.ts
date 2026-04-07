@@ -3,13 +3,7 @@ import {
   getAccountBalance,
   resolveAccountByApiKey
 } from "../payments/fileStore.js"
-
-function extractBearerToken(authHeader: string | undefined) {
-  if (!authHeader) return null
-  const match = authHeader.match(/^Bearer\s+(.+)$/i)
-  if (!match) return null
-  return match[1]?.trim() || null
-}
+import { extractBearerToken } from "../lib/auth.js"
 
 export const meRoute: FastifyPluginAsync = async (app) => {
   app.get("/me", async (req, reply) => {
