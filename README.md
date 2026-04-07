@@ -1,243 +1,172 @@
 # InterAI Risk Oracle
 
-Payment-gated AI response verification API for agents and LLM pipelines.
+A prepaid AI-to-AI verification primitive.
 
-AI-to-AI infrastructure service for **response consistency and hallucination risk detection**.
+This service allows autonomous systems and developers to:
 
-This API allows agents, applications, and LLM pipelines to **verify the reliability of an AI-generated response** before trusting it.
-
-The service is **payment-gated** using a machine-to-machine micropayment model.
-
----
-
-## Live API
-
-`https://ai-risk-oracle.fly.dev`
-
-Health check:
-
-`GET /health`
+* evaluate response consistency
+* estimate hallucination risk
+* take safer downstream actions
+* pay per request using a prepaid balance
 
 ---
 
-## Core Concept
+## Core Model
 
-Agents can call this API to ask:
+The system operates on:
 
-> "Is this response internally consistent and reliable?"
+account → balance → API key → usage → billing
 
-The API returns a **risk score** and recommendation.
+Each request:
 
-Example output:
+* consumes balance
+* returns risk + consistency metrics
+* is idempotent-safe
 
-```json
-{
-  "consistency_score": 0.83,
-  "hallucination_risk": 0.17,
-  "risk_level": "low",
-  "recommended_action": "accept"
-}
-Payment Model
+---
 
-The API uses a 402-style payment flow.
+## Quickstart (2 minutes)
 
-Workflow:
+### 1. Create an account
 
-Agent
-│
-▼
-POST /quote
-│
-▼
-receive payment_reference
-│
-▼
-pay
-│
-▼
-POST /verify
-Header: X-Payment-Ref
-Payment
+```bash
+curl -X POST https://ai-risk-oracle.fly.dev/accounts/create \
+  -H "Content-Type: application/json" \
+  -H "X-Admin-Token: YOUR_ADMIN_TOKEN" \
+  -d '{"account_id":"acct_example","name":"Example"}'
+```
 
-Current public deployment uses file-mode payment confirmation for MVP testing.
-Real onchain verification on Base is the next step.
+---
 
-The API uses USDC on Base.
+### 2. Create an API key
 
-Token
-USDC
-0x833589fcd6edb6e08f4c7c32d4f71b54bda02913
+```bash
+curl -X POST https://ai-risk-oracle.fly.dev/accounts/acct_example/api-keys \
+  -H "Content-Type: application/json" \
+  -H "X-Admin-Token: YOUR_ADMIN_TOKEN" \
+  -d '{"name":"main-key"}'
+```
 
-Network
-Base
-chain_id: 8453
+Save the returned API key.
 
-The client must transfer the quoted amount to the address returned by /quote.
+---
 
-After payment, call /verify using the payment_reference.
+### 3. Create a top-up request
 
-Pricing
-Mode	Price
-fast	0.0006 USDC
-batch	0.0004 USDC per item
-Stats
-
-GET /stats
-
-Returns basic service metrics:
-
-quotes issued
-
-payments confirmed
-
-verifications executed
-
-Quickstart (2 minutes)
-1. Request a quote
-curl https://ai-risk-oracle.fly.dev/quote \
--X POST \
--H "Content-Type: application/json" \
--d '{
-  "prompt": "What is the capital of France?",
-  "response": "Paris is the capital of France.",
-  "mode": "fast"
-}'
-
-Example response:
-
-{
-  "payment_reference": "abc123",
-  "amount": "0.0006",
-  "currency": "USDC"
-}
-2. Verify response
-curl https://ai-risk-oracle.fly.dev/verify \
--X POST \
--H "Content-Type: application/json" \
--H "X-Payment-Ref: abc123" \
--d '{
-  "prompt": "What is the capital of France?",
-  "response": "Paris is the capital of France."
-}'
+```bash
+curl -X POST https://ai-risk-oracle.fly.dev/topup/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "account_id":"acct_example",
+    "amount_usdc":"0.01"
+  }'
+```
 
 Response:
 
+```json
 {
-  "consistency_score": 0.83,
-  "hallucination_risk": 0.17,
-  "risk_level": "low",
-  "recommended_action": "accept"
+  "topup_id": "...",
+  "amount": "0.01",
+  "pay_to": "0x...",
+  "chain": "base"
 }
-Endpoints
-Health
+```
 
-GET /health
+---
 
-Returns service status.
+### 4. Send USDC
 
-Quote
+From your wallet:
 
-POST /quote
+* network: Base
+* token: USDC
+* amount: exact match
+* destination: `pay_to`
 
-Request:
+---
 
-{
-  "prompt": "...",
-  "response": "...",
-  "mode": "fast"
-}
+### 5. Confirm payment
 
-Returns payment quote.
+```bash
+curl -X POST https://ai-risk-oracle.fly.dev/topup/confirm \
+  -H "X-Topup-Id: YOUR_TOPUP_ID" \
+  -H "X-Tx-Hash: YOUR_TX_HASH"
+```
 
-Verify
+---
 
-POST /verify
+### 6. Verify a response
 
-Headers:
+```bash
+curl -X POST https://ai-risk-oracle.fly.dev/verify \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt":"What is the capital of France?",
+    "response":"Paris is the capital of France."
+  }'
+```
 
-X-Payment-Ref: <payment_reference>
+---
 
-Request:
+## Idempotency
 
-{
-  "prompt": "...",
-  "response": "...",
-  "domain": "general"
-}
-Verify Batch
+Use:
 
-POST /verify/batch
+```
+X-Idempotency-Key
+```
 
-Request:
+Same request + same key → no double charge.
 
-{
-  "items": [
-    {
-      "prompt": "...",
-      "response": "...",
-      "domain": "general"
-    }
-  ]
-}
-Public Example
+---
 
-Run the public example locally:
+## Billing
 
-npm run example
-Smoke Test
+* currency: USDC
+* unit: microusdc
+* model: prepaid balance
+* default verify cost: 0.0006 USDC
 
-Run the smoke test:
+---
 
-npm run smoke
-OpenAPI
+## Endpoints
 
-Machine-readable API specification:
+| Endpoint            | Description             |
+| ------------------- | ----------------------- |
+| POST /verify        | Single verification     |
+| POST /verify/batch  | Batch verification      |
+| POST /topup/create  | Generate payment        |
+| POST /topup/confirm | Confirm onchain payment |
+| GET /me             | Account + balance       |
 
-/.well-known/openapi.json
+---
 
-AI Service Discovery
+## Design Goal
 
-Agents can discover this service via:
+To act as a reusable economic primitive for AI-to-AI systems:
 
-/.well-known/ai-service.json
+* composable
+* autonomous
+* payment-aware
+* trust-aware
 
-SDK Example (TypeScript)
-import { quote, verify } from "./sdk/interai-risk-oracle"
+---
 
-const base = "https://ai-risk-oracle.fly.dev"
+## Status
 
-const q = await quote(base, prompt, response)
-const result = await verify(base, q.payment_reference, prompt, response)
+Early production-ready.
 
-console.log(result)
-Use Cases
+Stable core:
 
-LLM output validation
+* account + balance
+* API keys
+* onchain top-up
+* idempotent billing
 
-hallucination detection
+---
 
-AI agent self-checking
+## License
 
-multi-agent verification
-
-safety guardrails
-
-Performance
-
-Load tests (local benchmark):
-
-~900 requests/sec
-
-p95 latency ~125ms
-
-Architecture
-Client / Agent
-│
-▼
-AI Risk Oracle API
-│
-▼
-Heuristic engine
-License
-
-MIT
+TBD
