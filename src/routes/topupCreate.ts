@@ -33,7 +33,9 @@ export const topupCreateRoute: FastifyPluginAsync = async (app) => {
       amount: body.amount_usdc,
       pay_to,
       chain: "base",
-      expires_at
+      created_at: Date.now(),
+      expires_at,
+      ttl_minutes: Math.round((expires_at - Date.now()) / 60000)
     }
   })
 }
