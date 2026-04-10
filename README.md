@@ -33,7 +33,7 @@ It is a **machine-to-machine primitive**.
 
 ## Fastest integration (AI-to-AI)
 
-### 1. Onboard
+1. Onboard
 
 ```bash
 curl -X POST http://localhost:3000/onboard \

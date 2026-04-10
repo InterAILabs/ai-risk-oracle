@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 import Database from "better-sqlite3"
-import { createHash } from "crypto"
+import { createHash, randomUUID  } from "crypto"
 
 export type PaymentStatus = "quoted" | "paid" | "consumed" | "expired"
 
@@ -74,6 +74,13 @@ function ensureSchema() {
       used_at INTEGER NOT NULL,
       FOREIGN KEY(ref) REFERENCES payments(ref)
     );
+    
+    CREATE TABLE IF NOT EXISTS used_topup_txs (
+      tx_hash TEXT PRIMARY KEY,
+      topup_id TEXT NOT NULL,
+      used_at INTEGER NOT NULL,
+      FOREIGN KEY(topup_id) REFERENCES topups(id)
+    );
 
     CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
     CREATE INDEX IF NOT EXISTS idx_payments_expires_at ON payments(expires_at);
@@ -120,6 +127,10 @@ function ensureSchema() {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_usage_account_reference_unique
     ON usage(account_id, reference)
     WHERE reference IS NOT NULL;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_credit_topup_reference_unique
+    ON ledger(account_id, reference, entry_type)
+    WHERE reference IS NOT NULL AND entry_type = 'credit';
     
     CREATE TABLE IF NOT EXISTS api_keys (
       id TEXT PRIMARY KEY,
@@ -190,6 +201,17 @@ const selectUsedTxStmt = db.prepare(`
 
 const insertUsedTxStmt = db.prepare(`
   INSERT INTO used_txs (tx_hash, ref, used_at)
+  VALUES (?, ?, ?)
+`)
+
+const selectUsedTopupTxStmt = db.prepare(`
+  SELECT tx_hash, topup_id, used_at
+  FROM used_topup_txs
+  WHERE tx_hash = ?
+`)
+
+const insertUsedTopupTxStmt = db.prepare(`
+  INSERT INTO used_topup_txs (tx_hash, topup_id, used_at)
   VALUES (?, ?, ?)
 `)
 
@@ -267,6 +289,13 @@ const touchApiKeyLastUsedStmt = db.prepare(`
   UPDATE api_keys
   SET last_used_at = ?
   WHERE id = ?
+`)
+
+const selectApiKeyByRawHashStmt = db.prepare(`
+  SELECT id, account_id, name, key_prefix, status, created_at
+  FROM api_keys
+  WHERE key_hash = ?
+  LIMIT 1
 `)
 
 const selectApiKeyByIdForAccountStmt = db.prepare(`
@@ -390,6 +419,32 @@ export function markTxUsed(txHash: string, ref: string) {
       return false
     }
     throw error
+  }
+}
+
+export function markTopupTxUsed(txHash: string, topupId: string) {
+  try {
+    insertUsedTopupTxStmt.run(txHash, topupId, Date.now())
+    return true
+  } catch (error: any) {
+    if (String(error?.message || "").includes("UNIQUE constraint failed")) {
+      return false
+    }
+    throw error
+  }
+}
+
+export function getUsedTopupTx(txHash: string) {
+  const row = selectUsedTopupTxStmt.get(txHash) as
+    | { tx_hash: string; topup_id: string; used_at: number }
+    | undefined
+
+  if (!row) return null
+
+  return {
+    tx_hash: String(row.tx_hash),
+    topup_id: String(row.topup_id),
+    used_at: Number(row.used_at)
   }
 }
 
@@ -556,6 +611,32 @@ export function createApiKey(params: {
     key_prefix: keyPrefix,
     status: "active" as const,
     created_at: now
+  }
+}
+
+export function getApiKeyByRaw(rawKey: string) {
+  const keyHash = createHash("sha256").update(rawKey).digest("hex")
+
+  const row = selectApiKeyByRawHashStmt.get(keyHash) as
+    | {
+        id: string
+        account_id: string
+        name: string
+        key_prefix: string
+        status: string
+        created_at: number
+      }
+    | undefined
+
+  if (!row) return null
+
+  return {
+    id: String(row.id),
+    account_id: String(row.account_id),
+    name: String(row.name),
+    key_prefix: String(row.key_prefix),
+    status: String(row.status),
+    created_at: Number(row.created_at)
   }
 }
 
@@ -883,12 +964,191 @@ export function getTopup(id: string): TopupRecord | undefined {
     .get(id) as TopupRecord | undefined
 }
 
-export function confirmTopup(id: string, tx_hash: string) {
-  db.prepare(`
-    UPDATE topups
-    SET status = 'confirmed', tx_hash = ?
-    WHERE id = ?
-  `).run(tx_hash, id)
+export function getTopupForAccount(topupId: string, accountId: string) {
+  const row = db.prepare(`
+    SELECT id, account_id, amount, pay_to, status, tx_hash, created_at, expires_at
+    FROM topups
+    WHERE id = ? AND account_id = ?
+  `).get(topupId, accountId) as
+    | {
+        id: string
+        account_id: string
+        amount: string
+        pay_to: string
+        status: string
+        tx_hash: string | null
+        created_at: number
+        expires_at: number
+      }
+    | undefined
+
+  if (!row) return null
+
+  return {
+    id: String(row.id),
+    account_id: String(row.account_id),
+    amount: String(row.amount),
+    pay_to: String(row.pay_to),
+    status: String(row.status),
+    tx_hash: row.tx_hash ? String(row.tx_hash) : null,
+    created_at: Number(row.created_at),
+    expires_at: Number(row.expires_at)
+  }
+}
+
+export function confirmTopupAndCredit(params: {
+  topupId: string
+  txHash: string
+}) {
+  const { topupId, txHash } = params
+
+  return db.transaction(() => {
+    const topup = getTopup(topupId)
+
+    if (!topup) {
+      return { ok: false as const, error: "topup_not_found" }
+    }
+
+    if (topup.status === "expired") {
+      return { ok: false as const, error: "topup_expired" }
+    }
+
+    if (Date.now() > topup.expires_at) {
+      db.prepare(`
+        UPDATE topups
+        SET status = 'expired'
+        WHERE id = ?
+          AND status != 'confirmed'
+      `).run(topupId)
+
+      return { ok: false as const, error: "topup_expired" }
+    }
+
+    if (topup.status === "confirmed") {
+      const balance = getAccountBalance(topup.account_id)
+      return {
+        ok: true as const,
+        already_confirmed: true as const,
+        topup_id: topup.id,
+        account_id: topup.account_id,
+        tx_hash: topup.tx_hash,
+        credited_microusdc: 0,
+        credited_usdc: "0.000000",
+        balance
+      }
+    }
+
+    const used = getUsedTopupTx(txHash)
+    if (used && used.topup_id !== topupId) {
+      return { ok: false as const, error: "topup_tx_already_used" }
+    }
+
+    if (!used) {
+      const inserted = markTopupTxUsed(txHash, topupId)
+      if (!inserted) {
+        const raced = getUsedTopupTx(txHash)
+        if (raced && raced.topup_id !== topupId) {
+          return { ok: false as const, error: "topup_tx_already_used" }
+        }
+      }
+    }
+
+    const update = db.prepare(`
+      UPDATE topups
+      SET status = 'confirmed',
+          tx_hash = ?
+      WHERE id = ?
+        AND status = 'pending'
+    `).run(txHash, topupId)
+
+    if (update.changes === 0) {
+      const fresh = getTopup(topupId)
+
+      if (!fresh) {
+        return { ok: false as const, error: "topup_not_found" }
+      }
+
+      if (fresh.status === "confirmed") {
+        const balance = getAccountBalance(fresh.account_id)
+        return {
+          ok: true as const,
+          already_confirmed: true as const,
+          topup_id: fresh.id,
+          account_id: fresh.account_id,
+          tx_hash: fresh.tx_hash,
+          credited_microusdc: 0,
+          credited_usdc: "0.000000",
+          balance
+        }
+      }
+
+      return { ok: false as const, error: "topup_not_confirmable" }
+    }
+
+    const microusdc = Math.round(Number(topup.amount) * 1_000_000)
+
+    const now = Date.now()
+
+    const balanceRow = selectBalanceStmt.get(topup.account_id) as
+      | { balance_microusdc: number }
+      | undefined
+
+    const current = Number(balanceRow?.balance_microusdc ?? 0)
+    const next = current + microusdc
+
+    updateBalanceStmt.run(next, now, topup.account_id)
+
+    try {
+      insertLedgerStmt.run({
+        id: randomUUID(),
+        account_id: topup.account_id,
+        entry_type: "credit",
+        amount_microusdc: microusdc,
+        reference: topupId,
+        metadata_json: JSON.stringify({
+          source: "topup",
+          tx_hash: txHash
+        }),
+        created_at: now
+      })
+    } catch (error: any) {
+      const msg = String(error?.message || "")
+ 
+      if (
+        msg.includes("UNIQUE constraint failed") ||
+        msg.includes("idx_ledger_credit_topup_reference_unique")
+      ) {
+
+        const balance = getAccountBalance(topup.account_id)
+
+        return {
+          ok: true as const,
+          already_confirmed: true as const,
+          topup_id: topup.id,
+          account_id: topup.account_id,
+          tx_hash: txHash,
+          credited_microusdc: 0,
+          credited_usdc: "0.000000",
+          balance
+        }
+      }
+
+      throw error
+    }
+
+    const balance = getAccountBalance(topup.account_id)
+
+    return {
+      ok: true as const,
+      already_confirmed: false as const,
+      topup_id: topup.id,
+      account_id: topup.account_id,
+      tx_hash: txHash,
+      credited_microusdc: microusdc,
+      credited_usdc: topup.amount,
+      balance
+    }
+  })()
 }
 
 export function listLedgerForAccount(accountId: string, limit = 20) {

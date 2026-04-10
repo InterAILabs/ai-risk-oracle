@@ -7,6 +7,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "smoke": "node ./scripts/smoke-test.js",
+    "smoke:billing": "node ./scripts/smoke-billing-regression.js",
+    "smoke:topup-confirm": "node ./scripts/smoke-topup-confirm.js",
     "example": "node ./examples/test.js"
   },
   "dependencies": {
