@@ -1,37 +1,29 @@
 import { FastifyPluginAsync } from "fastify"
 import { randomUUID } from "crypto"
-import { createTopup, getAccount, resolveAccountByApiKey } from "../payments/fileStore.js"
-import { extractBearerToken } from "../lib/auth.js"
+import { createTopup } from "../payments/fileStore.js"
+import { economicError } from "../lib/httpErrors.js"
+import { resolveAccountIdFromBodyOrBearer } from "../auth/resolveBearerAccount.js"
 
 export const topupCreateRoute: FastifyPluginAsync = async (app) => {
   app.post("/topup/create", async (req, reply) => {
-    const body = (req.body as any) ?? {}
-    const authHeader = req.headers["authorization"] as string | undefined
-    const bearerToken = extractBearerToken(authHeader)
-
-    let accountId = body?.account_id ? String(body.account_id) : ""
-
-    if (!accountId && bearerToken) {
-      const resolved = resolveAccountByApiKey(bearerToken)
-      if (!resolved) {
-        return reply.code(401).send({ error: "invalid_api_key" })
-      }
-      accountId = resolved.account_id
+    const body =
+      (req.body as { account_id?: string; amount_usdc?: string } | undefined) ?? {}
+    if (!body.account_id && !req.headers.authorization) {
+      return reply.code(400).send(
+        economicError("missing_account_id", {
+          hint: "Provide account_id in body or Authorization: Bearer <api_key>"
+        })
+      )
     }
 
-    if (!accountId) {
-      return reply.code(400).send({
-        error: "missing_account_id",
-        hint: "Provide account_id in body or Authorization: Bearer <api_key>"
-      })
+    const target = resolveAccountIdFromBodyOrBearer({ body, req, reply })
+    if (!target) {
+      return
     }
 
-    const account = getAccount(accountId)
-    if (!account) {
-      return reply.code(404).send({ error: "account_not_found" })
-    }
+    const { accountId } = target
 
-    const amount = body?.amount_usdc
+    const amount = body.amount_usdc
       ? String(body.amount_usdc)
       : String(process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01")
 
@@ -39,7 +31,7 @@ export const topupCreateRoute: FastifyPluginAsync = async (app) => {
 
     const pay_to = process.env.TOPUP_RECEIVE_ADDRESS
     if (!pay_to) {
-      return reply.code(500).send({ error: "missing_TOPUP_RECEIVE_ADDRESS" })
+      return reply.code(500).send(economicError("missing_TOPUP_RECEIVE_ADDRESS"))
     }
 
     const expires_at = Date.now() + 45 * 60 * 1000

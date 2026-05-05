@@ -5,8 +5,8 @@ import { requireAdmin } from "../lib/adminauth.js"
 
 export const balanceRoute: FastifyPluginAsync = async (app) => {
   app.get("/accounts/:accountId/balance", async (req, reply) => {
-  if (!requireAdmin(req, reply)) return
-    const params = req.params as any
+    if (!requireAdmin(req, reply)) return
+    const params = req.params as { accountId?: string }
     const accountId = String(params.accountId)
 
     const account = getAccount(accountId)
@@ -24,21 +24,17 @@ export const balanceRoute: FastifyPluginAsync = async (app) => {
   })
 
   app.post("/accounts/:accountId/credit", async (req, reply) => {
-    const expectedAdminToken = process.env.ADMIN_TOKEN
-    if (!expectedAdminToken) {
-      return reply.code(500).send({ error: "admin_token_not_configured" })
-    }
-
-    const admin = req.headers["x-admin-token"]
-    if (admin !== expectedAdminToken) {
-      return reply.code(403).send({ error: "forbidden" })
-    }
-
-    const params = req.params as any
-    const body = req.body as any
+    if (!requireAdmin(req, reply)) return
+    const params = req.params as { accountId?: string }
+    const body =
+      (req.body as {
+        amount_microusdc?: number
+        reference?: string
+        metadata?: Record<string, unknown>
+      } | undefined) ?? {}
 
     const accountId = String(params.accountId)
-    const amountMicrousdc = Number(body?.amount_microusdc)
+    const amountMicrousdc = Number(body.amount_microusdc)
 
     if (!Number.isInteger(amountMicrousdc) || amountMicrousdc <= 0) {
       return reply.code(400).send({ error: "invalid_amount_microusdc" })
@@ -49,16 +45,17 @@ export const balanceRoute: FastifyPluginAsync = async (app) => {
         ledgerId: randomUUID(),
         accountId,
         amountMicrousdc,
-        reference: body?.reference ? String(body.reference) : undefined,
-        metadata: body?.metadata && typeof body.metadata === "object" ? body.metadata : undefined
+        reference: body.reference ? String(body.reference) : undefined,
+        metadata:
+          body.metadata && typeof body.metadata === "object" ? body.metadata : undefined
       })
 
       return {
         ok: true,
         result
       }
-    } catch (error: any) {
-      const msg = String(error?.message || "unknown_error")
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "unknown_error"
 
       if (msg === "account_not_found") {
         return reply.code(404).send({ error: msg })

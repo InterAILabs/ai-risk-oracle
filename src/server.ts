@@ -1,5 +1,6 @@
 import "dotenv/config"
 import Fastify from "fastify"
+import { pathToFileURL } from "url"
 import { healthRoute } from "./routes/health.js"
 import { quoteRoute } from "./routes/quote.js"
 import { verifyRoute } from "./routes/verify.js"
@@ -20,6 +21,20 @@ import { topupStatusRoute } from "./routes/topupStatus.js"
 import { topupDevRoute } from "./routes/topupDev.js"
 import { ledgerRoute } from "./routes/ledger.js"
 import { usageRoute } from "./routes/usage.js"
+import { trustReceiptsRoute } from "./routes/trustReceipts.js"
+import { trustVerifySignatureRoute } from "./routes/trustVerifySignature.js"
+import { trustReceiptGetRoute } from "./routes/trustReceiptGet.js"
+import { schemasRoute } from "./routes/schemas.js"
+import { isReceiptSigningEnabled } from "./lib/signing.js"
+import { agentCardRoute } from "./routes/agentCard.js"
+import { a2aRoute } from "./routes/a2a.js"
+
+declare module "fastify" {
+  interface FastifyReply {
+    __timeout?: NodeJS.Timeout
+    __timedOut?: boolean
+  }
+}
 
 const PORT = Number(process.env.PORT || 3000)
 const HOST = process.env.HOST || "0.0.0.0"
@@ -32,77 +47,94 @@ const RL_REFILL_PER_SEC = Number(process.env.RL_REFILL_PER_SEC || 2)
 
 const PAYMENT_MODE = (process.env.PAYMENT_MODE || "file") as "file" | "onchain"
 
-const app = Fastify({
-  logger: true,
-  bodyLimit: BODY_LIMIT_BYTES
-})
+export function buildApp() {
+  const app = Fastify({
+    logger: true,
+    bodyLimit: BODY_LIMIT_BYTES
+  })
 
-app.addHook("onRequest", async (_req, reply) => {
-  const t = setTimeout(() => {
-    if (!reply.sent) {
-      ;(reply as any).__timedOut = true
-      reply.code(503).send({ error: "timeout", hint: "Request took too long" })
-    }
-  }, REQUEST_TIMEOUT_MS)
-
-  ;(reply as any).__timeout = t
-  ;(reply as any).__timedOut = false
-})
-
-app.addHook("onResponse", async (_req, reply) => {
-  const t = (reply as any).__timeout as NodeJS.Timeout | undefined
-  if (t) clearTimeout(t)
-})
-
-const rateLimiter = createRateLimiter({
-  capacity: RL_CAPACITY,
-  refillPerSec: RL_REFILL_PER_SEC
-})
-
-app.addHook("preHandler", rateLimiter)
-
-app.get("/", async () => {
-  return {
-    name: "AI Risk Oracle",
-    status: "ok",
-    version: "0.0.1",
-
-    auth: {
-      primary: {
-        type: "Bearer API key",
-        header: "Authorization: Bearer <api_key>"
-      },
-      legacy: {
-        type: "X-Payment-Ref"
+  app.addHook("onRequest", async (_req, reply) => {
+    const t = setTimeout(() => {
+      if (!reply.sent) {
+        reply.__timedOut = true
+        reply.code(503).send({ error: "timeout", hint: "Request took too long" })
       }
-    },
+    }, REQUEST_TIMEOUT_MS)
 
-    endpoints: {
-      onboard: "POST /onboard",
-      verify: "POST /verify",
-      verify_batch: "POST /verify/batch",
-      me: "GET /me",
-      topup_create: "POST /topup/create",
-      topup_confirm: "POST /topup/confirm",
-      topup_status: "GET /topup/:topupId",
-      health: "GET /health"
-    },
+    reply.__timeout = t
+    reply.__timedOut = false
+  })
 
-    billing: {
-      model: "prepaid_balance_per_request",
-      default_cost_usdc: "0.0006",
-      recommended_topup_usdc: process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01",
-      idempotency_header: "X-Idempotency-Key"
-    },
+  app.addHook("onResponse", async (_req, reply) => {
+    const t = reply.__timeout
+    if (t) clearTimeout(t)
+  })
 
-    docs: {
-      openapi: "/.well-known/openapi.json",
-      service: "/.well-known/ai-service.json"
+  const rateLimiter = createRateLimiter({
+    capacity: RL_CAPACITY,
+    refillPerSec: RL_REFILL_PER_SEC
+  })
+
+  app.addHook("preHandler", rateLimiter)
+
+  app.get("/", async () => {
+    return {
+      name: "AI Risk Oracle",
+      status: "ok",
+      version: "0.0.1",
+
+      auth: {
+        primary: {
+          type: "Bearer API key",
+          header: "Authorization: Bearer <api_key>"
+        },
+        legacy: {
+          type: "X-Payment-Ref"
+        }
+      },
+
+      endpoints: {
+        onboard: "POST /onboard",
+        verify: "POST /verify",
+        verify_batch: "POST /verify/batch",
+        a2a: "POST /a2a",
+        agent_card: "GET /.well-known/agent.json",
+        trust_receipts: "GET /trust/receipts",
+        trust_receipt_get: "GET /trust/receipts/:receiptId",
+        trust_verify_signature: "POST /trust/verify-signature",
+        schemas: "GET /schemas/*.json",
+        me: "GET /me",
+        topup_create: "POST /topup/create",
+        topup_confirm: "POST /topup/confirm",
+        topup_status: "GET /topup/:topupId",
+        health: "GET /health",
+        ready: "GET /ready"
+      },
+
+      billing: {
+        model: "prepaid_balance_per_request",
+        default_cost_usdc: "0.0006",
+        recommended_topup_usdc: process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01",
+        idempotency_header: "X-Idempotency-Key"
+      },
+
+      docs: {
+        openapi: "/.well-known/openapi.json",
+        service: "/.well-known/ai-service.json"
+      },
+
+      trust: {
+        receipts: true,
+        signature_verification: true,
+        signing_enabled: isReceiptSigningEnabled()
+      }
     }
-  }
-})
+  })
 
-async function start() {
+  return app
+}
+
+async function registerRoutes(app: ReturnType<typeof buildApp>) {
   await app.register(healthRoute)
   await app.register(statsRoute)
   await app.register(quoteRoute)
@@ -114,6 +146,7 @@ async function start() {
   await app.register(meRoute)
   await app.register(ledgerRoute)
   await app.register(usageRoute)
+  await app.register(agentCardRoute)
   await app.register(wellKnownRoute)
   await app.register(openApiRoute)
   await app.register(onboardRoute)
@@ -121,15 +154,38 @@ async function start() {
   await app.register(topupConfirmRoute)
   await app.register(topupStatusRoute)
   await app.register(topupDevRoute)
-
+  await app.register(trustReceiptsRoute)
+  await app.register(trustReceiptGetRoute)
+  await app.register(trustVerifySignatureRoute)
+  await app.register(schemasRoute)
+  await app.register(a2aRoute)
   if (PAYMENT_MODE === "file") {
     await app.register(payRoute)
   }
 
-  await app.listen({ port: PORT, host: HOST })
+  return app
 }
 
-start().catch((err) => {
-  app.log.error(err, "Fatal startup error")
-  process.exit(1)
-})
+export async function createApp() {
+  const app = buildApp()
+  await registerRoutes(app)
+  return app
+}
+
+export async function start() {
+  const app = await createApp()
+
+  await app.listen({ port: PORT, host: HOST })
+
+  return app
+}
+
+const isDirectRun =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (isDirectRun) {
+  start().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}

@@ -19,18 +19,25 @@ function isEnabled(value: string | undefined, fallback = "false") {
 
 export const onboardRoute: FastifyPluginAsync = async (app) => {
   app.post("/onboard", async (req, reply) => {
-    const body = (req.body as any) ?? {}
+    const body =
+      (req.body as {
+        account_id?: string
+        name?: string
+        api_key_name?: string
+        recommended_topup_usdc?: string
+        dev_auto_credit_usdc?: string
+      } | undefined) ?? {}
 
     const onboardingEnabled = isEnabled(process.env.ONBOARDING_ENABLED, "true")
     if (!onboardingEnabled) {
       return reply.code(404).send({ error: "onboarding_disabled" })
     }
 
-    const accountId = body?.account_id ? String(body.account_id) : randomUUID()
-    const accountName = body?.name ? String(body.name) : undefined
-    const apiKeyName = body?.api_key_name ? String(body.api_key_name) : "default"
+    const accountId = body.account_id ? String(body.account_id) : randomUUID()
+    const accountName = body.name ? String(body.name) : undefined
+    const apiKeyName = body.api_key_name ? String(body.api_key_name) : "default"
     const recommendedTopupUsdc = String(
-      body?.recommended_topup_usdc ?? process.env.DEFAULT_RECOMMENDED_TOPUP_USDC ?? "0.01"
+      body.recommended_topup_usdc ?? process.env.DEFAULT_RECOMMENDED_TOPUP_USDC ?? "0.01"
     )
 
     const account = createAccount(accountId, accountName)
@@ -45,7 +52,7 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
 
     const devAutoCreditEnabled = isEnabled(process.env.ONBOARDING_DEV_AUTO_CREDIT_ENABLED, "false")
     const devAutoCreditUsdc = String(
-      body?.dev_auto_credit_usdc ??
+      body.dev_auto_credit_usdc ??
         process.env.ONBOARDING_DEV_AUTO_CREDIT_USDC ??
         "0.01"
     )

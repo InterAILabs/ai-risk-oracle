@@ -5,6 +5,7 @@ import {
   getAccount,
   revokeApiKey
 } from "../payments/fileStore.js"
+import { requireAdmin } from "../lib/adminauth.js"
 
 function generateRawApiKey() {
   return `iao_live_${randomBytes(24).toString("hex")}`
@@ -12,20 +13,9 @@ function generateRawApiKey() {
 
 export const apiKeysRoute: FastifyPluginAsync = async (app) => {
   app.post("/accounts/:accountId/api-keys", async (req, reply) => {
-    const expectedAdminToken = process.env.ADMIN_TOKEN
-
-    if (!expectedAdminToken) {
-      return reply.code(500).send({ error: "admin_token_not_configured" })
-    }
-
-    const admin = req.headers["x-admin-token"]
-
-    if (admin !== expectedAdminToken) {
-      return reply.code(403).send({ error: "forbidden" })
-    }
-
-    const params = req.params as any
-    const body = req.body as any
+    if (!requireAdmin(req, reply)) return
+    const params = req.params as { accountId?: string }
+    const body = (req.body as { name?: string } | undefined) ?? {}
 
     const accountId = String(params.accountId)
     const account = getAccount(accountId)
@@ -40,7 +30,7 @@ export const apiKeysRoute: FastifyPluginAsync = async (app) => {
         id: randomUUID(),
         accountId,
         rawKey,
-        name: body?.name ? String(body.name) : undefined
+        name: body.name ? String(body.name) : undefined
       })
 
       return {
@@ -48,8 +38,8 @@ export const apiKeysRoute: FastifyPluginAsync = async (app) => {
         api_key: rawKey,
         record
       }
-    } catch (error: any) {
-      const msg = String(error?.message || "unknown_error")
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "unknown_error"
 
       if (msg === "account_not_found") {
         return reply.code(404).send({ error: msg })
@@ -64,19 +54,8 @@ export const apiKeysRoute: FastifyPluginAsync = async (app) => {
   })
 
   app.post("/accounts/:accountId/api-keys/:apiKeyId/revoke", async (req, reply) => {
-    const expectedAdminToken = process.env.ADMIN_TOKEN
-
-    if (!expectedAdminToken) {
-      return reply.code(500).send({ error: "admin_token_not_configured" })
-    }
-
-    const admin = req.headers["x-admin-token"]
-
-    if (admin !== expectedAdminToken) {
-      return reply.code(403).send({ error: "forbidden" })
-    }
-
-    const params = req.params as any
+    if (!requireAdmin(req, reply)) return
+    const params = req.params as { accountId?: string; apiKeyId?: string }
     const accountId = String(params.accountId)
     const apiKeyId = String(params.apiKeyId)
 
@@ -93,8 +72,8 @@ export const apiKeysRoute: FastifyPluginAsync = async (app) => {
         ok: true,
         record
       }
-    } catch (error: any) {
-      const msg = String(error?.message || "unknown_error")
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "unknown_error"
 
       if (msg === "api_key_not_found") {
         return reply.code(404).send({ error: msg })

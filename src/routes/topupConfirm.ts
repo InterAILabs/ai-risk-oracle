@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify"
 import { getTopup, confirmTopupAndCredit, getAccountBalance } from "../payments/fileStore.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
+import { economicError } from "../lib/httpErrors.js"
 
 type TopupRecord = {
   id: string
@@ -19,17 +20,17 @@ export const topupConfirmRoute: FastifyPluginAsync = async (app) => {
     const tx = req.headers["x-tx-hash"] as string | undefined
 
     if (!topupId) {
-      return reply.code(400).send({ error: "missing_topup_id" })
+      return reply.code(400).send(economicError("missing_topup_id"))
     }
 
     if (!tx) {
-      return reply.code(400).send({ error: "missing_tx_hash" })
+      return reply.code(400).send(economicError("missing_tx_hash"))
     }
 
     const topup = getTopup(topupId) as TopupRecord | undefined
 
     if (!topup) {
-      return reply.code(404).send({ error: "topup_not_found" })
+      return reply.code(404).send(economicError("topup_not_found"))
     }
 
     if (topup.status === "confirmed") {
@@ -45,56 +46,55 @@ export const topupConfirmRoute: FastifyPluginAsync = async (app) => {
     }
 
     if (topup.status === "expired") {
-      return reply.code(400).send({ error: "topup_expired" })
+      return reply.code(400).send(economicError("topup_expired"))
     }
 
     if (Date.now() > topup.expires_at) {
-      return reply.code(400).send({ error: "topup_expired" })
+      return reply.code(400).send(economicError("topup_expired"))
     }
 
     const allowFakeTopupConfirm =
-  String(process.env.ALLOW_FAKE_TOPUP_CONFIRM || "").toLowerCase() === "true"
+      String(process.env.ALLOW_FAKE_TOPUP_CONFIRM || "").toLowerCase() === "true"
+    const fakeConfirmHeader = String(req.headers["x-test-confirm"] || "").toLowerCase()
+    const useFakeConfirm = allowFakeTopupConfirm && fakeConfirmHeader === "true"
 
-const fakeConfirmHeader = String(req.headers["x-test-confirm"] || "").toLowerCase()
-const useFakeConfirm = allowFakeTopupConfirm && fakeConfirmHeader === "true"
+    if (!useFakeConfirm) {
+      const rpcUrl = process.env.BASE_RPC_URL
+      if (!rpcUrl) {
+        return reply.code(500).send(economicError("missing_BASE_RPC_URL"))
+      }
 
-if (!useFakeConfirm) {
-  const rpcUrl = process.env.BASE_RPC_URL
-  if (!rpcUrl) {
-    return reply.code(500).send({ error: "missing_BASE_RPC_URL" })
-  }
+      const ok = await verifyUsdcPaymentOnBaseRpc({
+        txHash: tx as `0x${string}`,
+        payTo: topup.pay_to as `0x${string}`,
+        amount: topup.amount,
+        rpcUrl
+      })
 
-  const ok = await verifyUsdcPaymentOnBaseRpc({
-    txHash: tx as `0x${string}`,
-    payTo: topup.pay_to as `0x${string}`,
-    amount: topup.amount,
-    rpcUrl
-  })
+      if (!ok.ok) {
+        return reply.code(402).send(economicError(ok.error))
+      }
+    }
 
-  if (!ok.ok) {
-    return reply.code(402).send({ error: ok.error })
-  }
-}
-
-        const result = confirmTopupAndCredit({
+    const result = confirmTopupAndCredit({
       topupId,
       txHash: tx
     })
 
     if (!result.ok) {
       if (result.error === "topup_tx_already_used") {
-        return reply.code(409).send({ error: result.error })
+        return reply.code(409).send(economicError(result.error))
       }
 
       if (result.error === "topup_expired") {
-        return reply.code(400).send({ error: result.error })
+        return reply.code(400).send(economicError(result.error))
       }
 
       if (result.error === "topup_not_found") {
-        return reply.code(404).send({ error: result.error })
+        return reply.code(404).send(economicError(result.error))
       }
 
-      return reply.code(409).send({ error: result.error })
+      return reply.code(409).send(economicError(result.error))
     }
 
     return {

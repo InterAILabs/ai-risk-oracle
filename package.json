@@ -4,12 +4,18 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.sdk.json",
+    "test": "npm run build && node tests/run.mjs",
     "start": "node dist/server.js",
     "smoke": "node ./scripts/smoke-test.js",
     "smoke:billing": "node ./scripts/smoke-billing-regression.js",
     "smoke:topup-confirm": "node ./scripts/smoke-topup-confirm.js",
-    "example": "node ./examples/test.js"
+    "smoke:idempotency": "node ./scripts/smoke-idempotency.js",
+    "smoke:trust-signing": "node ./scripts/smoke-trust-signing.js",
+    "smoke:sdk": "node ./scripts/smoke-sdk.js",
+    "example": "node ./examples/test.js",
+    "example:basic": "tsx ./examples/basic-agent.mjs",
+    "example:basic:prod": "tsx ./examples/basic-agent-production.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",

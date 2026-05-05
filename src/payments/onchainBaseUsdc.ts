@@ -28,20 +28,38 @@ export async function verifyUsdcPaymentOnBaseRpc(args: OnchainRpcVerifyInput) {
     "event Transfer(address indexed from,address indexed to,uint256 value)"
   )
 
-  const logs = receipt.logs
-    .filter((l: any) => l.address.toLowerCase() === USDC_BASE.toLowerCase())
-    .map((l: any) => {
-      try {
-        return decodeEventLog({
-          abi: [transferEvent],
-          data: l.data,
-          topics: l.topics
-        })
-      } catch {
-        return null
-      }
-    })
-    .filter(Boolean)
+  type ReceiptLog = (typeof receipt.logs)[number]
+  type TransferMatch = {
+    args: {
+      to: `0x${string}`
+      value: bigint
+    }
+  }
+
+  const logs: TransferMatch[] = []
+
+  for (const l of receipt.logs as ReceiptLog[]) {
+    if (l.address.toLowerCase() !== USDC_BASE.toLowerCase()) {
+      continue
+    }
+
+    try {
+      const decoded = decodeEventLog({
+        abi: [transferEvent],
+        data: l.data,
+        topics: l.topics
+      })
+
+      logs.push({
+        args: {
+          to: decoded.args.to as `0x${string}`,
+          value: decoded.args.value as bigint
+        }
+      })
+    } catch {
+      continue
+    }
+  }
 
   const payToLower = args.payTo.toLowerCase()
 
@@ -49,7 +67,7 @@ export async function verifyUsdcPaymentOnBaseRpc(args: OnchainRpcVerifyInput) {
     Math.round(Number(args.amount) * 1_000_000)
   )
 
-  const paid = logs.some((ev: any) => {
+  const paid = logs.some((ev) => {
     const toOk = ev.args.to.toLowerCase() === payToLower
     const valOk = ev.args.value >= minUnits
     return toOk && valOk

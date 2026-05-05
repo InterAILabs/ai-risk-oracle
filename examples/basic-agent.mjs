@@ -57,7 +57,18 @@ async function main() {
   )
   console.log(JSON.stringify(batch, null, 2))
 
-  console.log("\nSTEP 5: me")
+  console.log("\nSTEP 5: trust receipts")
+  const receipts = await client.trustReceipts(10)
+  console.log(JSON.stringify(receipts, null, 2))
+
+  const latestReceiptId = receipts?.receipts?.[0]?.receipt_id
+  if (latestReceiptId) {
+    console.log("\nSTEP 6: canonical trust receipt lookup")
+    const publicReceipt = await client.getTrustReceipt(latestReceiptId)
+    console.log(JSON.stringify(publicReceipt, null, 2))
+  }
+
+  console.log("\nSTEP 7: me")
   const me = await client.me()
   console.log(JSON.stringify(me, null, 2))
 

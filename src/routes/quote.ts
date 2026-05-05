@@ -15,14 +15,19 @@ const TOKEN = {
 
 export const quoteRoute: FastifyPluginAsync = async (app) => {
   app.post("/quote", async (req, reply) => {
-    const body = req.body as any
+    const body =
+      (req.body as {
+        service?: string
+        mode?: string
+        items_count?: number
+      } | undefined) ?? {}
 
-    const service = String(body?.service ?? "verify")
+    const service = String(body.service ?? "verify")
     if (service !== "verify") {
       return reply.code(400).send({ error: "invalid_service" })
     }
 
-    const mode: string = body?.mode ?? "fast"
+    const mode: string = body.mode ?? "fast"
     const pay_to = (process.env.PAY_TO ||
       "0x0000000000000000000000000000000000000000") as string
 
@@ -30,7 +35,7 @@ export const quoteRoute: FastifyPluginAsync = async (app) => {
     let items_count: number | undefined
 
     if (mode === "batch") {
-      items_count = Number(body?.items_count ?? 0)
+      items_count = Number(body.items_count ?? 0)
 
       if (!Number.isInteger(items_count) || items_count <= 0) {
         return reply.code(400).send({ error: "invalid_items_count" })

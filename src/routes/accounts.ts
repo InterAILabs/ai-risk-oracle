@@ -5,10 +5,11 @@ import { requireAdmin } from "../lib/adminauth.js"
 
 export const accountsRoute: FastifyPluginAsync = async (app) => {
   app.post("/accounts/create", async (req, reply) => {
-  if (!requireAdmin(req, reply)) return
-    const body = req.body as any
-    const accountId = String(body?.account_id ?? randomUUID())
-    const name = body?.name ? String(body.name) : undefined
+    if (!requireAdmin(req, reply)) return
+    const body =
+      (req.body as { account_id?: string; name?: string } | undefined) ?? {}
+    const accountId = String(body.account_id ?? randomUUID())
+    const name = body.name ? String(body.name) : undefined
 
     const account = createAccount(accountId, name)
 

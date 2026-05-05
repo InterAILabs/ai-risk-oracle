@@ -4,28 +4,30 @@ import {
   getPayment,
   consume,
   confirmOnchainPayment,
-  debitAccountForUsage,
   getAccount,
   resolveAccountByApiKey
 } from "../payments/fileStore.js"
-import { scoreResponse } from "../engine/score.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 import { PRICING } from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
 import { economicError } from "../lib/httpErrors.js"
-
-const ENGINE_VERSION = process.env.ORACLE_ENGINE_VERSION || "0.0.1"
-
-function usdcAmountToMicrousdc(amount: string) {
-  const num = Number(amount)
-  if (!Number.isFinite(num) || num <= 0) {
-    throw new Error("invalid_usdc_amount")
-  }
-  return Math.round(num * 1_000_000)
-}
+import {
+  buildInsufficientBalanceDetails,
+  chargeAndRecordUsage,
+  ENGINE_VERSION,
+  ORACLE_SIGNALS_VERSION,
+  runVerification,
+  TRUST_SIGNING_ENABLED
+} from "../services/verificationFlow.js"
 
 export const verifyRoute: FastifyPluginAsync = async (app) => {
   app.post("/verify", async (req, reply) => {
+    const body =
+      (req.body as {
+        prompt?: string
+        response?: string
+        domain?: string
+      } | undefined) ?? {}
     const paymentRef = req.headers["x-payment-ref"] as string | undefined
     const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined
     const authHeader = req.headers["authorization"] as string | undefined
@@ -67,51 +69,43 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         return reply.code(402).send(economicError("account_not_active"))
       }
 
-      const costMicrousdc = usdcAmountToMicrousdc(PRICING.fast.amount)
       const usageId = randomUUID()
-
-      const debit = debitAccountForUsage({
-        ledgerId: randomUUID(),
+      const debit = chargeAndRecordUsage({
         usageId,
         accountId: resolved.account_id,
         service: "verify",
-        costMicrousdc,
+        costUsdc: PRICING.fast.amount,
         reference: idempotencyKey
       })
 
       if (!debit.ok) {
         if (debit.error === "insufficient_balance") {
-          const balanceMicrousdc = Number(debit.balance_microusdc ?? 0)
-          const shortfallMicrousdc = Math.max(costMicrousdc - balanceMicrousdc, 0)
-          const recommendedTopupUsdc = String(process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01")
-
           return reply.code(402).send(
-            economicError("insufficient_balance", {
-              service: "verify",
-              cost_microusdc: costMicrousdc,
-              cost_usdc: PRICING.fast.amount,
-              balance_microusdc: balanceMicrousdc,
-              balance_usdc: (balanceMicrousdc / 1_000_000).toFixed(6),
-              shortfall_microusdc: shortfallMicrousdc,
-              shortfall_usdc: (shortfallMicrousdc / 1_000_000).toFixed(6),
-              topup: {
-                create_url: "/topup/create",
-                receive_address: process.env.TOPUP_RECEIVE_ADDRESS || null,
-                recommended_amount_usdc: recommendedTopupUsdc
-              }
-            })
+            economicError(
+              "insufficient_balance",
+              buildInsufficientBalanceDetails({
+                service: "verify",
+                costMicrousdc: Math.round(Number(PRICING.fast.amount) * 1_000_000),
+                costUsdc: PRICING.fast.amount,
+                balanceMicrousdc: Number(debit.balance_microusdc ?? 0)
+              })
+            )
           )
         }
 
         return reply.code(402).send(economicError(String(debit.error)))
       }
 
-      const body = req.body as any
-
-      const result = scoreResponse({
-        prompt: body?.prompt ?? "",
-        response: body?.response ?? "",
-        domain: body?.domain ?? "general"
+      const prompt = body?.prompt ?? ""
+      const response = body?.response ?? ""
+      const domain = body?.domain ?? "general"
+      const verification = runVerification({
+        prompt,
+        response,
+        domain,
+        accountId: resolved.account_id,
+        usageId,
+        paymentRef: null
       })
 
       reply.header("X-Oracle-Auth-Mode", "bearer")
@@ -122,7 +116,11 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
       reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
       reply.header(
         "X-Oracle-Latency-Ms",
-        String(result.analysis.total_latency_ms ?? result.analysis.engine_latency_ms ?? 0)
+        String(
+          verification.result.analysis.total_latency_ms ??
+            verification.result.analysis.engine_latency_ms ??
+            0
+        )
       )
       reply.header(
         "X-Oracle-Remaining-Balance-MicroUSDC",
@@ -148,7 +146,20 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         idempotent_replay: debit.idempotent_replay ?? false
       })
 
-      return result
+      return {
+        ...verification.result,
+        trust_score: verification.trust_score,
+        risk_level: verification.risk_level,
+        trust_recommended_action: verification.trust_recommended_action,
+        confidence_band: verification.confidence_band,
+        signals: verification.signals,
+        trust_receipt: verification.trust_receipt,
+        oracle: {
+          version: ENGINE_VERSION,
+          signals_version: ORACLE_SIGNALS_VERSION,
+          trust_signing_enabled: TRUST_SIGNING_ENABLED
+        }
+      }
     }
 
     const ref = paymentRef as string
@@ -180,8 +191,9 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
           amount: payment.amount,
           rpcUrl
         })
-      } catch (err: any) {
-        const msg = String(err?.message || "")
+      } catch (err: unknown) {
+        const msg =
+          err instanceof Error ? err.message : String(err ?? "")
         if (msg.includes("could not be found")) {
           return reply.code(402).send(economicError("payment_tx_not_found"))
         }
@@ -205,12 +217,16 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
     const consumedOk = consume(ref)
     if (!consumedOk) return reply.code(402).send(economicError("payment_already_used"))
 
-    const body = req.body as any
-
-    const result = scoreResponse({
-      prompt: body?.prompt ?? "",
-      response: body?.response ?? "",
-      domain: body?.domain ?? "general"
+    const prompt = body?.prompt ?? ""
+    const response = body?.response ?? ""
+    const domain = body?.domain ?? "general"
+    const verification = runVerification({
+      prompt,
+      response,
+      domain,
+      accountId: null,
+      usageId: null,
+      paymentRef: ref
     })
 
     reply.header("X-Oracle-Billing-Mode", "payment_reference")
@@ -219,9 +235,26 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
     reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
     reply.header(
       "X-Oracle-Latency-Ms",
-      String(result.analysis.total_latency_ms ?? result.analysis.engine_latency_ms ?? 0)
+      String(
+        verification.result.analysis.total_latency_ms ??
+          verification.result.analysis.engine_latency_ms ??
+          0
+      )
     )
 
-    return result
+    return {
+      ...verification.result,
+      trust_score: verification.trust_score,
+      risk_level: verification.risk_level,
+      trust_recommended_action: verification.trust_recommended_action,
+      confidence_band: verification.confidence_band,
+      signals: verification.signals,
+      trust_receipt: verification.trust_receipt,
+      oracle: {
+        version: ENGINE_VERSION,
+        signals_version: ORACLE_SIGNALS_VERSION,
+        trust_signing_enabled: TRUST_SIGNING_ENABLED
+      }
+    }
   })
 }
