@@ -4,6 +4,7 @@ import {
   RECEIPT_SIGNATURE_ALG,
   verifyReceiptSignature
 } from "../lib/signing.js"
+import { trackServiceEvent } from "../lib/discovery.js"
 
 export const trustVerifySignatureRoute: FastifyPluginAsync = async (app) => {
   app.post("/trust/verify-signature", async (req, reply) => {
@@ -45,6 +46,8 @@ export const trustVerifySignatureRoute: FastifyPluginAsync = async (app) => {
       payload: receipt,
       signature
     })
+
+    trackServiceEvent(req, "trust_signature_check", "/trust/verify-signature")
 
     return {
       valid,

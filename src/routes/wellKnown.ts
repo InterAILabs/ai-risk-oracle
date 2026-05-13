@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify"
 
 import { isReceiptSigningEnabled } from "../lib/signing.js"
 import { trackDiscoveryEvent } from "../lib/discovery.js"
+import { buildPublicPricing, getTrialOffer } from "../lib/publicMeta.js"
 
 export async function wellKnownRoute(app: FastifyInstance) {
   app.get("/.well-known/ai-service.json", async (req) => {
@@ -20,13 +21,18 @@ export async function wellKnownRoute(app: FastifyInstance) {
       discovery: {
         service_descriptor: `${baseUrl}/.well-known/ai-service.json`,
         openapi: `${baseUrl}/.well-known/openapi.json`,
-        a2a_agent_card: `${baseUrl}/.well-known/agent.json`
+        a2a_agent_card: `${baseUrl}/.well-known/agent.json`,
+        discovery_bundle: `${baseUrl}/.well-known/discovery-bundle.json`,
+        pricing: `${baseUrl}/pricing`
       },
       endpoints: {
         health: `${baseUrl}/health`,
         ready: `${baseUrl}/ready`,
         a2a: `${baseUrl}/a2a`,
         a2a_agent_card: `${baseUrl}/.well-known/agent.json`,
+        discovery_bundle: `${baseUrl}/.well-known/discovery-bundle.json`,
+        mcp: `${baseUrl}/mcp`,
+        pricing: `${baseUrl}/pricing`,
         onboard: `${baseUrl}/onboard`,
         me: `${baseUrl}/me`,
         ledger: `${baseUrl}/ledger`,
@@ -34,6 +40,7 @@ export async function wellKnownRoute(app: FastifyInstance) {
         verify: `${baseUrl}/verify`,
         verify_batch: `${baseUrl}/verify/batch`,
         trust_receipts: `${baseUrl}/trust/receipts`,
+        trust_reputation: `${baseUrl}/trust/reputation`,
         trust_receipt_get: `${baseUrl}/trust/receipts/{receiptId}`,
         trust_verify_signature: `${baseUrl}/trust/verify-signature`,
         trust_receipt_schema: `${baseUrl}/schemas/trust-receipt.json`,
@@ -42,7 +49,9 @@ export async function wellKnownRoute(app: FastifyInstance) {
         topup_create: `${baseUrl}/topup/create`,
         topup_confirm: `${baseUrl}/topup/confirm`,
         topup_status: `${baseUrl}/topup/{topupId}`,
-        topup_dev_credit: `${baseUrl}/topup/dev/credit`
+        ...(process.env.DEV_TOPUP_ENABLED === "true"
+          ? { topup_dev_credit: `${baseUrl}/topup/dev/credit` }
+          : {})
       },
       auth: {
         primary: {
@@ -61,6 +70,7 @@ export async function wellKnownRoute(app: FastifyInstance) {
           verify: process.env.DEFAULT_VERIFY_COST_USDC || "0.0006",
           verify_batch_example_2_items: "0.001"
         },
+        pricing_url: `${baseUrl}/pricing`,
         topup: {
           method: "onchain",
           asset: "USDC",
@@ -74,7 +84,7 @@ export async function wellKnownRoute(app: FastifyInstance) {
         idempotency: {
           supported: true,
           header: "X-Idempotency-Key",
-          applies_to: ["/verify", "/verify/batch"]
+          applies_to: ["/verify", "/verify/batch", "/a2a", "/mcp"]
         },
         trust: {
           receipts_endpoint: "/trust/receipts",
@@ -85,7 +95,8 @@ export async function wellKnownRoute(app: FastifyInstance) {
           verify_result_schema_endpoint: "/schemas/verify-result.json",
           signature_algorithm: "hmac-sha256",
           signing_enabled: isReceiptSigningEnabled()
-        }
+        },
+        trial: getTrialOffer()
       },
       schemas: {
         trust_receipt: `${baseUrl}/schemas/trust-receipt.json`,
@@ -101,12 +112,24 @@ export async function wellKnownRoute(app: FastifyInstance) {
           skills: ["verify_response", "verify_batch"]
         },
         mcp: {
-          supported: false
+          supported: true,
+          rpc_endpoint: `${baseUrl}/mcp`,
+          supported_methods: [
+            "initialize",
+            "tools/list",
+            "tools/call",
+            "resources/list",
+            "resources/read",
+            "prompts/list",
+            "prompts/get"
+          ]
         }
       },
       integration_flow: [
         "1. POST /onboard to obtain an API key",
-        "2. Optionally fund account via /topup/dev/credit (dev) or /topup/create + /topup/confirm (onchain)",
+        process.env.DEV_TOPUP_ENABLED === "true"
+          ? "2. Optionally fund account via /topup/dev/credit (dev) or /topup/create + /topup/confirm (onchain)"
+          : "2. Fund account via /topup/create + /topup/confirm (onchain), or use the onboarding trial if enabled",
         "3. Call /verify or /verify/batch with Authorization: Bearer <api_key>",
         "4. Inspect /me, /ledger, /usage, and /trust/receipts for account state and trust evidence",
         "5. Optionally resolve /trust/receipts/{receiptId} for canonical public receipt lookup"
@@ -115,6 +138,10 @@ export async function wellKnownRoute(app: FastifyInstance) {
         onboard: {
           method: "POST",
           path: "/onboard"
+        },
+        pricing: {
+          method: "GET",
+          path: "/pricing"
         },
         verify_example: {
           method: "POST",
@@ -161,6 +188,9 @@ export async function wellKnownRoute(app: FastifyInstance) {
         payment_mode: process.env.PAYMENT_MODE || "file",
         readiness_probe: "/ready",
         health_probe: "/health"
+      },
+      machine_ready: {
+        pricing: buildPublicPricing(baseUrl)
       },
       sla: {
         target_p95_ms: 250

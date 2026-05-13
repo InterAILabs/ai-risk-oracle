@@ -280,6 +280,50 @@ export const selectTrustReceiptByIdStmt = db.prepare(`
   LIMIT 1
 `)
 
+export const selectTrustHistoryForAccountDomainStmt = db.prepare(`
+  SELECT
+    COUNT(*) AS sample_size,
+    AVG(trust_score) AS average_trust_score,
+    MIN(trust_score) AS min_trust_score,
+    MAX(trust_score) AS max_trust_score,
+    SUM(CASE WHEN risk_level = 'high' THEN 1 ELSE 0 END) AS high_risk_count,
+    SUM(CASE WHEN risk_level = 'medium' THEN 1 ELSE 0 END) AS medium_risk_count,
+    SUM(CASE WHEN risk_level = 'low' THEN 1 ELSE 0 END) AS low_risk_count,
+    MAX(issued_at) AS latest_receipt_at
+  FROM trust_receipts
+  WHERE account_id = ?
+    AND domain = ?
+`)
+
+export const selectTrustReputationForAccountStmt = db.prepare(`
+  SELECT
+    COUNT(*) AS sample_size,
+    AVG(trust_score) AS average_trust_score,
+    SUM(CASE WHEN risk_level = 'high' THEN 1 ELSE 0 END) AS high_risk_count,
+    SUM(CASE WHEN risk_level = 'medium' THEN 1 ELSE 0 END) AS medium_risk_count,
+    SUM(CASE WHEN risk_level = 'low' THEN 1 ELSE 0 END) AS low_risk_count,
+    MIN(issued_at) AS first_receipt_at,
+    MAX(issued_at) AS latest_receipt_at
+  FROM trust_receipts
+  WHERE account_id = ?
+`)
+
+export const selectTrustReputationDomainsForAccountStmt = db.prepare(`
+  SELECT
+    domain,
+    COUNT(*) AS sample_size,
+    AVG(trust_score) AS average_trust_score,
+    SUM(CASE WHEN risk_level = 'high' THEN 1 ELSE 0 END) AS high_risk_count,
+    SUM(CASE WHEN risk_level = 'medium' THEN 1 ELSE 0 END) AS medium_risk_count,
+    SUM(CASE WHEN risk_level = 'low' THEN 1 ELSE 0 END) AS low_risk_count,
+    MAX(issued_at) AS latest_receipt_at
+  FROM trust_receipts
+  WHERE account_id = ?
+  GROUP BY domain
+  ORDER BY sample_size DESC, average_trust_score DESC, domain ASC
+  LIMIT ?
+`)
+
 export const insertTopupStmt = db.prepare(`
   INSERT INTO topups (id, account_id, amount, pay_to, status, created_at, expires_at)
   VALUES (?, ?, ?, ?, 'pending', ?, ?)
@@ -343,4 +387,22 @@ export const selectRecentDiscoveryEventsStmt = db.prepare(`
   FROM discovery_events
   ORDER BY created_at DESC
   LIMIT ?
+`)
+
+export const selectDiscoveryUniqueClientsStmt = db.prepare(`
+  SELECT COUNT(DISTINCT client_hint) AS count
+  FROM discovery_events
+  WHERE client_hint IS NOT NULL
+    AND client_hint != ''
+`)
+
+export const selectDiscoveryDailyCountsStmt = db.prepare(`
+  SELECT
+    event_type,
+    CAST(created_at / 86400000 AS INTEGER) AS day_bucket,
+    COUNT(*) AS count
+  FROM discovery_events
+  WHERE created_at >= ?
+  GROUP BY event_type, day_bucket
+  ORDER BY day_bucket DESC, event_type ASC
 `)

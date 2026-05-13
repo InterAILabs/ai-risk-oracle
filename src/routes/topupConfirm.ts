@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify"
 import { getTopup, confirmTopupAndCredit, getAccountBalance } from "../payments/fileStore.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
+import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
 
 type TopupRecord = {
@@ -35,6 +36,7 @@ export const topupConfirmRoute: FastifyPluginAsync = async (app) => {
 
     if (topup.status === "confirmed") {
       const balance = getAccountBalance(topup.account_id)
+      trackServiceEvent(req, "topup_confirm_success", "/topup/confirm")
       return {
         ok: true,
         already_confirmed: true,
@@ -96,6 +98,8 @@ export const topupConfirmRoute: FastifyPluginAsync = async (app) => {
 
       return reply.code(409).send(economicError(result.error))
     }
+
+    trackServiceEvent(req, "topup_confirm_success", "/topup/confirm")
 
     return {
       ok: true,

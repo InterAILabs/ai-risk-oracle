@@ -197,6 +197,82 @@ export async function openApiRoute(app: FastifyInstance) {
             }
           }
         },
+        "/.well-known/discovery-bundle.json": {
+          get: {
+            responses: {
+              "200": {
+                description:
+                  "Single discovery bundle for agents that want service descriptor, agent card, runtime mode, schemas, and sample payloads in one fetch"
+              }
+            }
+          }
+        },
+        "/pricing": {
+          get: {
+            responses: {
+              "200": {
+                description:
+                  "Public pricing, trial, top-up and idempotency metadata for self-serve integration"
+              }
+            }
+          }
+        },
+        "/mcp": {
+          post: {
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    required: ["jsonrpc", "method"],
+                    properties: {
+                      jsonrpc: { type: "string", enum: ["2.0"] },
+                      id: {
+                        oneOf: [
+                          { type: "string" },
+                          { type: "number" },
+                          { type: "null" }
+                        ]
+                      },
+                      method: {
+                        type: "string",
+                        enum: [
+                          "initialize",
+                          "notifications/initialized",
+                          "tools/list",
+                          "tools/call",
+                          "resources/list",
+                          "resources/read",
+                          "prompts/list",
+                          "prompts/get"
+                        ]
+                      },
+                      params: {
+                        type: "object",
+                        additionalProperties: true
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              "200": {
+                description:
+                  "MCP JSON-RPC response supporting initialize, tools, resources, and prompts"
+              },
+              "202": {
+                description:
+                  "MCP notifications/initialized accepted without response body requirements"
+              },
+              "400": {
+                description: "Invalid JSON-RPC envelope"
+              }
+            }
+          }
+        },
         "/onboard": {
           post: {
             requestBody: {
@@ -345,6 +421,33 @@ export async function openApiRoute(app: FastifyInstance) {
               },
               "404": {
                 description: "Trust receipt not found",
+                content: {
+                  "application/json": {
+                    schema: errorResponseSchema
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/trust/reputation": {
+          get: {
+            security: [{ bearerAuth: [] }],
+            parameters: [
+              {
+                name: "domains_limit",
+                in: "query",
+                required: false,
+                schema: { type: "integer", minimum: 1, maximum: 100 }
+              }
+            ],
+            responses: {
+              "200": {
+                description:
+                  "Historical trust reputation summary for the authenticated account, including per-domain aggregates"
+              },
+              "401": {
+                description: "Missing or invalid API key",
                 content: {
                   "application/json": {
                     schema: errorResponseSchema

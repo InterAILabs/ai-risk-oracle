@@ -19,12 +19,17 @@ async function main() {
     funding: onboard.funding
   }, null, 2))
 
-  console.log("\nSTEP 2: create topup intent")
+  console.log("\nSTEP 2: inspect discovery bundle")
+  const bundle = await client.getDiscoveryBundle()
+  console.log(JSON.stringify(bundle, null, 2))
+
+  console.log("\nSTEP 3: create topup intent")
   const topup = await client.createTopup("0.01")
   console.log(JSON.stringify(topup, null, 2))
 
   console.log("\nNEXT")
   console.log("Send USDC on Base to the returned address, then confirm with /topup/confirm.")
+  console.log("After funding, you can call /verify directly or use the A2A endpoint in the discovery bundle.")
 }
 
 main().catch((err) => {

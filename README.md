@@ -21,18 +21,28 @@ This is not a human-facing app. It is a machine-to-machine primitive.
 - Per-request cost with microusdc precision
 - Idempotent billing with `X-Idempotency-Key`
 - Single and batch verification
+- Historical account/domain trust context in verification responses
 - Onchain topups on Base USDC
 - Account traceability via `/me`, `/ledger`, `/usage`
 - Trust receipts via `/trust/receipts`
+- Trust reputation summaries via `/trust/reputation`
 - Public canonical receipt lookup via `/trust/receipts/:receiptId`
 - Signature verification via `/trust/verify-signature`
 - Public JSON Schemas via `/schemas/trust-receipt.json`, `/schemas/trust-receipt-public.json`, and `/schemas/verify-result.json`
 - Machine-readable discovery via `/.well-known`
+- Public pricing metadata via `/pricing`
 - A2A discovery via `/.well-known/agent.json`
+- Single-fetch discovery bundle via `/.well-known/discovery-bundle.json`
 - A2A synchronous JSON-RPC endpoint at `/a2a`
+- MCP JSON-RPC bridge at `/mcp`
+- MCP resources and prompts for host-friendly discovery
 - SDK compiled to `dist/sdk/interai-risk-oracle.js`
 
 ## Quick Start
+
+For the shortest external integration path, see [docs/quickstart.md](docs/quickstart.md).
+For endpoint details, schemas, A2A, MCP, and SDK usage, see [docs/api-reference.md](docs/api-reference.md).
+For release safety, see [docs/release-checklist.md](docs/release-checklist.md).
 
 1. Install dependencies and start the API:
 
@@ -51,6 +61,8 @@ BASE_RPC_URL=https://...
 ONBOARDING_ENABLED=true
 DEFAULT_RECOMMENDED_TOPUP_USDC=0.01
 DEV_TOPUP_ENABLED=false
+ONBOARDING_TRIAL_CREDIT_ENABLED=false
+ONBOARDING_TRIAL_CREDIT_USDC=0.003
 ONBOARDING_DEV_AUTO_CREDIT_ENABLED=false
 ONBOARDING_DEV_AUTO_CREDIT_USDC=0.01
 ALLOW_FAKE_TOPUP_CONFIRM=false
@@ -157,11 +169,57 @@ curl -X GET http://localhost:3000/schemas/verify-result.json
 curl -X GET http://localhost:3000/.well-known/ai-service.json
 curl -X GET http://localhost:3000/.well-known/openapi.json
 curl -X GET http://localhost:3000/.well-known/agent.json
+curl -X GET http://localhost:3000/.well-known/discovery-bundle.json
+curl -X GET http://localhost:3000/pricing
 curl -X GET http://localhost:3000/health
 curl -X GET http://localhost:3000/ready
 ```
 
-10. Call the minimal A2A endpoint with bearer auth:
+10. Initialize the MCP bridge and inspect tools/resources/prompts:
+
+```bash
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "init-1",
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-11-25",
+      "capabilities": {},
+      "clientInfo": {
+        "name": "example-client",
+        "version": "0.0.1"
+      }
+    }
+  }'
+
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "tools-1",
+    "method": "tools/list"
+  }'
+
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "resources-1",
+    "method": "resources/list"
+  }'
+
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "prompts-1",
+    "method": "prompts/list"
+  }'
+```
+
+11. Call the minimal A2A endpoint with bearer auth:
 
 ```bash
 curl -X POST http://localhost:3000/a2a \
@@ -202,6 +260,7 @@ curl -X POST http://localhost:3000/a2a \
 - `POST /verify`
 - `POST /verify/batch`
 - `GET /trust/receipts`
+- `GET /trust/reputation`
 - `GET /trust/receipts/:receiptId`
 - `POST /trust/verify-signature`
 - `GET /schemas/trust-receipt.json`
@@ -235,6 +294,30 @@ Run the local verification suite:
 npm test
 ```
 
+Check the public package export, OpenAPI paths, schemas, pricing metadata, and discovery bundle:
+
+```bash
+npm run contracts
+```
+
+Check the npm package contents before publishing:
+
+```bash
+npm run package:check
+```
+
+Type-check the package-style SDK consumer example:
+
+```bash
+npm run typecheck:examples
+```
+
+Validate production deployment environment variables before a real deploy:
+
+```bash
+npm run deploy:check
+```
+
 Then, if you want the broader smoke coverage, run:
 
 ```bash
@@ -254,7 +337,10 @@ The broader smoke scripts cover discovery, billing regression, topup replay prot
 - `GET /.well-known/ai-service.json` exposes agent-oriented discovery metadata, billing conventions, schema URLs, and integration flow.
 - `GET /.well-known/openapi.json` exposes the HTTP contract for tooling and SDK generation.
 - `GET /.well-known/agent.json` exposes an A2A Agent Card at the recommended well-known location.
+- `GET /.well-known/discovery-bundle.json` exposes a single-fetch discovery payload with service metadata, runtime mode, interfaces, schema URLs, and ready-to-copy samples.
+- `GET /pricing` exposes public pricing, trial, top-up and idempotency metadata for self-serve integration.
 - `POST /a2a` exposes a minimal A2A-compatible JSON-RPC interface for synchronous `message/send` verification calls.
+- `POST /mcp` exposes an MCP bridge with `initialize`, `tools/list`, `tools/call`, `resources/list`, `resources/read`, `prompts/list`, and `prompts/get` over JSON-RPC.
 - `GET /schemas/trust-receipt.json` describes the canonical signed receipt payload.
 - `GET /schemas/trust-receipt-public.json` describes the public lookup response returned by `GET /trust/receipts/:receiptId`.
 - `GET /schemas/verify-result.json` describes the enriched single-item verification response returned by `POST /verify`.
@@ -274,11 +360,20 @@ curl -X GET http://localhost:3000/stats \
 - `/.well-known/agent.json`
 - `POST /a2a`
 
+It also tracks adoption milestones for:
+- successful onboardings
+- trial credits granted
+- successful topup creation and confirmation
+- successful `verify` calls
+- successful `verify/batch` calls
+- successful A2A executions
+- trust receipt signature verification checks
+
 This gives you a concrete funnel to watch:
 - discovery document views
 - agent card views
 - A2A calls
-- eventual onboardings and verification traffic
+- eventual onboardings, funded accounts, and verification traffic
 
 ## Public Repo Readiness
 
@@ -291,6 +386,12 @@ If you make the GitHub repository public, the project becomes easier to discover
 
 ## SDK
 
+The package root exports the official TypeScript SDK after build/publish:
+
+```ts
+import { InterAIRiskOracleClient } from "ai-risk-oracle"
+```
+
 After `npm run build`, the compiled client is available at:
 
 ```text
@@ -302,6 +403,7 @@ Example usage scripts:
 ```bash
 npm run example:basic
 npm run example:basic:prod
+npm run typecheck:examples
 ```
 
 ## Notes

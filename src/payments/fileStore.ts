@@ -23,7 +23,13 @@ import {
   markPaid,
   markTxUsed
 } from "./store/payments.js"
-import { createTrustReceipt, getTrustReceiptById, listTrustReceipts } from "./store/receipts.js"
+import {
+  createTrustReceipt,
+  getTrustHistoryForAccountDomain,
+  getTrustReputationForAccount,
+  getTrustReceiptById,
+  listTrustReceipts
+} from "./store/receipts.js"
 import {
   confirmTopupAndCredit,
   createTopup,
@@ -69,6 +75,8 @@ export {
   getPaymentStats,
   getTopup,
   getTopupForAccount,
+  getTrustHistoryForAccountDomain,
+  getTrustReputationForAccount,
   getTrustReceiptById,
   getUsedTopupTx,
   hasUsageReference,

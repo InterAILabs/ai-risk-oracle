@@ -3,6 +3,7 @@ import Fastify from "fastify"
 import { pathToFileURL } from "url"
 import { healthRoute } from "./routes/health.js"
 import { quoteRoute } from "./routes/quote.js"
+import { pricingRoute } from "./routes/pricing.js"
 import { verifyRoute } from "./routes/verify.js"
 import { verifyBatchRoute } from "./routes/verifyBatch.js"
 import { payRoute } from "./routes/pay.js"
@@ -24,10 +25,14 @@ import { usageRoute } from "./routes/usage.js"
 import { trustReceiptsRoute } from "./routes/trustReceipts.js"
 import { trustVerifySignatureRoute } from "./routes/trustVerifySignature.js"
 import { trustReceiptGetRoute } from "./routes/trustReceiptGet.js"
+import { trustReputationRoute } from "./routes/trustReputation.js"
 import { schemasRoute } from "./routes/schemas.js"
 import { isReceiptSigningEnabled } from "./lib/signing.js"
+import { buildPublicPricing, getTrialOffer, isEnabled } from "./lib/publicMeta.js"
 import { agentCardRoute } from "./routes/agentCard.js"
 import { a2aRoute } from "./routes/a2a.js"
+import { discoveryBundleRoute } from "./routes/discoveryBundle.js"
+import { mcpRoute } from "./routes/mcp.js"
 
 declare module "fastify" {
   interface FastifyReply {
@@ -77,7 +82,16 @@ export function buildApp() {
 
   app.addHook("preHandler", rateLimiter)
 
-  app.get("/", async () => {
+  app.get("/", async (req) => {
+    const host = String(req.headers.host || "localhost:3000")
+    const forwardedProto = req.headers["x-forwarded-proto"]
+    const proto =
+      forwardedProto
+        ? String(forwardedProto)
+        : host.includes("localhost") || host.startsWith("127.0.0.1")
+          ? "http"
+          : "https"
+    const baseUrl = `${proto}://${host}`
     return {
       name: "AI Risk Oracle",
       status: "ok",
@@ -99,7 +113,11 @@ export function buildApp() {
         verify_batch: "POST /verify/batch",
         a2a: "POST /a2a",
         agent_card: "GET /.well-known/agent.json",
+        discovery_bundle: "GET /.well-known/discovery-bundle.json",
+        mcp: "POST /mcp",
+        pricing: "GET /pricing",
         trust_receipts: "GET /trust/receipts",
+        trust_reputation: "GET /trust/reputation",
         trust_receipt_get: "GET /trust/receipts/:receiptId",
         trust_verify_signature: "POST /trust/verify-signature",
         schemas: "GET /schemas/*.json",
@@ -107,6 +125,9 @@ export function buildApp() {
         topup_create: "POST /topup/create",
         topup_confirm: "POST /topup/confirm",
         topup_status: "GET /topup/:topupId",
+        ...(isEnabled(process.env.DEV_TOPUP_ENABLED, "false")
+          ? { topup_dev_credit: "POST /topup/dev/credit" }
+          : {}),
         health: "GET /health",
         ready: "GET /ready"
       },
@@ -115,18 +136,24 @@ export function buildApp() {
         model: "prepaid_balance_per_request",
         default_cost_usdc: "0.0006",
         recommended_topup_usdc: process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01",
-        idempotency_header: "X-Idempotency-Key"
+        idempotency_header: "X-Idempotency-Key",
+        pricing_url: "/pricing",
+        trial: getTrialOffer()
       },
 
       docs: {
         openapi: "/.well-known/openapi.json",
-        service: "/.well-known/ai-service.json"
+        service: "/.well-known/ai-service.json",
+        pricing: "/pricing"
       },
 
       trust: {
         receipts: true,
         signature_verification: true,
         signing_enabled: isReceiptSigningEnabled()
+      },
+      machine_ready: {
+        pricing: buildPublicPricing(baseUrl)
       }
     }
   })
@@ -137,6 +164,7 @@ export function buildApp() {
 async function registerRoutes(app: ReturnType<typeof buildApp>) {
   await app.register(healthRoute)
   await app.register(statsRoute)
+  await app.register(pricingRoute)
   await app.register(quoteRoute)
   await app.register(verifyRoute)
   await app.register(verifyBatchRoute)
@@ -147,6 +175,8 @@ async function registerRoutes(app: ReturnType<typeof buildApp>) {
   await app.register(ledgerRoute)
   await app.register(usageRoute)
   await app.register(agentCardRoute)
+  await app.register(discoveryBundleRoute)
+  await app.register(mcpRoute)
   await app.register(wellKnownRoute)
   await app.register(openApiRoute)
   await app.register(onboardRoute)
@@ -155,6 +185,7 @@ async function registerRoutes(app: ReturnType<typeof buildApp>) {
   await app.register(topupStatusRoute)
   await app.register(topupDevRoute)
   await app.register(trustReceiptsRoute)
+  await app.register(trustReputationRoute)
   await app.register(trustReceiptGetRoute)
   await app.register(trustVerifySignatureRoute)
   await app.register(schemasRoute)

@@ -36,3 +36,5 @@ export function trackDiscoveryEvent(
     // Discovery telemetry should never break a public endpoint.
   }
 }
+
+export const trackServiceEvent = trackDiscoveryEvent

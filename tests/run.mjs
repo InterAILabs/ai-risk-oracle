@@ -78,6 +78,8 @@ async function runIntegrationChecks() {
   const previousDbFile = process.env.PAYMENTS_DB_FILE
   const previousDevTopup = process.env.DEV_TOPUP_ENABLED
   const previousAdminToken = process.env.ADMIN_TOKEN
+  const previousTrialEnabled = process.env.ONBOARDING_TRIAL_CREDIT_ENABLED
+  const previousTrialUsdc = process.env.ONBOARDING_TRIAL_CREDIT_USDC
   process.env.PAYMENTS_DB_FILE = path.join(
     fs.mkdtempSync(path.join(os.tmpdir(), "ai-risk-oracle-tests-")),
     "payments.db"
@@ -159,6 +161,10 @@ async function runIntegrationChecks() {
       Boolean(openapi.json?.paths?.["/verify/batch"]),
       "openapi documenta verify/batch"
     )
+    check(
+      Boolean(openapi.json?.paths?.["/trust/reputation"]),
+      "openapi documenta trust/reputation"
+    )
     check(Boolean(openapi.json?.paths?.["/a2a"]), "openapi documenta a2a")
 
     const agentCard = await http("GET", "/.well-known/agent.json", {
@@ -170,6 +176,171 @@ async function runIntegrationChecks() {
       Array.isArray(agentCard.json?.skills) &&
         agentCard.json.skills.some((skill) => skill.id === "verify_response"),
       "agent card publica skill verify_response"
+    )
+
+    const discoveryBundle = await http("GET", "/.well-known/discovery-bundle.json", {
+      headers: { Host: "localhost:3000" }
+    })
+    assert.equal(discoveryBundle.status, 200)
+    check(
+      discoveryBundle.json?.interfaces?.a2a?.endpoint ===
+        "https://localhost:3000/a2a",
+      "discovery bundle publica endpoint A2A"
+    )
+    check(
+      discoveryBundle.json?.interfaces?.mcp?.endpoint ===
+        "https://localhost:3000/mcp",
+      "discovery bundle publica endpoint MCP"
+    )
+    check(
+      Boolean(discoveryBundle.json?.discovery?.agent_card_url),
+      "discovery bundle publica referencias de discovery"
+    )
+
+    const pricing = await http("GET", "/pricing", {
+      headers: { Host: "localhost:3000" }
+    })
+    assert.equal(pricing.status, 200)
+    check(
+      pricing.json?.pricing?.verify?.cost_usdc === "0.0006",
+      "pricing publica costo de verify"
+    )
+    check(
+      typeof pricing.json?.pricing?.trial?.enabled === "boolean",
+      "pricing publica trial"
+    )
+
+    const mcpInit = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-init-1",
+        method: "initialize",
+        params: {
+          protocolVersion: "2025-11-25",
+          capabilities: {},
+          clientInfo: {
+            name: "tests",
+            version: "0.0.1"
+          }
+        }
+      }
+    })
+    assert.equal(mcpInit.status, 200)
+    check(
+      mcpInit.json?.result?.serverInfo?.name === "interai-risk-oracle",
+      "mcp initialize responde serverInfo"
+    )
+
+    const mcpTools = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-tools-1",
+        method: "tools/list"
+      }
+    })
+    assert.equal(mcpTools.status, 200)
+    check(
+      Array.isArray(mcpTools.json?.result?.tools) &&
+        mcpTools.json.result.tools.some((tool) => tool.name === "oracle.verify_response") &&
+        mcpTools.json.result.tools.some((tool) => tool.name === "oracle.get_pricing"),
+      "mcp tools/list publica tool de verify"
+    )
+
+    const mcpResources = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-resources-1",
+        method: "resources/list"
+      }
+    })
+    assert.equal(mcpResources.status, 200)
+    check(
+      Array.isArray(mcpResources.json?.result?.resources) &&
+        mcpResources.json.result.resources.some(
+          (resource) => resource.uri === "oracle://service/discovery-bundle"
+        ),
+      "mcp resources/list publica discovery bundle"
+    )
+
+    const mcpReadResource = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-resource-read-1",
+        method: "resources/read",
+        params: {
+          uri: "oracle://service/discovery-bundle"
+        }
+      }
+    })
+    assert.equal(mcpReadResource.status, 200)
+    check(
+      String(mcpReadResource.json?.result?.contents?.[0]?.text || "").includes("verify_batch"),
+      "mcp resources/read devuelve bundle"
+    )
+
+    const mcpReadPricing = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-resource-read-pricing-1",
+        method: "resources/read",
+        params: {
+          uri: "oracle://service/pricing"
+        }
+      }
+    })
+    assert.equal(mcpReadPricing.status, 200)
+    check(
+      String(mcpReadPricing.json?.result?.contents?.[0]?.text || "").includes("\"verify\""),
+      "mcp resources/read devuelve pricing"
+    )
+
+    const mcpPrompts = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-prompts-1",
+        method: "prompts/list"
+      }
+    })
+    assert.equal(mcpPrompts.status, 200)
+    check(
+      Array.isArray(mcpPrompts.json?.result?.prompts) &&
+        mcpPrompts.json.result.prompts.some((prompt) => prompt.name === "verify_response"),
+      "mcp prompts/list publica verify_response"
+    )
+
+    const mcpPromptGet = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-prompt-get-1",
+        method: "prompts/get",
+        params: {
+          name: "verify_response"
+        }
+      }
+    })
+    assert.equal(mcpPromptGet.status, 200)
+    check(
+      String(mcpPromptGet.json?.result?.messages?.[0]?.content?.text || "").includes(
+        "oracle.verify_response"
+      ),
+      "mcp prompts/get devuelve template"
+    )
+
+    const mcpPricingTool = await http("POST", "/mcp", {
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-pricing-1",
+        method: "tools/call",
+        params: {
+          name: "oracle.get_pricing",
+          arguments: {}
+        }
+      }
+    })
+    assert.equal(mcpPricingTool.status, 200)
+    check(
+      String(mcpPricingTool.json?.result?.content?.[0]?.text || "").includes("\"trial\""),
+      "mcp tools/call devuelve pricing"
     )
 
     const publicReceiptSchema = await http(
@@ -193,6 +364,10 @@ async function runIntegrationChecks() {
       verifyResultSchema.json?.required?.includes("trust_receipt"),
       "schema de verify incluye trust_receipt"
     )
+    check(
+      verifyResultSchema.json?.required?.includes("historical_context"),
+      "schema de verify incluye historical_context"
+    )
 
     const stats = await http("GET", "/stats", {
       headers: {
@@ -204,6 +379,14 @@ async function runIntegrationChecks() {
       typeof stats.json?.discovery?.totals_by_type?.service_descriptor_view ===
         "number",
       "stats expone discovery telemetry"
+    )
+    check(
+      typeof stats.json?.discovery?.funnel?.discovery_views === "number",
+      "stats expone funnel de adopcion"
+    )
+    check(
+      typeof stats.json?.discovery?.funnel?.trial_credit_granted === "number",
+      "stats expone trial en funnel"
     )
   }
 
@@ -373,6 +556,29 @@ async function runIntegrationChecks() {
       "verify sin balance devuelve insufficient_balance"
     )
 
+    process.env.ONBOARDING_TRIAL_CREDIT_ENABLED = "true"
+    process.env.ONBOARDING_TRIAL_CREDIT_USDC = "0.0012"
+    const trialOnboard = await http("POST", "/onboard")
+    assert.equal(trialOnboard.status, 200)
+    check(
+      trialOnboard.json?.trial?.credit_applied === true,
+      "onboard aplica trial cuando esta habilitado"
+    )
+    check(
+      trialOnboard.json?.balance?.balance_usdc === "0.001200",
+      "onboard trial acredita saldo esperado"
+    )
+    if (previousTrialEnabled == null) {
+      delete process.env.ONBOARDING_TRIAL_CREDIT_ENABLED
+    } else {
+      process.env.ONBOARDING_TRIAL_CREDIT_ENABLED = previousTrialEnabled
+    }
+    if (previousTrialUsdc == null) {
+      delete process.env.ONBOARDING_TRIAL_CREDIT_USDC
+    } else {
+      process.env.ONBOARDING_TRIAL_CREDIT_USDC = previousTrialUsdc
+    }
+
     const apiKey = await onboardAndGetKey()
     const topup = await http("POST", "/topup/dev/credit", {
       headers: {
@@ -388,6 +594,17 @@ async function runIntegrationChecks() {
     await runA2AEdgeChecks(apiKey)
 
     const verifyKey = `verify-idempotency-${Date.now()}`
+    const reputationBeforeVerify = await http("GET", "/trust/reputation", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      }
+    })
+    assert.equal(reputationBeforeVerify.status, 200)
+    check(
+      reputationBeforeVerify.json?.reputation?.sample_size >= 1,
+      "trust/reputation expone historial existente"
+    )
+
     const verify1 = await http("POST", "/verify", {
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -405,8 +622,32 @@ async function runIntegrationChecks() {
     assert.equal(verify1.status, 200)
     assert.equal(verify2.status, 200)
     check(
+      verify1.json?.historical_context?.prior_to_current === true,
+      "verify devuelve contexto historico previo"
+    )
+    check(
+      typeof verify1.json?.historical_context?.sample_size === "number",
+      "verify devuelve sample_size historico"
+    )
+    check(
       verify2.headers["x-oracle-idempotent-replay"] === "true",
       "verify repite idempotency sin doble cargo"
+    )
+
+    const reputationAfterVerify = await http("GET", "/trust/reputation?domains_limit=5", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      }
+    })
+    assert.equal(reputationAfterVerify.status, 200)
+    check(
+      reputationAfterVerify.json?.reputation?.sample_size >=
+        reputationBeforeVerify.json?.reputation?.sample_size,
+      "trust/reputation acumula receipts de la cuenta"
+    )
+    check(
+      Array.isArray(reputationAfterVerify.json?.reputation?.domains),
+      "trust/reputation devuelve breakdown por dominio"
     )
 
     const a2aVerify = await http("POST", "/a2a", {
@@ -438,6 +679,40 @@ async function runIntegrationChecks() {
     check(
       a2aVerify.json?.result?.parts?.[0]?.data?.result?.trust_receipt?.receipt_id,
       "a2a devuelve trust_receipt en respuesta sincronica"
+    )
+    check(
+      a2aVerify.json?.result?.parts?.[0]?.data?.result?.historical_context
+        ?.prior_to_current === true,
+      "a2a devuelve historical_context"
+    )
+
+    const mcpVerify = await http("POST", "/mcp", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: {
+        jsonrpc: "2.0",
+        id: "mcp-verify-1",
+        method: "tools/call",
+        params: {
+          name: "oracle.verify_response",
+          arguments: {
+            prompt: "What is the capital of France?",
+            response: "Paris",
+            domain: "general",
+            idempotency_key: `mcp-verify-${Date.now()}`
+          }
+        }
+      }
+    })
+    assert.equal(mcpVerify.status, 200)
+    check(
+      String(mcpVerify.json?.result?.content?.[0]?.text || "").includes("trust_receipt"),
+      "mcp tools/call devuelve resultado de verify"
+    )
+    check(
+      String(mcpVerify.json?.result?.content?.[0]?.text || "").includes("historical_context"),
+      "mcp tools/call devuelve historical_context"
     )
 
     const batchKey = `batch-idempotency-${Date.now()}`
@@ -471,6 +746,10 @@ async function runIntegrationChecks() {
       batch1.json?.results?.[0]?.trust_receipt?.receipt_id,
       "verify/batch devuelve trust_receipt por item"
     )
+    check(
+      batch1.json?.results?.[0]?.historical_context?.prior_to_current === true,
+      "verify/batch devuelve historical_context por item"
+    )
 
     const me = await http("GET", "/me", {
       headers: {
@@ -479,7 +758,7 @@ async function runIntegrationChecks() {
     })
     assert.equal(me.status, 200)
     check(
-      me.json?.balance?.balance_usdc === "0.017200",
+      me.json?.balance?.balance_usdc === "0.016600",
       "billing final conserva el saldo esperado"
     )
   } finally {
@@ -501,6 +780,18 @@ async function runIntegrationChecks() {
       delete process.env.ADMIN_TOKEN
     } else {
       process.env.ADMIN_TOKEN = previousAdminToken
+    }
+
+    if (previousTrialEnabled == null) {
+      delete process.env.ONBOARDING_TRIAL_CREDIT_ENABLED
+    } else {
+      process.env.ONBOARDING_TRIAL_CREDIT_ENABLED = previousTrialEnabled
+    }
+
+    if (previousTrialUsdc == null) {
+      delete process.env.ONBOARDING_TRIAL_CREDIT_USDC
+    } else {
+      process.env.ONBOARDING_TRIAL_CREDIT_USDC = previousTrialUsdc
     }
   }
 }

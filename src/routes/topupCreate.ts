@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify"
 import { randomUUID } from "crypto"
 import { createTopup } from "../payments/fileStore.js"
+import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
 import { resolveAccountIdFromBodyOrBearer } from "../auth/resolveBearerAccount.js"
 
@@ -43,6 +44,8 @@ export const topupCreateRoute: FastifyPluginAsync = async (app) => {
       pay_to,
       expires_at
     })
+
+    trackServiceEvent(req, "topup_create_success", "/topup/create")
 
     return {
       ok: true,

@@ -68,7 +68,22 @@ async function main() {
     console.log(JSON.stringify(publicReceipt, null, 2))
   }
 
-  console.log("\nSTEP 7: me")
+  console.log("\nSTEP 7: discovery bundle")
+  const discoveryBundle = await client.getDiscoveryBundle()
+  console.log(JSON.stringify(discoveryBundle, null, 2))
+
+  console.log("\nSTEP 8: A2A verify")
+  const a2a = await client.a2aVerify(
+    {
+      prompt: "What is the capital of France?",
+      response: "Paris",
+      domain: "general"
+    },
+    "basic-agent-example-a2a-1"
+  )
+  console.log(JSON.stringify(a2a, null, 2))
+
+  console.log("\nSTEP 9: me")
   const me = await client.me()
   console.log(JSON.stringify(me, null, 2))
 

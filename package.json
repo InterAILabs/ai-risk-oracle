@@ -1,18 +1,48 @@
 {
   "name": "ai-risk-oracle",
   "version": "0.0.1",
+  "description": "AI-to-AI risk, trust receipt, and prepaid verification primitive for autonomous agents.",
   "type": "module",
+  "main": "./dist/sdk/interai-risk-oracle.js",
+  "types": "./dist/sdk/interai-risk-oracle.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/sdk/interai-risk-oracle.d.ts",
+      "import": "./dist/sdk/interai-risk-oracle.js"
+    },
+    "./sdk": {
+      "types": "./dist/sdk/interai-risk-oracle.d.ts",
+      "import": "./dist/sdk/interai-risk-oracle.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "docs"
+  ],
+  "keywords": [
+    "ai-agents",
+    "a2a",
+    "mcp",
+    "risk-oracle",
+    "trust-receipts",
+    "base-usdc"
+  ],
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.sdk.json",
+    "typecheck:examples": "npm run build && tsc -p tsconfig.examples.json",
     "test": "npm run build && node tests/run.mjs",
+    "contracts": "npm run build && node ./scripts/check-contracts.js",
+    "package:check": "npm run build && node ./scripts/check-package.js",
+    "deploy:check": "node ./scripts/check-production-config.js",
     "start": "node dist/server.js",
     "smoke": "node ./scripts/smoke-test.js",
     "smoke:billing": "node ./scripts/smoke-billing-regression.js",
     "smoke:topup-confirm": "node ./scripts/smoke-topup-confirm.js",
     "smoke:idempotency": "node ./scripts/smoke-idempotency.js",
     "smoke:trust-signing": "node ./scripts/smoke-trust-signing.js",
-    "smoke:sdk": "node ./scripts/smoke-sdk.js",
+    "smoke:sdk": "npm run build && node ./scripts/smoke-sdk.js",
     "example": "node ./examples/test.js",
     "example:basic": "tsx ./examples/basic-agent.mjs",
     "example:basic:prod": "tsx ./examples/basic-agent-production.mjs"
@@ -20,7 +50,7 @@
   "dependencies": {
     "better-sqlite3": "^11.10.0",
     "dotenv": "^17.4.1",
-    "fastify": "^4.25.0",
+    "fastify": "^5.8.5",
     "viem": "^2.47.0"
   },
   "devDependencies": {

@@ -7,14 +7,11 @@ import {
   creditAccount
 } from "../payments/fileStore.js"
 import { PRICING } from "../config/pricing.js"
+import { trackServiceEvent } from "../lib/discovery.js"
+import { getTrialOffer, isEnabled } from "../lib/publicMeta.js"
 
 function generateRawApiKey() {
   return `iao_live_${randomBytes(24).toString("hex")}`
-}
-
-function isEnabled(value: string | undefined, fallback = "false") {
-  const normalized = String(value ?? fallback).toLowerCase()
-  return ["true", "1", "yes", "on"].includes(normalized)
 }
 
 export const onboardRoute: FastifyPluginAsync = async (app) => {
@@ -50,6 +47,7 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
       name: apiKeyName
     })
 
+    const trialOffer = getTrialOffer()
     const devAutoCreditEnabled = isEnabled(process.env.ONBOARDING_DEV_AUTO_CREDIT_ENABLED, "false")
     const devAutoCreditUsdc = String(
       body.dev_auto_credit_usdc ??
@@ -57,8 +55,26 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
         "0.01"
     )
 
+    let trialCreditApplied = false
+    let trialCreditedMicrousdc = 0
     let devAutoCreditApplied = false
     let devCreditedMicrousdc = 0
+
+    if (trialOffer.enabled && trialOffer.amount_microusdc > 0) {
+      creditAccount({
+        ledgerId: randomUUID(),
+        accountId: account.id,
+        amountMicrousdc: trialOffer.amount_microusdc,
+        reference: `onboard-trial-credit:${account.id}`,
+        metadata: {
+          source: "onboard_trial_credit"
+        }
+      })
+
+      trialCreditApplied = true
+      trialCreditedMicrousdc = trialOffer.amount_microusdc
+      trackServiceEvent(req, "trial_credit_granted", "/onboard")
+    }
 
     if (devAutoCreditEnabled) {
       const amountMicrousdc = Math.round(Number(devAutoCreditUsdc) * 1_000_000)
@@ -91,6 +107,8 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
       : "https"
     const baseUrl = `${proto}://${host}`
 
+    trackServiceEvent(req, "onboard_success", "/onboard")
+
     return {
       ok: true,
       message: "account_created",
@@ -106,9 +124,18 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
       funding: {
         create_topup_url: `${baseUrl}/topup/create`,
         confirm_topup_url: `${baseUrl}/topup/confirm`,
-        dev_credit_url: `${baseUrl}/topup/dev/credit`,
         receive_address: process.env.TOPUP_RECEIVE_ADDRESS || null,
-        recommended_topup_usdc: recommendedTopupUsdc
+        recommended_topup_usdc: recommendedTopupUsdc,
+        ...(isEnabled(process.env.DEV_TOPUP_ENABLED, "false")
+          ? { dev_credit_url: `${baseUrl}/topup/dev/credit` }
+          : {})
+      },
+      trial: {
+        enabled: trialOffer.enabled,
+        credit_applied: trialCreditApplied,
+        credited_usdc: trialCreditApplied ? trialOffer.amount_usdc : "0",
+        credited_microusdc: trialCreditedMicrousdc,
+        estimated_verify_calls: trialOffer.estimated_verify_calls
       },
       dev: {
         auto_credit_enabled: devAutoCreditEnabled,
@@ -122,7 +149,9 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
       },
       next_steps: [
         "Call GET /me with the returned Bearer API key.",
-        "If balance is zero, call POST /topup/create or POST /topup/dev/credit.",
+        isEnabled(process.env.DEV_TOPUP_ENABLED, "false")
+          ? "If balance is zero, call GET /pricing and then POST /topup/create or POST /topup/dev/credit."
+          : "If balance is zero, call GET /pricing and then POST /topup/create.",
         "For onchain funding, send USDC on Base and then call POST /topup/confirm.",
         "Call POST /verify with Authorization: Bearer <api_key>."
       ]

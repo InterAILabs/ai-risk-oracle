@@ -45,6 +45,23 @@ const trustReceiptSchema = {
   }
 } as const
 
+const trustReceiptWithSignatureSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    ...trustReceiptSchema.required,
+    "signature",
+    "signature_alg",
+    "signed"
+  ],
+  properties: {
+    ...trustReceiptSchema.properties,
+    signature: { type: ["string", "null"] },
+    signature_alg: { type: ["string", "null"] },
+    signed: { type: "boolean" }
+  }
+} as const
+
 const trustSignalsSchema = {
   type: "object",
   additionalProperties: false,
@@ -61,6 +78,48 @@ const trustSignalsSchema = {
     unsupported_specificity: { type: "number", minimum: 0, maximum: 1 },
     numeric_consistency: { type: "number", minimum: 0, maximum: 1 },
     overconfidence: { type: "number", minimum: 0, maximum: 1 }
+  }
+} as const
+
+const historicalContextSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "available",
+    "scope",
+    "domain",
+    "sample_size",
+    "average_trust_score",
+    "min_trust_score",
+    "max_trust_score",
+    "high_risk_count",
+    "medium_risk_count",
+    "low_risk_count",
+    "high_risk_rate",
+    "latest_receipt_at",
+    "prior_to_current"
+  ],
+  properties: {
+    available: { type: "boolean" },
+    scope: {
+      type: "string",
+      enum: ["account_domain", "none"]
+    },
+    domain: { type: "string" },
+    sample_size: { type: "integer", minimum: 0 },
+    average_trust_score: { type: ["number", "null"], minimum: 0, maximum: 1 },
+    min_trust_score: { type: ["number", "null"], minimum: 0, maximum: 1 },
+    max_trust_score: { type: ["number", "null"], minimum: 0, maximum: 1 },
+    high_risk_count: { type: "integer", minimum: 0 },
+    medium_risk_count: { type: "integer", minimum: 0 },
+    low_risk_count: { type: "integer", minimum: 0 },
+    high_risk_rate: { type: ["number", "null"], minimum: 0, maximum: 1 },
+    latest_receipt_at: { type: ["string", "null"], format: "date-time" },
+    prior_to_current: { type: "boolean", const: true },
+    reason: {
+      type: "string",
+      enum: ["account_history_unavailable", "insufficient_history"]
+    }
   }
 } as const
 
@@ -131,6 +190,7 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
         "trust_recommended_action",
         "confidence_band",
         "signals",
+        "historical_context",
         "trust_receipt",
         "oracle"
       ],
@@ -189,21 +249,8 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
           enum: ["low", "medium", "high"]
         },
         signals: trustSignalsSchema,
-        trust_receipt: {
-          allOf: [
-            { $ref: TRUST_RECEIPT_SCHEMA_ID },
-            {
-              type: "object",
-              additionalProperties: false,
-              required: ["signature", "signature_alg", "signed"],
-              properties: {
-                signature: { type: ["string", "null"] },
-                signature_alg: { type: ["string", "null"] },
-                signed: { type: "boolean" }
-              }
-            }
-          ]
-        },
+        historical_context: historicalContextSchema,
+        trust_receipt: trustReceiptWithSignatureSchema,
         oracle: {
           type: "object",
           additionalProperties: false,

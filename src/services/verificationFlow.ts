@@ -1,6 +1,7 @@
 import {
   createTrustReceipt,
-  debitAccountForUsage
+  debitAccountForUsage,
+  getTrustHistoryForAccountDomain
 } from "../payments/fileStore.js"
 import { scoreResponse } from "../engine/score.js"
 import { computeSignals, type Signals } from "../lib/signals.js"
@@ -42,11 +43,29 @@ export type VerificationComputation = {
   risk_level: "low" | "medium" | "high"
   trust_recommended_action: "accept" | "review" | "reject"
   confidence_band: ConfidenceBand
+  historical_context: HistoricalTrustContext
   trust_receipt: ReturnType<typeof buildTrustReceipt> & {
     signature: string | null
     signature_alg: string | null
     signed: boolean
   }
+}
+
+export type HistoricalTrustContext = {
+  available: boolean
+  scope: "account_domain" | "none"
+  domain: string
+  sample_size: number
+  average_trust_score: number | null
+  min_trust_score: number | null
+  max_trust_score: number | null
+  high_risk_count: number
+  medium_risk_count: number
+  low_risk_count: number
+  high_risk_rate: number | null
+  latest_receipt_at: string | null
+  prior_to_current: boolean
+  reason?: "account_history_unavailable" | "insufficient_history"
 }
 
 function normalizeRecommendedAction(
@@ -163,8 +182,60 @@ export function persistReceipt(params: {
   }
 }
 
+function emptyHistoricalContext(params: {
+  domain: string
+  reason: "account_history_unavailable" | "insufficient_history"
+}): HistoricalTrustContext {
+  return {
+    available: false,
+    scope: params.reason === "account_history_unavailable" ? "none" : "account_domain",
+    domain: params.domain,
+    sample_size: 0,
+    average_trust_score: null,
+    min_trust_score: null,
+    max_trust_score: null,
+    high_risk_count: 0,
+    medium_risk_count: 0,
+    low_risk_count: 0,
+    high_risk_rate: null,
+    latest_receipt_at: null,
+    prior_to_current: true,
+    reason: params.reason
+  }
+}
+
+export function getHistoricalTrustContext(params: {
+  accountId: string | null
+  domain: string
+}): HistoricalTrustContext {
+  if (!params.accountId) {
+    return emptyHistoricalContext({
+      domain: params.domain,
+      reason: "account_history_unavailable"
+    })
+  }
+
+  const profile = getTrustHistoryForAccountDomain({
+    accountId: params.accountId,
+    domain: params.domain
+  })
+
+  if (!profile.available) {
+    return emptyHistoricalContext({
+      domain: params.domain,
+      reason: "insufficient_history"
+    })
+  }
+
+  return {
+    ...profile,
+    prior_to_current: true
+  }
+}
+
 export function runVerification(
-  input: VerificationInput
+  input: VerificationInput,
+  historicalContext?: HistoricalTrustContext
 ): VerificationComputation {
   const result = scoreResponse({
     prompt: input.prompt,
@@ -175,6 +246,12 @@ export function runVerification(
   const signals = computeSignals(input.prompt, input.response)
   const trust = computeTrust(signals)
   const confidence_band = computeConfidenceBand(signals)
+  const historical_context =
+    historicalContext ??
+    getHistoricalTrustContext({
+      accountId: input.accountId,
+      domain: input.domain
+    })
   const trust_receipt = persistReceipt({
     verification: input,
     signals,
@@ -192,6 +269,7 @@ export function runVerification(
       trust.recommended_action
     ),
     confidence_band,
+    historical_context,
     trust_receipt
   }
 }
@@ -200,6 +278,20 @@ export function runBatchVerification(
   items: BatchVerificationInput[],
   owner: Omit<VerificationInput, "prompt" | "response" | "domain">
 ) {
+  const historicalContextsByDomain = new Map<string, HistoricalTrustContext>()
+  for (const item of items) {
+    const domain = item.domain ?? "general"
+    if (!historicalContextsByDomain.has(domain)) {
+      historicalContextsByDomain.set(
+        domain,
+        getHistoricalTrustContext({
+          accountId: owner.accountId,
+          domain
+        })
+      )
+    }
+  }
+
   const results = items.map((item) =>
     runVerification({
       prompt: item.prompt ?? "",
@@ -208,7 +300,7 @@ export function runBatchVerification(
       accountId: owner.accountId,
       usageId: owner.usageId,
       paymentRef: owner.paymentRef
-    })
+    }, historicalContextsByDomain.get(item.domain ?? "general"))
   )
 
   const avgConsistency =

@@ -5,10 +5,7 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
-    "declaration": true,
-    "declarationMap": true,
-    "rootDir": "sdk",
-    "outDir": "dist/sdk"
+    "noEmit": true
   },
-  "include": ["sdk"]
+  "include": ["examples/sdk-package-consumer.ts"]
 }

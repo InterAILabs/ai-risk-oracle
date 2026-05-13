@@ -356,6 +356,8 @@ export const a2aRoute: FastifyPluginAsync = async (app) => {
         paymentRef: null
       })
 
+      trackDiscoveryEvent(req, "a2a_success", "/a2a")
+
       return reply.send(
         jsonRpcSuccess(
           requestId,
@@ -380,6 +382,7 @@ export const a2aRoute: FastifyPluginAsync = async (app) => {
                 trust_recommended_action: item.trust_recommended_action,
                 confidence_band: item.confidence_band,
                 signals: item.signals,
+                historical_context: item.historical_context,
                 trust_receipt: item.trust_receipt
               })),
               summary: verification.summary,
@@ -440,6 +443,8 @@ export const a2aRoute: FastifyPluginAsync = async (app) => {
       paymentRef: null
     })
 
+    trackDiscoveryEvent(req, "a2a_success", "/a2a")
+
     return reply.send(
       jsonRpcSuccess(
         requestId,
@@ -463,6 +468,7 @@ export const a2aRoute: FastifyPluginAsync = async (app) => {
               trust_recommended_action: verification.trust_recommended_action,
               confidence_band: verification.confidence_band,
               signals: verification.signals,
+              historical_context: verification.historical_context,
               trust_receipt: verification.trust_receipt,
               oracle: {
                 version: ENGINE_VERSION,

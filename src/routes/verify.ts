@@ -10,6 +10,7 @@ import {
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 import { PRICING } from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
+import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
 import {
   buildInsufficientBalanceDetails,
@@ -146,6 +147,8 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         idempotent_replay: debit.idempotent_replay ?? false
       })
 
+      trackServiceEvent(req, "verify_success", "/verify")
+
       return {
         ...verification.result,
         trust_score: verification.trust_score,
@@ -153,6 +156,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         trust_recommended_action: verification.trust_recommended_action,
         confidence_band: verification.confidence_band,
         signals: verification.signals,
+        historical_context: verification.historical_context,
         trust_receipt: verification.trust_receipt,
         oracle: {
           version: ENGINE_VERSION,
@@ -242,6 +246,8 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
       )
     )
 
+    trackServiceEvent(req, "verify_success", "/verify")
+
     return {
       ...verification.result,
       trust_score: verification.trust_score,
@@ -249,6 +255,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
       trust_recommended_action: verification.trust_recommended_action,
       confidence_band: verification.confidence_band,
       signals: verification.signals,
+      historical_context: verification.historical_context,
       trust_receipt: verification.trust_receipt,
       oracle: {
         version: ENGINE_VERSION,

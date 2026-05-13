@@ -10,6 +10,7 @@ import {
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 import { getBatchAmount } from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
+import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
 import {
   buildInsufficientBalanceDetails,
@@ -151,6 +152,8 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
         idempotent_replay: debit.idempotent_replay ?? false
       })
 
+      trackServiceEvent(req, "verify_batch_success", "/verify/batch")
+
       return {
         ok: true,
         batch_size: verification.results.length,
@@ -168,6 +171,7 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
           trust_recommended_action: item.trust_recommended_action,
           confidence_band: item.confidence_band,
           signals: item.signals,
+          historical_context: item.historical_context,
           trust_receipt: item.trust_receipt
         })),
         summary: verification.summary,
@@ -246,6 +250,8 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
     reply.header("X-Oracle-Latency-Ms", String(verification.maxLatencyMs))
 
+    trackServiceEvent(req, "verify_batch_success", "/verify/batch")
+
     return {
       ok: true,
       batch_size: verification.results.length,
@@ -260,6 +266,7 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
         trust_recommended_action: item.trust_recommended_action,
         confidence_band: item.confidence_band,
         signals: item.signals,
+        historical_context: item.historical_context,
         trust_receipt: item.trust_receipt
       })),
       summary: verification.summary,
