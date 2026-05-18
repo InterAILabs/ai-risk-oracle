@@ -29,7 +29,8 @@ function serviceSummary(baseUrl: string) {
         header: "Authorization: Bearer <api_key>"
       },
       legacy: {
-        type: "X-Payment-Ref"
+        type: "X-Payment-Ref",
+        status: "compatibility_only"
       }
     },
 
@@ -60,6 +61,7 @@ function serviceSummary(baseUrl: string) {
 
     billing: {
       model: "prepaid_balance_per_request",
+      x402_status: "payment_requirements_advertised",
       default_cost_usdc: "0.0006",
       recommended_topup_usdc: process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01",
       idempotency_header: "X-Idempotency-Key",
@@ -362,7 +364,7 @@ function landingHtml(baseUrl: string) {
         <h1>InterAI Risk Oracle</h1>
         <p class="lead">
           Verify AI responses before agents act on them. Score consistency, estimate hallucination risk,
-          bill per request with prepaid Base USDC, and issue signed trust receipts for downstream audit.
+          bill per request with prepaid Base USDC, advertise x402 payment requirements, and issue signed trust receipts for downstream audit.
         </p>
         <div class="actions">
           <a class="button primary" href="/.well-known/openapi.json">View API contract</a>
@@ -379,15 +381,19 @@ function landingHtml(baseUrl: string) {
         <pre><span class="blue">POST</span> /verify
 {
   "trust_score": <span class="ok">0.94</span>,
+  "verdict": "accept",
   "risk_level": "low",
   "recommended_action": "accept",
+  "risk_factors": [],
   "billing": {
     "cost_usdc": "0.0006",
     "idempotent": true
   },
   "trust_receipt": {
     "signature_alg": "hmac-sha256",
-    "receipt_id": "tr_..."
+    "receipt_id": "tr_...",
+    "claims_checked": 3,
+    "claims_supported": 3
   }
 }</pre>
       </div>

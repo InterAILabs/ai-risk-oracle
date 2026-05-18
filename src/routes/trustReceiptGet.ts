@@ -25,6 +25,14 @@ export const trustReceiptGetRoute: FastifyPluginAsync = async (app) => {
         oracle_version: record.oracle_version,
         signals_version: record.signals_version,
         request_hash: record.request_hash,
+        verdict: record.verdict,
+        confidence: record.confidence,
+        risk_level: record.risk_level,
+        confidence_band: record.confidence_band,
+        risk_factors: record.risk_factors,
+        claims_checked: record.claims_checked,
+        claims_supported: record.claims_supported,
+        claims_uncertain: record.claims_uncertain,
         decision_basis: {
           dominant_negatives: record.dominant_negatives,
           dominant_positives: record.dominant_positives
@@ -39,6 +47,8 @@ export const trustReceiptGetRoute: FastifyPluginAsync = async (app) => {
         domain: record.domain,
         trust_score: record.trust_score,
         risk_level: record.risk_level,
+        verdict: record.verdict,
+        risk_factors: record.risk_factors,
         confidence_band: record.confidence_band
       }
     }

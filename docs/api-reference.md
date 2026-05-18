@@ -122,9 +122,14 @@ Important response fields:
 - `hallucination_risk`: estimated risk from `0` to `1`.
 - `risk_level`: `low`, `medium`, or `high`.
 - `recommended_action`: `accept`, `review`, or `reject`.
+- `verdict`: trust-layer action for agents to use directly.
 - `trust_score`: weighted trust score from `0` to `1`.
 - `trust_recommended_action`: trust-specific action.
 - `confidence_band`: `low`, `medium`, or `high`.
+- `risk_factors`: stable machine-readable reasons such as `possible_contradiction`,
+  `unsupported_specificity`, or `numeric_claim_risk`.
+- `claims_checked`, `claims_supported`, `claims_uncertain`: lightweight claim
+  summary derived from the current verifier signals.
 - `signals`: machine-readable signal breakdown.
 - `historical_context`: prior account/domain trust history when available.
 - `trust_receipt`: canonical evidence payload plus signature metadata.
@@ -232,6 +237,7 @@ Use these schemas for validation, SDK generation, or agent-side contract checks.
 - top-up endpoints
 - trial metadata
 - idempotency conventions
+- x402 payment requirement metadata under `protocols.x402`
 
 Current defaults:
 
@@ -239,6 +245,25 @@ Current defaults:
 verify: 0.0006 USDC
 verify_batch: 0.0006 USDC base + 0.0002 USDC per item
 ```
+
+## x402 Payment Requirements
+
+The current production payment path is bearer API key plus prepaid Base USDC
+balance. Paid endpoints also expose x402-style discovery metadata so agents can
+negotiate payment using a standard `402 Payment Required` flow as support is
+expanded:
+
+- unauthenticated `POST /verify` and `POST /verify/batch` return HTTP `402`
+- the response includes `PAYMENT-REQUIRED` and `X-Payment-Required` headers
+  containing base64-encoded requirements
+- the JSON response includes `x402Version`, `accepts`, `scheme: "exact"`,
+  `network: "eip155:8453"`, USDC asset metadata, resource URL, price, and pay-to
+  address
+- `/pricing` returns the same metadata in `pricing.protocols.x402.accepts`
+
+Full `PAYMENT-SIGNATURE` verification and facilitator settlement are not yet the
+production billing path. Use bearer prepaid billing for live integrations until
+that milestone is enabled.
 
 ## A2A
 

@@ -9,6 +9,7 @@ InterAI Risk Oracle is an AI-to-AI service for systems that need to:
 - evaluate prompt/response consistency
 - estimate hallucination risk
 - make automated decisions (`accept` / `review` / `reject`)
+- produce signed trust receipts with verdicts, risk factors, claim counts, and request hashes
 - pay per request with prepaid balance on Base USDC
 - retrieve trust receipts for downstream audit or agent-to-agent verification
 
@@ -19,6 +20,7 @@ This is not a human-facing app. It is a machine-to-machine primitive.
 - Bearer API key authentication
 - Prepaid account billing
 - Per-request cost with microusdc precision
+- x402-style `402 Payment Required` metadata for agent-native payment clients
 - Idempotent billing with `X-Idempotency-Key`
 - Single and batch verification
 - Historical account/domain trust context in verification responses
@@ -130,6 +132,32 @@ curl -X POST http://localhost:3000/verify \
     "response": "Paris",
     "domain": "general"
   }'
+```
+
+Successful verification returns both a direct verdict and a canonical receipt:
+
+```json
+{
+  "verdict": "accept",
+  "trust_score": 0.94,
+  "risk_level": "low",
+  "risk_factors": [],
+  "claims_checked": 3,
+  "claims_supported": 3,
+  "claims_uncertain": 0,
+  "trust_receipt": {
+    "receipt_id": "receipt-id",
+    "request_hash": "sha256...",
+    "verdict": "accept",
+    "confidence": 0.94,
+    "risk_factors": [],
+    "claims_checked": 3,
+    "claims_supported": 3,
+    "claims_uncertain": 0,
+    "signed": true,
+    "signature_alg": "hmac-sha256"
+  }
+}
 ```
 
 5. List trust receipts:
@@ -292,6 +320,17 @@ curl -X POST http://localhost:3000/a2a \
 - Model: prepaid balance
 - Debit: per request
 - Example verify cost: `0.0006 USDC`
+
+## x402 Status
+
+The production path today is bearer API key plus prepaid Base USDC balance. For agent-native clients, unauthenticated paid endpoints also advertise x402-style requirements:
+
+- missing payment returns HTTP `402`
+- `PAYMENT-REQUIRED` contains base64-encoded payment requirements
+- the JSON body includes an `accepts` array with `scheme: "exact"`, `network: "eip155:8453"`, USDC asset metadata, resource URL, price, and pay-to address
+- `/pricing` exposes the same `protocols.x402.accepts` metadata for discovery
+
+Full `PAYMENT-SIGNATURE` verification and facilitator settlement are the next billing milestone. Until that lands, production usage should use `/onboard`, `/topup/create`, and bearer-authenticated `/verify`.
 
 ## Local Verification
 

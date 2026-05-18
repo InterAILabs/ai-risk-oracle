@@ -12,6 +12,7 @@ import { getBatchAmount } from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
+import { buildX402PaymentRequirements, sendX402PaymentRequired } from "../lib/x402.js"
 import {
   buildInsufficientBalanceDetails,
   chargeAndRecordUsage,
@@ -36,14 +37,21 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     const bearerToken = extractBearerToken(authHeader)
 
     if (!paymentRef && !bearerToken) {
-      return reply.code(402).send(
-        economicError("payment_required", {
-          hint: "Provide Authorization: Bearer <api_key> or x-payment-ref",
+      return sendX402PaymentRequired(
+        reply,
+        buildX402PaymentRequirements({
+          req,
+          path: "/verify/batch",
+          service: "verify_batch"
+        }),
+        {
+          hint:
+            "Use Authorization: Bearer <api_key> with prepaid balance today; x402 payment requirements are advertised for agent-native clients.",
           onboarding: {
             create_account_url: "/onboard",
             topup_create_url: "/topup/create"
           }
-        })
+        }
       )
     }
 
@@ -166,10 +174,15 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
         },
         results: verification.results.map((item) => ({
           ...item.result,
+          verdict: item.trust_recommended_action,
           trust_score: item.trust_score,
           risk_level: item.risk_level,
           trust_recommended_action: item.trust_recommended_action,
           confidence_band: item.confidence_band,
+          risk_factors: item.trust_receipt.risk_factors,
+          claims_checked: item.trust_receipt.claims_checked,
+          claims_supported: item.trust_receipt.claims_supported,
+          claims_uncertain: item.trust_receipt.claims_uncertain,
           signals: item.signals,
           historical_context: item.historical_context,
           trust_receipt: item.trust_receipt
@@ -261,10 +274,15 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
       },
       results: verification.results.map((item) => ({
         ...item.result,
+        verdict: item.trust_recommended_action,
         trust_score: item.trust_score,
         risk_level: item.risk_level,
         trust_recommended_action: item.trust_recommended_action,
         confidence_band: item.confidence_band,
+        risk_factors: item.trust_receipt.risk_factors,
+        claims_checked: item.trust_receipt.claims_checked,
+        claims_supported: item.trust_receipt.claims_supported,
+        claims_uncertain: item.trust_receipt.claims_uncertain,
         signals: item.signals,
         historical_context: item.historical_context,
         trust_receipt: item.trust_receipt

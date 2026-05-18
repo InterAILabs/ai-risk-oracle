@@ -41,6 +41,12 @@ export type TrustReceiptRecord = {
   trust_score: number
   risk_level: "low" | "medium" | "high"
   confidence_band: "low" | "medium" | "high"
+  verdict: "accept" | "review" | "reject"
+  confidence: number
+  risk_factors: string[]
+  claims_checked: number
+  claims_supported: number
+  claims_uncertain: number
   dominant_negatives: string[]
   dominant_positives: string[]
   signature: string

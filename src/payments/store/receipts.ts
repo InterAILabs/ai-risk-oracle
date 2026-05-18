@@ -87,6 +87,12 @@ export function listTrustReceipts(params: {
     trust_score: number
     risk_level: "low" | "medium" | "high"
     confidence_band: "low" | "medium" | "high"
+    verdict: "accept" | "review" | "reject"
+    confidence: number
+    risk_factors_json: string
+    claims_checked: number
+    claims_supported: number
+    claims_uncertain: number
     dominant_negatives_json: string
     dominant_positives_json: string
     signature: string
@@ -111,6 +117,12 @@ export function getTrustReceiptById(receiptId: string) {
         trust_score: number
         risk_level: "low" | "medium" | "high"
         confidence_band: "low" | "medium" | "high"
+        verdict: "accept" | "review" | "reject"
+        confidence: number
+        risk_factors_json: string
+        claims_checked: number
+        claims_supported: number
+        claims_uncertain: number
         dominant_negatives_json: string
         dominant_positives_json: string
         signature: string

@@ -95,6 +95,10 @@ async function main() {
       "verify-result schema requires historical_context"
     )
     check(
+      verifySchema.required?.includes("risk_factors"),
+      "verify-result schema requires risk_factors"
+    )
+    check(
       verifySchema.properties?.trust_receipt?.required?.includes("signature"),
       "verify-result trust_receipt schema includes signature fields"
     )
@@ -108,6 +112,10 @@ async function main() {
       receiptSchema.$id === "https://ai-risk-oracle/schemas/trust-receipt.json",
       "trust receipt schema has canonical id"
     )
+    check(
+      receiptSchema.required?.includes("risk_factors"),
+      "trust receipt schema exposes risk factors"
+    )
 
     const publicReceiptSchema = await getJson("/schemas/trust-receipt-public.json")
     check(
@@ -120,6 +128,10 @@ async function main() {
     check(
       pricing.pricing?.idempotency?.header === "X-Idempotency-Key",
       "pricing exposes idempotency header"
+    )
+    check(
+      pricing.pricing?.protocols?.x402?.accepts?.[0]?.scheme === "exact",
+      "pricing exposes x402 exact accepts"
     )
 
     const discoveryBundle = await getJson("/.well-known/discovery-bundle.json")

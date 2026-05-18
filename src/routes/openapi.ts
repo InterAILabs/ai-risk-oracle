@@ -688,20 +688,6 @@ export async function openApiRoute(app: FastifyInstance) {
                 in: "header",
                 required: false,
                 schema: { type: "string" }
-              },
-              {
-                name: "X-Payment-Ref",
-                in: "header",
-                required: false,
-                schema: { type: "string" },
-                description: "Legacy compatibility mode only"
-              },
-              {
-                name: "X-Payment-Tx",
-                in: "header",
-                required: false,
-                schema: { type: "string" },
-                description: "Legacy compatibility mode only"
               }
             ],
             requestBody: {
@@ -765,20 +751,6 @@ export async function openApiRoute(app: FastifyInstance) {
                 in: "header",
                 required: false,
                 schema: { type: "string" }
-              },
-              {
-                name: "X-Payment-Ref",
-                in: "header",
-                required: false,
-                schema: { type: "string" },
-                description: "Legacy compatibility mode only"
-              },
-              {
-                name: "X-Payment-Tx",
-                in: "header",
-                required: false,
-                schema: { type: "string" },
-                description: "Legacy compatibility mode only"
               }
             ],
             requestBody: {
@@ -920,31 +892,6 @@ export async function openApiRoute(app: FastifyInstance) {
               },
               "400": {
                 description: "Invalid JSON-RPC envelope"
-              }
-            }
-          }
-        },
-        "/quote": {
-          post: {
-            requestBody: {
-              required: true,
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      service: { type: "string", enum: ["verify"] },
-                      mode: { type: "string", enum: ["fast", "batch"] },
-                      items_count: { type: "integer" }
-                    },
-                    required: ["service", "mode"]
-                  }
-                }
-              }
-            },
-            responses: {
-              "200": {
-                description: "Legacy compatibility quote created"
               }
             }
           }

@@ -259,6 +259,10 @@ async function runIntegrationChecks() {
       typeof pricing.json?.pricing?.trial?.enabled === "boolean",
       "pricing publica trial"
     )
+    check(
+      pricing.json?.pricing?.protocols?.x402?.accepts?.[0]?.scheme === "exact",
+      "pricing publica x402 exact accepts"
+    )
 
     const mcpInit = await http("POST", "/mcp", {
       body: {
@@ -417,6 +421,10 @@ async function runIntegrationChecks() {
     check(
       verifyResultSchema.json?.required?.includes("historical_context"),
       "schema de verify incluye historical_context"
+    )
+    check(
+      verifyResultSchema.json?.required?.includes("risk_factors"),
+      "schema de verify incluye risk_factors"
     )
 
     const stats = await http("GET", "/stats", {
@@ -597,6 +605,19 @@ async function runIntegrationChecks() {
     await runContractChecks()
 
     const noBalanceKey = await onboardAndGetKey()
+    const missingPayment = await http("POST", "/verify", {
+      body: verificationPayload("What is the capital of France?", "Paris")
+    })
+    assert.equal(missingPayment.status, 402)
+    check(
+      Boolean(missingPayment.headers["payment-required"]),
+      "verify sin auth publica PAYMENT-REQUIRED x402"
+    )
+    check(
+      missingPayment.json?.accepts?.[0]?.network === "eip155:8453",
+      "verify sin auth publica x402 Base"
+    )
+
     const noBalanceVerify = await http("POST", "/verify", {
       headers: {
         Authorization: `Bearer ${noBalanceKey}`,
@@ -682,6 +703,15 @@ async function runIntegrationChecks() {
     check(
       typeof verify1.json?.historical_context?.sample_size === "number",
       "verify devuelve sample_size historico"
+    )
+    check(
+      verify1.json?.verdict && Array.isArray(verify1.json?.risk_factors),
+      "verify devuelve verdict y risk_factors"
+    )
+    check(
+      typeof verify1.json?.claims_checked === "number" &&
+        typeof verify1.json?.trust_receipt?.claims_checked === "number",
+      "verify devuelve claims summary en resultado y receipt"
     )
     check(
       verify2.headers["x-oracle-idempotent-replay"] === "true",

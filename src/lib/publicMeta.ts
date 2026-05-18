@@ -1,4 +1,5 @@
 import { getBatchAmount, PRICING } from "../config/pricing.js"
+import { buildX402Accept } from "./x402.js"
 
 export function isEnabled(value: string | undefined, fallback = "false") {
   const normalized = String(value ?? fallback).toLowerCase()
@@ -24,11 +25,34 @@ export function getTrialOffer() {
 }
 
 export function buildPublicPricing(baseUrl: string) {
+  const verifyAccept = buildX402Accept({
+    baseUrl,
+    path: "/verify",
+    service: "verify",
+    amountUsdc: PRICING.fast.amount
+  })
+  const batchAccept = buildX402Accept({
+    baseUrl,
+    path: "/verify/batch",
+    service: "verify_batch",
+    amountUsdc: getBatchAmount(1)
+  })
+
   return {
     model: "prepaid_balance_per_request",
     currency: "USDC",
     chain: "base",
     unit: "microusdc",
+    protocols: {
+      primary: "bearer_prepaid_balance",
+      x402: {
+        status: "advertised",
+        payment_required_header: "PAYMENT-REQUIRED",
+        payment_signature_header: "PAYMENT-SIGNATURE",
+        payment_response_header: "PAYMENT-RESPONSE",
+        accepts: [verifyAccept, batchAccept]
+      }
+    },
     auth: {
       type: "bearer_api_key",
       onboarding_url: `${baseUrl}/onboard`

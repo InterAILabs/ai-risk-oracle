@@ -134,6 +134,12 @@ function ensureSchema() {
       trust_score REAL NOT NULL,
       risk_level TEXT NOT NULL CHECK(risk_level IN ('low', 'medium', 'high')),
       confidence_band TEXT NOT NULL CHECK(confidence_band IN ('low', 'medium', 'high')),
+      verdict TEXT NOT NULL DEFAULT 'review' CHECK(verdict IN ('accept', 'review', 'reject')),
+      confidence REAL NOT NULL DEFAULT 0,
+      risk_factors_json TEXT NOT NULL DEFAULT '[]',
+      claims_checked INTEGER NOT NULL DEFAULT 0,
+      claims_supported INTEGER NOT NULL DEFAULT 0,
+      claims_uncertain INTEGER NOT NULL DEFAULT 0,
       dominant_negatives_json TEXT NOT NULL,
       dominant_positives_json TEXT NOT NULL,
       signature TEXT NOT NULL DEFAULT '',
@@ -176,5 +182,23 @@ function ensureTrustReceiptSignatureColumns() {
   } catch {}
 }
 
+function ensureTrustReceiptEvidenceColumns() {
+  const columns = [
+    `ALTER TABLE trust_receipts ADD COLUMN verdict TEXT NOT NULL DEFAULT 'review'`,
+    `ALTER TABLE trust_receipts ADD COLUMN confidence REAL NOT NULL DEFAULT 0`,
+    `ALTER TABLE trust_receipts ADD COLUMN risk_factors_json TEXT NOT NULL DEFAULT '[]'`,
+    `ALTER TABLE trust_receipts ADD COLUMN claims_checked INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE trust_receipts ADD COLUMN claims_supported INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE trust_receipts ADD COLUMN claims_uncertain INTEGER NOT NULL DEFAULT 0`
+  ]
+
+  for (const statement of columns) {
+    try {
+      db.exec(statement)
+    } catch {}
+  }
+}
+
 ensureSchema()
 ensureTrustReceiptSignatureColumns()
+ensureTrustReceiptEvidenceColumns()

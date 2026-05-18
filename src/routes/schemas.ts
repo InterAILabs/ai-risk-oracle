@@ -33,6 +33,14 @@ const trustReceiptSchema = {
     "oracle_version",
     "signals_version",
     "request_hash",
+    "verdict",
+    "confidence",
+    "risk_level",
+    "confidence_band",
+    "risk_factors",
+    "claims_checked",
+    "claims_supported",
+    "claims_uncertain",
     "decision_basis"
   ],
   properties: {
@@ -41,6 +49,17 @@ const trustReceiptSchema = {
     oracle_version: { type: "string" },
     signals_version: { type: "string" },
     request_hash: { type: "string" },
+    verdict: { type: "string", enum: ["accept", "review", "reject"] },
+    confidence: { type: "number", minimum: 0, maximum: 1 },
+    risk_level: { type: "string", enum: ["low", "medium", "high"] },
+    confidence_band: { type: "string", enum: ["low", "medium", "high"] },
+    risk_factors: {
+      type: "array",
+      items: { type: "string" }
+    },
+    claims_checked: { type: "integer", minimum: 0 },
+    claims_supported: { type: "integer", minimum: 0 },
+    claims_uncertain: { type: "integer", minimum: 0 },
     decision_basis: decisionBasisSchema
   }
 } as const
@@ -154,6 +173,8 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
             "domain",
             "trust_score",
             "risk_level",
+            "verdict",
+            "risk_factors",
             "confidence_band"
           ],
           properties: {
@@ -162,6 +183,14 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
             risk_level: {
               type: "string",
               enum: ["low", "medium", "high"]
+            },
+            verdict: {
+              type: "string",
+              enum: ["accept", "review", "reject"]
+            },
+            risk_factors: {
+              type: "array",
+              items: { type: "string" }
             },
             confidence_band: {
               type: "string",
@@ -186,9 +215,14 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
         "risk_level",
         "recommended_action",
         "analysis",
+        "verdict",
         "trust_score",
         "trust_recommended_action",
         "confidence_band",
+        "risk_factors",
+        "claims_checked",
+        "claims_supported",
+        "claims_uncertain",
         "signals",
         "historical_context",
         "trust_receipt",
@@ -240,6 +274,10 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
           }
         },
         trust_score: { type: "number", minimum: 0, maximum: 1 },
+        verdict: {
+          type: "string",
+          enum: ["accept", "review", "reject"]
+        },
         trust_recommended_action: {
           type: "string",
           enum: ["accept", "review", "reject"]
@@ -248,6 +286,13 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
           type: "string",
           enum: ["low", "medium", "high"]
         },
+        risk_factors: {
+          type: "array",
+          items: { type: "string" }
+        },
+        claims_checked: { type: "integer", minimum: 0 },
+        claims_supported: { type: "integer", minimum: 0 },
+        claims_uncertain: { type: "integer", minimum: 0 },
         signals: trustSignalsSchema,
         historical_context: historicalContextSchema,
         trust_receipt: trustReceiptWithSignatureSchema,

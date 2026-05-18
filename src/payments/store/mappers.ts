@@ -77,6 +77,12 @@ export function normalizeTrustReceiptRecord(
         trust_score: number
         risk_level: "low" | "medium" | "high"
         confidence_band: "low" | "medium" | "high"
+        verdict?: "accept" | "review" | "reject"
+        confidence?: number
+        risk_factors_json?: string
+        claims_checked?: number
+        claims_supported?: number
+        claims_uncertain?: number
         dominant_negatives_json: string
         dominant_positives_json: string
         signature: string
@@ -99,6 +105,12 @@ export function normalizeTrustReceiptRecord(
     trust_score: Number(row.trust_score),
     risk_level: row.risk_level,
     confidence_band: row.confidence_band,
+    verdict: row.verdict ?? "review",
+    confidence: Number(row.confidence ?? row.trust_score ?? 0),
+    risk_factors: JSON.parse(row.risk_factors_json || "[]"),
+    claims_checked: Number(row.claims_checked ?? 0),
+    claims_supported: Number(row.claims_supported ?? 0),
+    claims_uncertain: Number(row.claims_uncertain ?? 0),
     dominant_negatives: JSON.parse(row.dominant_negatives_json || "[]"),
     dominant_positives: JSON.parse(row.dominant_positives_json || "[]"),
     signature: row.signature ? String(row.signature) : null,
@@ -121,6 +133,12 @@ export function mapTrustReceiptInsert(record: TrustReceiptRecord) {
     trust_score: record.trust_score,
     risk_level: record.risk_level,
     confidence_band: record.confidence_band,
+    verdict: record.verdict,
+    confidence: record.confidence,
+    risk_factors_json: JSON.stringify(record.risk_factors),
+    claims_checked: record.claims_checked,
+    claims_supported: record.claims_supported,
+    claims_uncertain: record.claims_uncertain,
     dominant_negatives_json: JSON.stringify(record.dominant_negatives),
     dominant_positives_json: JSON.stringify(record.dominant_positives),
     signature: record.signature,

@@ -139,9 +139,11 @@ export function buildInsufficientBalanceDetails(params: {
 
 export function persistReceipt(params: {
   verification: VerificationInput
+  result: ReturnType<typeof scoreResponse>
   signals: Signals
   trust_score: number
   risk_level: "low" | "medium" | "high"
+  recommended_action: "accept" | "review" | "reject"
   confidence_band: ConfidenceBand
 }) {
   const baseReceipt = buildTrustReceipt({
@@ -149,6 +151,11 @@ export function persistReceipt(params: {
     response: params.verification.response,
     domain: params.verification.domain,
     signals: params.signals,
+    analysis: params.result.analysis,
+    trustScore: params.trust_score,
+    riskLevel: params.risk_level,
+    recommendedAction: params.recommended_action,
+    confidenceBand: params.confidence_band,
     oracleVersion: ENGINE_VERSION,
     signalsVersion: ORACLE_SIGNALS_VERSION
   })
@@ -168,6 +175,12 @@ export function persistReceipt(params: {
     trust_score: params.trust_score,
     risk_level: params.risk_level,
     confidence_band: params.confidence_band,
+    verdict: baseReceipt.verdict,
+    confidence: baseReceipt.confidence,
+    risk_factors: baseReceipt.risk_factors,
+    claims_checked: baseReceipt.claims_checked,
+    claims_supported: baseReceipt.claims_supported,
+    claims_uncertain: baseReceipt.claims_uncertain,
     dominant_negatives: baseReceipt.decision_basis.dominant_negatives,
     dominant_positives: baseReceipt.decision_basis.dominant_positives,
     signature: signature ?? "",
@@ -254,9 +267,11 @@ export function runVerification(
     })
   const trust_receipt = persistReceipt({
     verification: input,
+    result,
     signals,
     trust_score: trust.trust_score,
     risk_level: trust.risk_level,
+    recommended_action: normalizeRecommendedAction(trust.recommended_action),
     confidence_band
   })
 
