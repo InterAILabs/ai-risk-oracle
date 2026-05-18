@@ -131,6 +131,32 @@ async function runIntegrationChecks() {
     assert.equal(ready.status, 200)
     check(ready.json?.ready === true, "ready responde listo")
 
+    const landing = await http("GET", "/", {
+      headers: { Host: "localhost:3000" }
+    })
+    assert.equal(landing.status, 200)
+    check(
+      String(landing.headers["content-type"] || "").includes("text/html"),
+      "landing publica HTML"
+    )
+    check(
+      String(landing.json?.raw || "").includes("InterAI Risk Oracle"),
+      "landing comunica el producto"
+    )
+
+    const serviceSummary = await http("GET", "/service.json", {
+      headers: { Host: "localhost:3000" }
+    })
+    assert.equal(serviceSummary.status, 200)
+    check(
+      serviceSummary.json?.endpoints?.verify === "POST /verify",
+      "service.json conserva resumen machine-readable"
+    )
+
+    const favicon = await http("GET", "/favicon.ico")
+    assert.equal(favicon.status, 204)
+    check(true, "favicon no ensucia telemetry de 404")
+
     const wellKnown = await http("GET", "/.well-known/ai-service.json", {
       headers: { Host: "localhost:3000" }
     })
@@ -146,6 +172,15 @@ async function runIntegrationChecks() {
     check(
       Boolean(wellKnown.json?.schemas?.trust_receipt_public),
       "well-known expone schema publico de receipt"
+    )
+
+    const wellKnownAlias = await http("GET", "/.well-known/ai-risk-oracle", {
+      headers: { Host: "localhost:3000" }
+    })
+    assert.equal(wellKnownAlias.status, 200)
+    check(
+      wellKnownAlias.json?.id === "interai-risk-oracle",
+      "alias well-known ai-risk-oracle responde descriptor"
     )
 
     const openapi = await http("GET", "/.well-known/openapi.json", {
@@ -166,6 +201,12 @@ async function runIntegrationChecks() {
       "openapi documenta trust/reputation"
     )
     check(Boolean(openapi.json?.paths?.["/a2a"]), "openapi documenta a2a")
+
+    const openapiAlias = await http("GET", "/openapi.json", {
+      headers: { Host: "localhost:3000" }
+    })
+    assert.equal(openapiAlias.status, 200)
+    check(openapiAlias.json?.openapi === "3.0.3", "alias openapi.json responde contrato")
 
     const agentCard = await http("GET", "/.well-known/agent.json", {
       headers: { Host: "localhost:3000" }
@@ -195,6 +236,15 @@ async function runIntegrationChecks() {
     check(
       Boolean(discoveryBundle.json?.discovery?.agent_card_url),
       "discovery bundle publica referencias de discovery"
+    )
+
+    const discoveryAlias = await http("GET", "/discovery.json", {
+      headers: { Host: "localhost:3000" }
+    })
+    assert.equal(discoveryAlias.status, 200)
+    check(
+      discoveryAlias.json?.service?.id === "interai-risk-oracle",
+      "alias discovery.json responde bundle"
     )
 
     const pricing = await http("GET", "/pricing", {
@@ -387,6 +437,10 @@ async function runIntegrationChecks() {
     check(
       typeof stats.json?.discovery?.funnel?.trial_credit_granted === "number",
       "stats expone trial en funnel"
+    )
+    check(
+      typeof stats.json?.discovery?.funnel?.landing_views === "number",
+      "stats expone landing en funnel"
     )
   }
 

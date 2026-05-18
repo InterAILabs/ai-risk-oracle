@@ -19,11 +19,18 @@ https://ai-risk-oracle.fly.dev
 
 Machine-readable contracts:
 
+- `GET /service.json`
 - `GET /.well-known/openapi.json`
+- `GET /openapi.json`
 - `GET /.well-known/ai-service.json`
+- `GET /.well-known/ai-risk-oracle`
 - `GET /.well-known/agent.json`
 - `GET /.well-known/discovery-bundle.json`
+- `GET /discovery.json`
 - `GET /pricing`
+
+The root path, `GET /`, serves the human-facing landing page for quick
+evaluation and links back to these contracts.
 
 ## Authentication
 

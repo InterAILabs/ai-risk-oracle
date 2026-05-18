@@ -1,12 +1,11 @@
-import { FastifyInstance } from "fastify"
+import { FastifyInstance, FastifyRequest } from "fastify"
 
 import { isReceiptSigningEnabled } from "../lib/signing.js"
 import { trackDiscoveryEvent } from "../lib/discovery.js"
 import { buildPublicPricing, getTrialOffer } from "../lib/publicMeta.js"
 
 export async function wellKnownRoute(app: FastifyInstance) {
-  app.get("/.well-known/ai-service.json", async (req) => {
-    trackDiscoveryEvent(req, "service_descriptor_view", "/.well-known/ai-service.json")
+  async function serviceDescriptor(req: FastifyRequest) {
     const baseUrl =
       (req.headers["x-forwarded-proto"] ? String(req.headers["x-forwarded-proto"]) : "https") +
       "://" +
@@ -196,5 +195,20 @@ export async function wellKnownRoute(app: FastifyInstance) {
         target_p95_ms: 250
       }
     }
+  }
+
+  app.get("/.well-known/ai-service.json", async (req) => {
+    trackDiscoveryEvent(req, "service_descriptor_view", "/.well-known/ai-service.json")
+    return serviceDescriptor(req)
+  })
+
+  app.get("/.well-known/ai-risk-oracle", async (req) => {
+    trackDiscoveryEvent(req, "service_descriptor_alias_view", "/.well-known/ai-risk-oracle")
+    return serviceDescriptor(req)
+  })
+
+  app.get("/.well-known/ai-risk-oracle.json", async (req) => {
+    trackDiscoveryEvent(req, "service_descriptor_alias_view", "/.well-known/ai-risk-oracle.json")
+    return serviceDescriptor(req)
   })
 }

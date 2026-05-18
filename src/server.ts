@@ -7,6 +7,7 @@ import { pricingRoute } from "./routes/pricing.js"
 import { verifyRoute } from "./routes/verify.js"
 import { verifyBatchRoute } from "./routes/verifyBatch.js"
 import { payRoute } from "./routes/pay.js"
+import { landingRoute } from "./routes/landing.js"
 import { wellKnownRoute } from "./routes/wellKnown.js"
 import { openApiRoute } from "./routes/openapi.js"
 import { statsRoute } from "./routes/stats.js"
@@ -27,8 +28,7 @@ import { trustVerifySignatureRoute } from "./routes/trustVerifySignature.js"
 import { trustReceiptGetRoute } from "./routes/trustReceiptGet.js"
 import { trustReputationRoute } from "./routes/trustReputation.js"
 import { schemasRoute } from "./routes/schemas.js"
-import { isReceiptSigningEnabled } from "./lib/signing.js"
-import { buildPublicPricing, getTrialOffer, isEnabled } from "./lib/publicMeta.js"
+import { trackDiscoveryEvent } from "./lib/discovery.js"
 import { agentCardRoute } from "./routes/agentCard.js"
 import { a2aRoute } from "./routes/a2a.js"
 import { discoveryBundleRoute } from "./routes/discoveryBundle.js"
@@ -82,78 +82,20 @@ export function buildApp() {
 
   app.addHook("preHandler", rateLimiter)
 
-  app.get("/", async (req) => {
-    const host = String(req.headers.host || "localhost:3000")
-    const forwardedProto = req.headers["x-forwarded-proto"]
-    const proto =
-      forwardedProto
-        ? String(forwardedProto)
-        : host.includes("localhost") || host.startsWith("127.0.0.1")
-          ? "http"
-          : "https"
-    const baseUrl = `${proto}://${host}`
+  app.setNotFoundHandler(async (req, reply) => {
+    trackDiscoveryEvent(req, "not_found", req.url)
+    reply.code(404)
     return {
-      name: "AI Risk Oracle",
-      status: "ok",
-      version: "0.0.1",
-
-      auth: {
-        primary: {
-          type: "Bearer API key",
-          header: "Authorization: Bearer <api_key>"
-        },
-        legacy: {
-          type: "X-Payment-Ref"
-        }
-      },
-
-      endpoints: {
-        onboard: "POST /onboard",
-        verify: "POST /verify",
-        verify_batch: "POST /verify/batch",
-        a2a: "POST /a2a",
-        agent_card: "GET /.well-known/agent.json",
-        discovery_bundle: "GET /.well-known/discovery-bundle.json",
-        mcp: "POST /mcp",
-        pricing: "GET /pricing",
-        trust_receipts: "GET /trust/receipts",
-        trust_reputation: "GET /trust/reputation",
-        trust_receipt_get: "GET /trust/receipts/:receiptId",
-        trust_verify_signature: "POST /trust/verify-signature",
-        schemas: "GET /schemas/*.json",
-        me: "GET /me",
-        topup_create: "POST /topup/create",
-        topup_confirm: "POST /topup/confirm",
-        topup_status: "GET /topup/:topupId",
-        ...(isEnabled(process.env.DEV_TOPUP_ENABLED, "false")
-          ? { topup_dev_credit: "POST /topup/dev/credit" }
-          : {}),
-        health: "GET /health",
-        ready: "GET /ready"
-      },
-
-      billing: {
-        model: "prepaid_balance_per_request",
-        default_cost_usdc: "0.0006",
-        recommended_topup_usdc: process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01",
-        idempotency_header: "X-Idempotency-Key",
-        pricing_url: "/pricing",
-        trial: getTrialOffer()
-      },
-
-      docs: {
-        openapi: "/.well-known/openapi.json",
+      message: `Route ${req.method}:${req.url} not found`,
+      error: "Not Found",
+      statusCode: 404,
+      discovery: {
+        home: "/",
         service: "/.well-known/ai-service.json",
+        openapi: "/.well-known/openapi.json",
+        agent_card: "/.well-known/agent.json",
+        discovery_bundle: "/.well-known/discovery-bundle.json",
         pricing: "/pricing"
-      },
-
-      trust: {
-        receipts: true,
-        signature_verification: true,
-        signing_enabled: isReceiptSigningEnabled()
-      },
-      machine_ready: {
-        pricing: buildPublicPricing(baseUrl)
       }
     }
   })
@@ -162,6 +104,7 @@ export function buildApp() {
 }
 
 async function registerRoutes(app: ReturnType<typeof buildApp>) {
+  await app.register(landingRoute)
   await app.register(healthRoute)
   await app.register(statsRoute)
   await app.register(pricingRoute)

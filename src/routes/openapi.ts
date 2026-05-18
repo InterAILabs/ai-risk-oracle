@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify"
+import { FastifyInstance, FastifyRequest } from "fastify"
 import { isReceiptSigningEnabled } from "../lib/signing.js"
 import { trackDiscoveryEvent } from "../lib/discovery.js"
 
@@ -98,8 +98,7 @@ const batchVerifyResponseSchema = {
 } as const
 
 export async function openApiRoute(app: FastifyInstance) {
-  app.get("/.well-known/openapi.json", async (req) => {
-    trackDiscoveryEvent(req, "openapi_view", "/.well-known/openapi.json")
+  async function openApiDocument(req: FastifyRequest) {
     const baseUrl =
       (req.headers["x-forwarded-proto"] ? String(req.headers["x-forwarded-proto"]) : "https") +
       "://" +
@@ -133,6 +132,26 @@ export async function openApiRoute(app: FastifyInstance) {
         }
       },
       paths: {
+        "/": {
+          get: {
+            responses: {
+              "200": {
+                description:
+                  "Human-facing landing page with integration links and discovery entry points"
+              }
+            }
+          }
+        },
+        "/service.json": {
+          get: {
+            responses: {
+              "200": {
+                description:
+                  "Machine-readable service summary for clients that previously consumed the root JSON response"
+              }
+            }
+          }
+        },
         "/health": {
           get: {
             responses: {
@@ -197,12 +216,39 @@ export async function openApiRoute(app: FastifyInstance) {
             }
           }
         },
+        "/.well-known/ai-risk-oracle": {
+          get: {
+            responses: {
+              "200": {
+                description: "Alias for the AI Risk Oracle service descriptor"
+              }
+            }
+          }
+        },
         "/.well-known/discovery-bundle.json": {
           get: {
             responses: {
               "200": {
                 description:
                   "Single discovery bundle for agents that want service descriptor, agent card, runtime mode, schemas, and sample payloads in one fetch"
+              }
+            }
+          }
+        },
+        "/openapi.json": {
+          get: {
+            responses: {
+              "200": {
+                description: "Alias for the OpenAPI contract"
+              }
+            }
+          }
+        },
+        "/discovery.json": {
+          get: {
+            responses: {
+              "200": {
+                description: "Alias for the single-fetch discovery bundle"
               }
             }
           }
@@ -905,5 +951,15 @@ export async function openApiRoute(app: FastifyInstance) {
         }
       }
     }
+  }
+
+  app.get("/.well-known/openapi.json", async (req) => {
+    trackDiscoveryEvent(req, "openapi_view", "/.well-known/openapi.json")
+    return openApiDocument(req)
+  })
+
+  app.get("/openapi.json", async (req) => {
+    trackDiscoveryEvent(req, "openapi_alias_view", "/openapi.json")
+    return openApiDocument(req)
   })
 }

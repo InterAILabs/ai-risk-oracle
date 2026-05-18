@@ -95,10 +95,17 @@ export function getDiscoveryStats(limit = 20) {
   }
 
   const funnel = {
+    landing_views: Number(totalsByType.landing_view ?? 0),
     discovery_views:
       Number(totalsByType.service_descriptor_view ?? 0) +
       Number(totalsByType.openapi_view ?? 0) +
-      Number(totalsByType.agent_card_view ?? 0),
+      Number(totalsByType.agent_card_view ?? 0) +
+      Number(totalsByType.discovery_bundle_view ?? 0) +
+      Number(totalsByType.service_summary_view ?? 0) +
+      Number(totalsByType.service_descriptor_alias_view ?? 0) +
+      Number(totalsByType.openapi_alias_view ?? 0) +
+      Number(totalsByType.discovery_bundle_alias_view ?? 0),
+    pricing_views: Number(totalsByType.pricing_view ?? 0),
     onboard_success: Number(totalsByType.onboard_success ?? 0),
     trial_credit_granted: Number(totalsByType.trial_credit_granted ?? 0),
     topup_create_success: Number(totalsByType.topup_create_success ?? 0),
@@ -107,7 +114,8 @@ export function getDiscoveryStats(limit = 20) {
     a2a_success: Number(totalsByType.a2a_success ?? 0),
     verify_success: Number(totalsByType.verify_success ?? 0),
     verify_batch_success: Number(totalsByType.verify_batch_success ?? 0),
-    trust_signature_checks: Number(totalsByType.trust_signature_check ?? 0)
+    trust_signature_checks: Number(totalsByType.trust_signature_check ?? 0),
+    not_found: Number(totalsByType.not_found ?? 0)
   }
 
   return {

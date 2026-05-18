@@ -1,12 +1,10 @@
-import { FastifyPluginAsync } from "fastify"
+import { FastifyPluginAsync, FastifyRequest } from "fastify"
 import { isReceiptSigningEnabled } from "../lib/signing.js"
 import { trackDiscoveryEvent } from "../lib/discovery.js"
 import { buildPublicPricing } from "../lib/publicMeta.js"
 
 export const discoveryBundleRoute: FastifyPluginAsync = async (app) => {
-  app.get("/.well-known/discovery-bundle.json", async (req) => {
-    trackDiscoveryEvent(req, "discovery_bundle_view", "/.well-known/discovery-bundle.json")
-
+  async function discoveryBundle(req: FastifyRequest) {
     const baseUrl =
       (req.headers["x-forwarded-proto"] ? String(req.headers["x-forwarded-proto"]) : "https") +
       "://" +
@@ -144,5 +142,15 @@ export const discoveryBundleRoute: FastifyPluginAsync = async (app) => {
         }
       }
     }
+  }
+
+  app.get("/.well-known/discovery-bundle.json", async (req) => {
+    trackDiscoveryEvent(req, "discovery_bundle_view", "/.well-known/discovery-bundle.json")
+    return discoveryBundle(req)
+  })
+
+  app.get("/discovery.json", async (req) => {
+    trackDiscoveryEvent(req, "discovery_bundle_alias_view", "/discovery.json")
+    return discoveryBundle(req)
   })
 }

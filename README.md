@@ -36,6 +36,8 @@ This is not a human-facing app. It is a machine-to-machine primitive.
 - A2A synchronous JSON-RPC endpoint at `/a2a`
 - MCP JSON-RPC bridge at `/mcp`
 - MCP resources and prompts for host-friendly discovery
+- Human-facing landing page at `/`
+- Stable machine-readable service summary at `/service.json`
 - SDK compiled to `dist/sdk/interai-risk-oracle.js`
 
 ## Quick Start
@@ -166,10 +168,15 @@ curl -X GET http://localhost:3000/schemas/verify-result.json
 9. Discover the service contract and runtime probes:
 
 ```bash
+curl -X GET http://localhost:3000/
+curl -X GET http://localhost:3000/service.json
 curl -X GET http://localhost:3000/.well-known/ai-service.json
+curl -X GET http://localhost:3000/.well-known/ai-risk-oracle
 curl -X GET http://localhost:3000/.well-known/openapi.json
+curl -X GET http://localhost:3000/openapi.json
 curl -X GET http://localhost:3000/.well-known/agent.json
 curl -X GET http://localhost:3000/.well-known/discovery-bundle.json
+curl -X GET http://localhost:3000/discovery.json
 curl -X GET http://localhost:3000/pricing
 curl -X GET http://localhost:3000/health
 curl -X GET http://localhost:3000/ready
@@ -334,10 +341,15 @@ The broader smoke scripts cover discovery, billing regression, topup replay prot
 
 ## Discovery And Contracts
 
+- `GET /` serves the human-facing landing page for developers, evaluators, and operators.
+- `GET /service.json` preserves a compact machine-readable service summary.
 - `GET /.well-known/ai-service.json` exposes agent-oriented discovery metadata, billing conventions, schema URLs, and integration flow.
+- `GET /.well-known/ai-risk-oracle` and `GET /.well-known/ai-risk-oracle.json` are discovery aliases for clients guessing the product-specific well-known path.
 - `GET /.well-known/openapi.json` exposes the HTTP contract for tooling and SDK generation.
+- `GET /openapi.json` aliases the OpenAPI contract for simpler manual discovery.
 - `GET /.well-known/agent.json` exposes an A2A Agent Card at the recommended well-known location.
 - `GET /.well-known/discovery-bundle.json` exposes a single-fetch discovery payload with service metadata, runtime mode, interfaces, schema URLs, and ready-to-copy samples.
+- `GET /discovery.json` aliases the single-fetch discovery bundle.
 - `GET /pricing` exposes public pricing, trial, top-up and idempotency metadata for self-serve integration.
 - `POST /a2a` exposes a minimal A2A-compatible JSON-RPC interface for synchronous `message/send` verification calls.
 - `POST /mcp` exposes an MCP bridge with `initialize`, `tools/list`, `tools/call`, `resources/list`, `resources/read`, `prompts/list`, and `prompts/get` over JSON-RPC.
@@ -355,10 +367,16 @@ curl -X GET http://localhost:3000/stats \
 ```
 
 `/stats` now includes lightweight discovery telemetry for:
+- `/`
+- `/service.json`
 - `/.well-known/ai-service.json`
+- `/.well-known/ai-risk-oracle`
 - `/.well-known/openapi.json`
+- `/openapi.json`
+- `/discovery.json`
 - `/.well-known/agent.json`
 - `POST /a2a`
+- public 404s with discovery links
 
 It also tracks adoption milestones for:
 - successful onboardings
@@ -370,8 +388,11 @@ It also tracks adoption milestones for:
 - trust receipt signature verification checks
 
 This gives you a concrete funnel to watch:
+- landing views
 - discovery document views
+- pricing views
 - agent card views
+- unexpected 404s
 - A2A calls
 - eventual onboardings, funded accounts, and verification traffic
 
@@ -381,6 +402,7 @@ If you make the GitHub repository public, the project becomes easier to discover
 
 - remove or ignore any local-only files, logs, or database artifacts
 - make sure the README matches the deployed behavior
+- keep the landing page focused on fast technical evaluation and visible discovery contracts
 - add repository topics such as `a2a`, `ai-agents`, `agent-infrastructure`, `typescript`, `fastify`, `trust`, `billing`, `risk-oracle`
 - set the repository homepage to `https://ai-risk-oracle.fly.dev/`
 

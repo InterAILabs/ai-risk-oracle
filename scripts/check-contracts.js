@@ -15,6 +15,9 @@ const REQUIRED_OPENAPI_PATHS = [
   "/trust/verify-signature",
   "/.well-known/agent.json",
   "/.well-known/discovery-bundle.json",
+  "/.well-known/ai-risk-oracle",
+  "/openapi.json",
+  "/discovery.json",
   "/mcp",
   "/a2a"
 ]
@@ -50,6 +53,29 @@ async function main() {
   }
 
   try {
+    const landing = await app.inject({
+      method: "GET",
+      url: "/",
+      headers: {
+        Host: "localhost:3000"
+      }
+    })
+    assert.equal(landing.statusCode, 200, "/ should return 200")
+    check(
+      String(landing.headers["content-type"] || "").includes("text/html"),
+      "landing serves HTML"
+    )
+    check(
+      landing.body.includes("InterAI Risk Oracle"),
+      "landing names the product"
+    )
+
+    const serviceSummary = await getJson("/service.json")
+    check(
+      serviceSummary.endpoints?.verify === "POST /verify",
+      "service.json preserves machine-readable summary"
+    )
+
     const openapi = await getJson("/.well-known/openapi.json")
     check(openapi.openapi === "3.0.3", "openapi version is stable")
     check(openapi.info?.title === "InterAI Risk Oracle", "openapi title is present")
@@ -108,6 +134,21 @@ async function main() {
     check(
       discoveryBundle.interfaces?.mcp?.endpoint === "https://localhost:3000/mcp",
       "discovery bundle exposes MCP endpoint"
+    )
+
+    const wellKnownAlias = await getJson("/.well-known/ai-risk-oracle")
+    check(
+      wellKnownAlias.id === "interai-risk-oracle",
+      "ai-risk-oracle well-known alias resolves"
+    )
+
+    const openapiAlias = await getJson("/openapi.json")
+    check(openapiAlias.openapi === "3.0.3", "openapi alias resolves")
+
+    const discoveryAlias = await getJson("/discovery.json")
+    check(
+      discoveryAlias.service?.id === "interai-risk-oracle",
+      "discovery alias resolves"
     )
 
     console.log("CONTRACT CHECK OK")
