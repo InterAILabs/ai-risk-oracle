@@ -1,6 +1,8 @@
 # InterAI Risk Oracle
 
-Economic infrastructure for autonomous agents to verify response consistency, estimate hallucination risk, and exchange machine-readable trust evidence with prepaid billing.
+Paid trust-verification infrastructure for autonomous agents.
+
+InterAI Risk Oracle issues machine-readable trust receipts before agents trust outputs, execute tools, or settle payments.
 
 ## What This Is
 
@@ -14,6 +16,8 @@ InterAI Risk Oracle is an AI-to-AI service for systems that need to:
 - retrieve trust receipts for downstream audit or agent-to-agent verification
 
 This is not a human-facing app. It is a machine-to-machine primitive.
+
+Use it when a downstream action is more expensive than the verification: before paying another agent, executing a tool, accepting a tool output, storing a claim, or returning a sensitive answer.
 
 ## Core Capabilities
 
@@ -47,6 +51,26 @@ This is not a human-facing app. It is a machine-to-machine primitive.
 For the shortest external integration path, see [docs/quickstart.md](docs/quickstart.md).
 For endpoint details, schemas, A2A, MCP, and SDK usage, see [docs/api-reference.md](docs/api-reference.md).
 For release safety, see [docs/release-checklist.md](docs/release-checklist.md).
+
+## Try In 2 Minutes
+
+Inspect the live service:
+
+```bash
+curl -sS https://ai-risk-oracle.fly.dev/health
+curl -sS https://ai-risk-oracle.fly.dev/pricing
+curl -sS https://ai-risk-oracle.fly.dev/.well-known/agent.json
+```
+
+See the x402 payment requirement for a paid verification:
+
+```bash
+curl -i -sS -X POST https://ai-risk-oracle.fly.dev/verify \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"What is 2 + 2?","response":"4","domain":"math"}'
+```
+
+The unauthenticated response returns `402` plus `PAYMENT-REQUIRED`. Bearer API-key clients can use `/onboard` and prepaid balance; x402 clients can pay by retrying with `PAYMENT-SIGNATURE`.
 
 1. Install dependencies and start the API:
 
@@ -335,6 +359,36 @@ Paid endpoints support the x402 v2 server flow while keeping bearer prepaid bill
 
 Set `X402_FACILITATOR_URL` to choose the facilitator; otherwise the default x402 facilitator URL from the official client is used.
 
+## Agent-Native Examples
+
+The repository includes copyable integration patterns:
+
+```bash
+npm run example:x402
+npm run example:pre-payment
+npm run example:pre-tool
+npm run example:mcp-agent
+npm run example:a2a-agent
+```
+
+- `examples/x402-client.ts` inspects the production `402` response and decodes `PAYMENT-REQUIRED`.
+- `examples/pre-payment-verification.ts` gates a payment decision on a trust receipt.
+- `examples/pre-tool-execution-check.ts` gates a tool execution on a trust receipt.
+- `examples/mcp-agent-verify.ts` calls the MCP tool bridge.
+- `examples/a2a-agent-verify.ts` calls the A2A JSON-RPC endpoint.
+
+The bearer-authenticated examples require `ORACLE_API_KEY`; use `/onboard` and funding first.
+
+## Benchmark Baseline
+
+Run the initial public benchmark:
+
+```bash
+npm run benchmark
+```
+
+The benchmark is intentionally small and honest. It compares expected actions against the current trust-layer action across supported, uncertain, and risky outputs. The current baseline is conservative and may warn that calibration work is needed; that warning is product signal, not a test failure.
+
 ## Local Verification
 
 Run the local verification suite:
@@ -353,6 +407,12 @@ Check the npm package contents before publishing:
 
 ```bash
 npm run package:check
+```
+
+Run the public benchmark baseline:
+
+```bash
+npm run benchmark
 ```
 
 Type-check the package-style SDK consumer example:

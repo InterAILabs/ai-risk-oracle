@@ -34,6 +34,7 @@
     "typecheck:examples": "npm run build && tsc -p tsconfig.examples.json",
     "test": "npm run build && node tests/run.mjs",
     "contracts": "npm run build && node ./scripts/check-contracts.js",
+    "benchmark": "npm run build && node ./benchmarks/run-benchmark.mjs",
     "package:check": "npm run build && node ./scripts/check-package.js",
     "deploy:check": "node ./scripts/check-production-config.js",
     "start": "node dist/server.js",
@@ -45,14 +46,19 @@
     "smoke:sdk": "npm run build && node ./scripts/smoke-sdk.js",
     "example": "node ./examples/test.js",
     "example:basic": "tsx ./examples/basic-agent.mjs",
-    "example:basic:prod": "tsx ./examples/basic-agent-production.mjs"
+    "example:basic:prod": "tsx ./examples/basic-agent-production.mjs",
+    "example:x402": "tsx ./examples/x402-client.ts",
+    "example:pre-payment": "tsx ./examples/pre-payment-verification.ts",
+    "example:pre-tool": "tsx ./examples/pre-tool-execution-check.ts",
+    "example:mcp-agent": "tsx ./examples/mcp-agent-verify.ts",
+    "example:a2a-agent": "tsx ./examples/a2a-agent-verify.ts"
   },
   "dependencies": {
     "@x402/core": "^2.12.0",
     "better-sqlite3": "^11.10.0",
     "dotenv": "^17.4.1",
     "fastify": "^5.8.5",
-    "viem": "^2.47.0"
+    "viem": "^2.50.4"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

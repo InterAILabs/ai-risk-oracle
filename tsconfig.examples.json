@@ -5,7 +5,8 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["examples/sdk-package-consumer.ts"]
+  "include": ["examples/*.ts"]
 }

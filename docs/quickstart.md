@@ -3,6 +3,14 @@
 This guide takes a new integrator from a local server to a billed verification,
 trust receipt lookup, and SDK usage path.
 
+For the live deployment, start with:
+
+```bash
+curl -sS https://ai-risk-oracle.fly.dev/health
+curl -sS https://ai-risk-oracle.fly.dev/pricing
+curl -sS https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json
+```
+
 ## 1. Run The API
 
 ```bash
@@ -92,6 +100,27 @@ The response includes:
 - `signals`
 - `historical_context`
 - `trust_receipt`
+
+## 4a. Inspect x402 Payment Requirements
+
+Paid endpoints also support x402. Without bearer auth or a legacy payment
+reference, the API returns `402` and a `PAYMENT-REQUIRED` header:
+
+```bash
+curl -i -sS -X POST http://localhost:3000/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "What is 2 + 2?",
+    "response": "4",
+    "domain": "math"
+  }'
+```
+
+For a decoded TypeScript example:
+
+```bash
+npm run example:x402
+```
 
 ## 5. Verify A Batch
 
@@ -197,8 +226,15 @@ Local examples:
 
 ```bash
 npm run example:basic
+npm run example:pre-payment
+npm run example:pre-tool
+npm run example:mcp-agent
+npm run example:a2a-agent
 npm run smoke:sdk
 ```
+
+The agent-native examples use `ORACLE_API_KEY` for bearer prepaid calls. Create
+and fund an account first, or point them at a funded production account.
 
 ## 8. Discover Machine Contracts
 
@@ -217,3 +253,13 @@ curl -sS http://localhost:3000/schemas/verify-result.json
 - `402 insufficient_balance`: fund the account with `/topup/dev/credit` locally or `/topup/create` in production.
 - `receipt_signing_not_configured`: set `ORACLE_SIGNING_SECRET` before expecting signed receipts.
 - Duplicate retries should reuse the same `X-Idempotency-Key`.
+
+## 10. Benchmark The Current Trust Layer
+
+```bash
+npm run benchmark
+```
+
+The baseline benchmark is deliberately small. It reports calibration gaps, false
+positives, and false negatives without failing the build unless the script
+itself breaks.

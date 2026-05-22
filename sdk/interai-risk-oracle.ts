@@ -127,6 +127,11 @@ export type VerifyResult = {
   trust_score: number
   trust_recommended_action: RecommendedAction
   confidence_band: ConfidenceBand
+  verdict?: RecommendedAction
+  risk_factors: string[]
+  claims_checked: number
+  claims_supported: number
+  claims_uncertain: number
   signals: TrustSignals
   historical_context: HistoricalTrustContext
   trust_receipt: SignedTrustReceipt
