@@ -688,6 +688,14 @@ export async function openApiRoute(app: FastifyInstance) {
                 in: "header",
                 required: false,
                 schema: { type: "string" }
+              },
+              {
+                name: "PAYMENT-SIGNATURE",
+                in: "header",
+                required: false,
+                schema: { type: "string" },
+                description:
+                  "x402 v2 payment payload. Use either PAYMENT-SIGNATURE or bearer auth, not both."
               }
             ],
             requestBody: {
@@ -724,10 +732,14 @@ export async function openApiRoute(app: FastifyInstance) {
                 }
               },
               "402": {
-                description: "Insufficient balance or payment required",
+                description:
+                  "Insufficient prepaid balance, x402 payment required, or x402 settlement failure",
                 content: {
                   "application/json": {
-                    schema: errorResponseSchema
+                    schema: {
+                      type: "object",
+                      additionalProperties: true
+                    }
                   }
                 }
               },
@@ -751,6 +763,14 @@ export async function openApiRoute(app: FastifyInstance) {
                 in: "header",
                 required: false,
                 schema: { type: "string" }
+              },
+              {
+                name: "PAYMENT-SIGNATURE",
+                in: "header",
+                required: false,
+                schema: { type: "string" },
+                description:
+                  "x402 v2 payment payload. Use either PAYMENT-SIGNATURE or bearer auth, not both."
               }
             ],
             requestBody: {

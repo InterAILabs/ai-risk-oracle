@@ -26,14 +26,10 @@ export function getTrialOffer() {
 
 export function buildPublicPricing(baseUrl: string) {
   const verifyAccept = buildX402Accept({
-    baseUrl,
-    path: "/verify",
     service: "verify",
     amountUsdc: PRICING.fast.amount
   })
   const batchAccept = buildX402Accept({
-    baseUrl,
-    path: "/verify/batch",
     service: "verify_batch",
     amountUsdc: getBatchAmount(1)
   })
@@ -46,10 +42,16 @@ export function buildPublicPricing(baseUrl: string) {
     protocols: {
       primary: "bearer_prepaid_balance",
       x402: {
-        status: "advertised",
+        status: "verify_and_settle_supported",
         payment_required_header: "PAYMENT-REQUIRED",
         payment_signature_header: "PAYMENT-SIGNATURE",
         payment_response_header: "PAYMENT-RESPONSE",
+        facilitator_url:
+          process.env.X402_FACILITATOR_URL || "https://x402.org/facilitator",
+        resources: {
+          verify: `${baseUrl}/verify`,
+          verify_batch: `${baseUrl}/verify/batch`
+        },
         accepts: [verifyAccept, batchAccept]
       }
     },

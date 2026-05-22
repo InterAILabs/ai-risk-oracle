@@ -20,7 +20,7 @@ This is not a human-facing app. It is a machine-to-machine primitive.
 - Bearer API key authentication
 - Prepaid account billing
 - Per-request cost with microusdc precision
-- x402-style `402 Payment Required` metadata for agent-native payment clients
+- x402 `402 Payment Required`, `PAYMENT-SIGNATURE`, facilitator verify/settle, and `PAYMENT-RESPONSE`
 - Idempotent billing with `X-Idempotency-Key`
 - Single and batch verification
 - Historical account/domain trust context in verification responses
@@ -323,14 +323,17 @@ curl -X POST http://localhost:3000/a2a \
 
 ## x402 Status
 
-The production path today is bearer API key plus prepaid Base USDC balance. For agent-native clients, unauthenticated paid endpoints also advertise x402-style requirements:
+Paid endpoints support the x402 v2 server flow while keeping bearer prepaid billing for direct account integrations:
 
 - missing payment returns HTTP `402`
 - `PAYMENT-REQUIRED` contains base64-encoded payment requirements
-- the JSON body includes an `accepts` array with `scheme: "exact"`, `network: "eip155:8453"`, USDC asset metadata, resource URL, price, and pay-to address
+- the JSON body includes a `resource` object and an `accepts` array with `scheme: "exact"`, `network: "eip155:8453"`, USDC asset, atomic amount, and pay-to address
+- clients retry with `PAYMENT-SIGNATURE`
+- the server verifies and settles through the configured facilitator
+- successful paid responses include `PAYMENT-RESPONSE`
 - `/pricing` exposes the same `protocols.x402.accepts` metadata for discovery
 
-Full `PAYMENT-SIGNATURE` verification and facilitator settlement are the next billing milestone. Until that lands, production usage should use `/onboard`, `/topup/create`, and bearer-authenticated `/verify`.
+Set `X402_FACILITATOR_URL` to choose the facilitator; otherwise the default x402 facilitator URL from the official client is used.
 
 ## Local Verification
 

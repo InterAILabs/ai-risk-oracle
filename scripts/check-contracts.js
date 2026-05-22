@@ -133,6 +133,10 @@ async function main() {
       pricing.pricing?.protocols?.x402?.accepts?.[0]?.scheme === "exact",
       "pricing exposes x402 exact accepts"
     )
+    check(
+      pricing.pricing?.protocols?.x402?.accepts?.[0]?.amount === "600",
+      "pricing exposes x402 atomic amount"
+    )
 
     const discoveryBundle = await getJson("/.well-known/discovery-bundle.json")
     check(

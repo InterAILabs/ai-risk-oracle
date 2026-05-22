@@ -246,24 +246,24 @@ verify: 0.0006 USDC
 verify_batch: 0.0006 USDC base + 0.0002 USDC per item
 ```
 
-## x402 Payment Requirements
+## x402 Payments
 
-The current production payment path is bearer API key plus prepaid Base USDC
-balance. Paid endpoints also expose x402-style discovery metadata so agents can
-negotiate payment using a standard `402 Payment Required` flow as support is
-expanded:
+The production payment path supports both bearer API key plus prepaid Base USDC
+balance and x402 v2 payment negotiation:
 
 - unauthenticated `POST /verify` and `POST /verify/batch` return HTTP `402`
 - the response includes `PAYMENT-REQUIRED` and `X-Payment-Required` headers
   containing base64-encoded requirements
-- the JSON response includes `x402Version`, `accepts`, `scheme: "exact"`,
-  `network: "eip155:8453"`, USDC asset metadata, resource URL, price, and pay-to
-  address
+- the JSON response includes `x402Version`, top-level `resource`, `accepts`,
+  `scheme: "exact"`, `network: "eip155:8453"`, USDC asset, atomic amount, and
+  pay-to address
+- clients retry with a base64-encoded `PAYMENT-SIGNATURE`
+- the server verifies and settles through the configured facilitator
+- successful x402 responses include `PAYMENT-RESPONSE`
 - `/pricing` returns the same metadata in `pricing.protocols.x402.accepts`
 
-Full `PAYMENT-SIGNATURE` verification and facilitator settlement are not yet the
-production billing path. Use bearer prepaid billing for live integrations until
-that milestone is enabled.
+Set `X402_FACILITATOR_URL` to choose the facilitator. If omitted, the official
+x402 client default is used.
 
 ## A2A
 

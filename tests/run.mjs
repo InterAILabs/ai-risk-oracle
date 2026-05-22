@@ -1,7 +1,9 @@
 import assert from "node:assert/strict"
 import fs from "node:fs"
+import nodeHttp from "node:http"
 import os from "node:os"
 import path from "node:path"
+import { Buffer } from "node:buffer"
 import { scoreResponse } from "../dist/engine/score.js"
 import { computeSignals } from "../dist/lib/signals.js"
 import { computeTrust } from "../dist/lib/trust.js"
@@ -80,12 +82,62 @@ async function runIntegrationChecks() {
   const previousAdminToken = process.env.ADMIN_TOKEN
   const previousTrialEnabled = process.env.ONBOARDING_TRIAL_CREDIT_ENABLED
   const previousTrialUsdc = process.env.ONBOARDING_TRIAL_CREDIT_USDC
+  const previousX402FacilitatorUrl = process.env.X402_FACILITATOR_URL
+  const facilitatorCalls = {
+    verify: 0,
+    settle: 0
+  }
+  const facilitatorServer = nodeHttp.createServer(async (req, res) => {
+    let raw = ""
+    for await (const chunk of req) {
+      raw += chunk
+    }
+    const body = raw ? JSON.parse(raw) : {}
+
+    res.setHeader("Content-Type", "application/json")
+    if (req.url === "/verify") {
+      facilitatorCalls.verify += 1
+      res.end(
+        JSON.stringify({
+          isValid:
+            body?.paymentPayload?.accepted?.amount ===
+            body?.paymentRequirements?.amount,
+          payer: "0x0000000000000000000000000000000000000abc"
+        })
+      )
+      return
+    }
+
+    if (req.url === "/settle") {
+      facilitatorCalls.settle += 1
+      res.end(
+        JSON.stringify({
+          success: true,
+          payer: "0x0000000000000000000000000000000000000abc",
+          transaction: `0xtestsettlement${facilitatorCalls.settle}`,
+          network: body?.paymentRequirements?.network ?? "eip155:8453",
+          amount: body?.paymentRequirements?.amount
+        })
+      )
+      return
+    }
+
+    res.statusCode = 404
+    res.end(JSON.stringify({ error: "not_found" }))
+  })
+  await new Promise((resolve) => facilitatorServer.listen(0, "127.0.0.1", resolve))
+  const facilitatorAddress = facilitatorServer.address()
+  const facilitatorPort =
+    typeof facilitatorAddress === "object" && facilitatorAddress
+      ? facilitatorAddress.port
+      : 0
   process.env.PAYMENTS_DB_FILE = path.join(
     fs.mkdtempSync(path.join(os.tmpdir(), "ai-risk-oracle-tests-")),
     "payments.db"
   )
   process.env.DEV_TOPUP_ENABLED = "true"
   process.env.ADMIN_TOKEN = "test-admin-token"
+  process.env.X402_FACILITATOR_URL = `http://127.0.0.1:${facilitatorPort}`
 
   const app = await createApp()
 
@@ -110,6 +162,9 @@ async function runIntegrationChecks() {
       json
     }
   }
+
+  const encodePaymentPayload = (payload) =>
+    Buffer.from(JSON.stringify(payload)).toString("base64")
 
   const onboardAndGetKey = async () => {
     const onboard = await http("POST", "/onboard")
@@ -262,6 +317,10 @@ async function runIntegrationChecks() {
     check(
       pricing.json?.pricing?.protocols?.x402?.accepts?.[0]?.scheme === "exact",
       "pricing publica x402 exact accepts"
+    )
+    check(
+      pricing.json?.pricing?.protocols?.x402?.accepts?.[0]?.amount === "600",
+      "pricing publica x402 atomic amount"
     )
 
     const mcpInit = await http("POST", "/mcp", {
@@ -631,6 +690,33 @@ async function runIntegrationChecks() {
       "verify sin balance devuelve insufficient_balance"
     )
 
+    const paymentRequired = missingPayment.json
+    const accepted = paymentRequired.accepts?.[0]
+    const x402Payload = {
+      x402Version: 2,
+      resource: paymentRequired.resource,
+      accepted,
+      payload: {
+        authorization: "test-signature"
+      }
+    }
+    const x402Verify = await http("POST", "/verify", {
+      headers: {
+        "PAYMENT-SIGNATURE": encodePaymentPayload(x402Payload)
+      },
+      body: verificationPayload("What is the capital of France?", "Paris")
+    })
+    assert.equal(x402Verify.status, 200)
+    check(
+      x402Verify.headers["payment-response"] &&
+        x402Verify.json?.billed?.mode === "x402",
+      "verify acepta PAYMENT-SIGNATURE y devuelve PAYMENT-RESPONSE"
+    )
+    check(
+      facilitatorCalls.verify === 1 && facilitatorCalls.settle === 1,
+      "verify x402 usa facilitator verify y settle"
+    )
+
     process.env.ONBOARDING_TRIAL_CREDIT_ENABLED = "true"
     process.env.ONBOARDING_TRIAL_CREDIT_USDC = "0.0012"
     const trialOnboard = await http("POST", "/onboard")
@@ -847,6 +933,7 @@ async function runIntegrationChecks() {
     )
   } finally {
     await app.close()
+    await new Promise((resolve) => facilitatorServer.close(resolve))
 
     if (previousDbFile == null) {
       delete process.env.PAYMENTS_DB_FILE
@@ -876,6 +963,12 @@ async function runIntegrationChecks() {
       delete process.env.ONBOARDING_TRIAL_CREDIT_USDC
     } else {
       process.env.ONBOARDING_TRIAL_CREDIT_USDC = previousTrialUsdc
+    }
+
+    if (previousX402FacilitatorUrl == null) {
+      delete process.env.X402_FACILITATOR_URL
+    } else {
+      process.env.X402_FACILITATOR_URL = previousX402FacilitatorUrl
     }
   }
 }

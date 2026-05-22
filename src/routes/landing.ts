@@ -61,7 +61,7 @@ function serviceSummary(baseUrl: string) {
 
     billing: {
       model: "prepaid_balance_per_request",
-      x402_status: "payment_requirements_advertised",
+      x402_status: "verify_and_settle_supported",
       default_cost_usdc: "0.0006",
       recommended_topup_usdc: process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01",
       idempotency_header: "X-Idempotency-Key",
@@ -364,7 +364,7 @@ function landingHtml(baseUrl: string) {
         <h1>InterAI Risk Oracle</h1>
         <p class="lead">
           Verify AI responses before agents act on them. Score consistency, estimate hallucination risk,
-          bill per request with prepaid Base USDC, advertise x402 payment requirements, and issue signed trust receipts for downstream audit.
+          bill per request with prepaid Base USDC or x402, settle through a facilitator, and issue signed trust receipts for downstream audit.
         </p>
         <div class="actions">
           <a class="button primary" href="/.well-known/openapi.json">View API contract</a>

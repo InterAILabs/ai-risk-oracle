@@ -12,7 +12,12 @@ import { getBatchAmount } from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
-import { buildX402PaymentRequirements, sendX402PaymentRequired } from "../lib/x402.js"
+import {
+  buildX402PaymentRequired,
+  paymentSignatureFromRequest,
+  sendX402PaymentRequired,
+  verifyAndSettleX402Payment
+} from "../lib/x402.js"
 import {
   buildInsufficientBalanceDetails,
   chargeAndRecordUsage,
@@ -35,23 +40,35 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
     const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined
     const authHeader = req.headers["authorization"] as string | undefined
     const bearerToken = extractBearerToken(authHeader)
+    const x402PaymentSignature = paymentSignatureFromRequest(req)
+    const body = req.body as { items?: BatchItem[] }
+    const batchSize = Array.isArray(body?.items) ? body.items.length : 1
+    const batchAmount = getBatchAmount(Math.max(1, batchSize))
 
-    if (!paymentRef && !bearerToken) {
+    if (!paymentRef && !bearerToken && !x402PaymentSignature) {
       return sendX402PaymentRequired(
         reply,
-        buildX402PaymentRequirements({
+        buildX402PaymentRequired({
           req,
-          path: "/verify/batch",
-          service: "verify_batch"
+          service: "verify_batch",
+          amountUsdc: batchAmount
         }),
         {
           hint:
-            "Use Authorization: Bearer <api_key> with prepaid balance today; x402 payment requirements are advertised for agent-native clients.",
+            "Provide PAYMENT-SIGNATURE for x402, or use Authorization: Bearer <api_key> with prepaid balance.",
           onboarding: {
             create_account_url: "/onboard",
             topup_create_url: "/topup/create"
           }
         }
+      )
+    }
+
+    if (x402PaymentSignature && (paymentRef || bearerToken)) {
+      return reply.code(400).send(
+        economicError("ambiguous_payment_mode", {
+          hint: "Use x402 PAYMENT-SIGNATURE, Bearer account auth, or x-payment-ref; only one payment mode is allowed"
+        })
       )
     }
 
@@ -62,8 +79,6 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
         })
       )
     }
-
-    const body = req.body as { items?: BatchItem[] }
 
     if (!body?.items || !Array.isArray(body.items)) {
       return reply.code(400).send(economicError("invalid_batch_items"))
@@ -77,6 +92,71 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
       return reply.code(400).send(
         economicError("batch_limit_exceeded", { max_items: 100 })
       )
+    }
+
+    if (x402PaymentSignature) {
+      const x402 = await verifyAndSettleX402Payment({
+        req,
+        reply,
+        service: "verify_batch",
+        amountUsdc: batchAmount
+      })
+
+      if (!x402.ok) {
+        return
+      }
+
+      const verification = runBatchVerification(body.items, {
+        accountId: null,
+        usageId: null,
+        paymentRef: `x402:${x402.settlement.settle.transaction}`
+      })
+
+      reply.header("X-Oracle-Auth-Mode", "x402")
+      reply.header("X-Oracle-Billing-Mode", "x402")
+      reply.header("X-Oracle-Cost", batchAmount)
+      reply.header("X-Oracle-Cost-MicroUSDC", x402.settlement.paymentRequirements.amount)
+      reply.header("X-Oracle-Currency", "USDC")
+      reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
+      reply.header("X-Oracle-Latency-Ms", String(verification.maxLatencyMs))
+      reply.header("X-Oracle-Payer", x402.settlement.settle.payer || "")
+      reply.header("X-Oracle-Payment-Tx", x402.settlement.settle.transaction)
+
+      trackServiceEvent(req, "verify_batch_success", "/verify/batch")
+
+      return {
+        ok: true,
+        batch_size: verification.results.length,
+        billed: {
+          mode: "x402",
+          cost_usdc: batchAmount,
+          cost_microusdc: Number(x402.settlement.paymentRequirements.amount),
+          payer: x402.settlement.settle.payer || null,
+          transaction: x402.settlement.settle.transaction,
+          network: x402.settlement.settle.network
+        },
+        results: verification.results.map((item) => ({
+          ...item.result,
+          verdict: item.trust_recommended_action,
+          trust_score: item.trust_score,
+          risk_level: item.risk_level,
+          trust_recommended_action: item.trust_recommended_action,
+          confidence_band: item.confidence_band,
+          risk_factors: item.trust_receipt.risk_factors,
+          claims_checked: item.trust_receipt.claims_checked,
+          claims_supported: item.trust_receipt.claims_supported,
+          claims_uncertain: item.trust_receipt.claims_uncertain,
+          signals: item.signals,
+          historical_context: item.historical_context,
+          trust_receipt: item.trust_receipt
+        })),
+        summary: verification.summary,
+        oracle: {
+          version: ENGINE_VERSION,
+          signals_version: ORACLE_SIGNALS_VERSION,
+          trust_signing_enabled: TRUST_SIGNING_ENABLED
+        }
+      }
     }
 
     if (bearerToken) {
@@ -95,7 +175,6 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
         return reply.code(402).send(economicError("account_not_active"))
       }
 
-      const batchAmount = getBatchAmount(body.items.length)
       const costMicrousdc = usdcAmountToMicrousdc(batchAmount)
       const usageId = randomUUID()
       const debit = chargeAndRecordUsage({

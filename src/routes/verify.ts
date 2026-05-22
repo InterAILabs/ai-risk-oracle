@@ -12,7 +12,12 @@ import { PRICING } from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
-import { buildX402PaymentRequirements, sendX402PaymentRequired } from "../lib/x402.js"
+import {
+  buildX402PaymentRequired,
+  paymentSignatureFromRequest,
+  sendX402PaymentRequired,
+  verifyAndSettleX402Payment
+} from "../lib/x402.js"
 import {
   buildInsufficientBalanceDetails,
   chargeAndRecordUsage,
@@ -34,24 +39,32 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
     const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined
     const authHeader = req.headers["authorization"] as string | undefined
     const bearerToken = extractBearerToken(authHeader)
+    const x402PaymentSignature = paymentSignatureFromRequest(req)
 
-    if (!paymentRef && !bearerToken) {
+    if (!paymentRef && !bearerToken && !x402PaymentSignature) {
       return sendX402PaymentRequired(
         reply,
-        buildX402PaymentRequirements({
+        buildX402PaymentRequired({
           req,
-          path: "/verify",
           service: "verify",
           amountUsdc: PRICING.fast.amount
         }),
         {
           hint:
-            "Use Authorization: Bearer <api_key> with prepaid balance today; x402 payment requirements are advertised for agent-native clients.",
+            "Provide PAYMENT-SIGNATURE for x402, or use Authorization: Bearer <api_key> with prepaid balance.",
           onboarding: {
             create_account_url: "/onboard",
             topup_create_url: "/topup/create"
           }
         }
+      )
+    }
+
+    if (x402PaymentSignature && (paymentRef || bearerToken)) {
+      return reply.code(400).send(
+        economicError("ambiguous_payment_mode", {
+          hint: "Use x402 PAYMENT-SIGNATURE, Bearer account auth, or x-payment-ref; only one payment mode is allowed"
+        })
       )
     }
 
@@ -61,6 +74,79 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
           hint: "Use Bearer account auth or x-payment-ref, not both"
         })
       )
+    }
+
+    if (x402PaymentSignature) {
+      const x402 = await verifyAndSettleX402Payment({
+        req,
+        reply,
+        service: "verify",
+        amountUsdc: PRICING.fast.amount
+      })
+
+      if (!x402.ok) {
+        return
+      }
+
+      const prompt = body?.prompt ?? ""
+      const response = body?.response ?? ""
+      const domain = body?.domain ?? "general"
+      const verification = runVerification({
+        prompt,
+        response,
+        domain,
+        accountId: null,
+        usageId: null,
+        paymentRef: `x402:${x402.settlement.settle.transaction}`
+      })
+
+      reply.header("X-Oracle-Auth-Mode", "x402")
+      reply.header("X-Oracle-Billing-Mode", "x402")
+      reply.header("X-Oracle-Cost", PRICING.fast.amount)
+      reply.header("X-Oracle-Cost-MicroUSDC", x402.settlement.paymentRequirements.amount)
+      reply.header("X-Oracle-Currency", "USDC")
+      reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
+      reply.header("X-Oracle-Payer", x402.settlement.settle.payer || "")
+      reply.header("X-Oracle-Payment-Tx", x402.settlement.settle.transaction)
+      reply.header(
+        "X-Oracle-Latency-Ms",
+        String(
+          verification.result.analysis.total_latency_ms ??
+            verification.result.analysis.engine_latency_ms ??
+            0
+        )
+      )
+
+      trackServiceEvent(req, "verify_success", "/verify")
+
+      return {
+        ...verification.result,
+        verdict: verification.trust_recommended_action,
+        trust_score: verification.trust_score,
+        risk_level: verification.risk_level,
+        trust_recommended_action: verification.trust_recommended_action,
+        confidence_band: verification.confidence_band,
+        risk_factors: verification.trust_receipt.risk_factors,
+        claims_checked: verification.trust_receipt.claims_checked,
+        claims_supported: verification.trust_receipt.claims_supported,
+        claims_uncertain: verification.trust_receipt.claims_uncertain,
+        signals: verification.signals,
+        historical_context: verification.historical_context,
+        trust_receipt: verification.trust_receipt,
+        billed: {
+          mode: "x402",
+          cost_usdc: PRICING.fast.amount,
+          cost_microusdc: Number(x402.settlement.paymentRequirements.amount),
+          payer: x402.settlement.settle.payer || null,
+          transaction: x402.settlement.settle.transaction,
+          network: x402.settlement.settle.network
+        },
+        oracle: {
+          version: ENGINE_VERSION,
+          signals_version: ORACLE_SIGNALS_VERSION,
+          trust_signing_enabled: TRUST_SIGNING_ENABLED
+        }
+      }
     }
 
     if (bearerToken) {

@@ -38,6 +38,16 @@ export type TrustReceipt = {
   oracle_version: string
   signals_version: string
   request_hash: string
+  response_hash?: string
+  domain?: string
+  trust_score?: number
+  risk_level?: RiskLevel
+  recommended_action?: RecommendedAction
+  confidence_band?: ConfidenceBand
+  risk_factors?: string[]
+  claims_checked?: number
+  claims_supported?: number
+  claims_uncertain?: number
   decision_basis: DecisionBasis
 }
 
@@ -63,6 +73,32 @@ export type OracleMeta = {
   version: string
   signals_version: string
   trust_signing_enabled: boolean
+}
+
+export type X402PaymentRequirements = {
+  scheme: string
+  network: string
+  amount: string
+  asset: string
+  payTo: string
+  maxTimeoutSeconds?: number
+  extra?: Record<string, unknown>
+}
+
+export type X402PaymentRequiredResponse = {
+  x402Version: number
+  error: string
+  resource?: {
+    url?: string
+    description?: string
+    mimeType?: string
+    serviceName?: string
+    tags?: string[]
+    [key: string]: unknown
+  }
+  accepts: X402PaymentRequirements[]
+  extensions?: Record<string, unknown>
+  [key: string]: unknown
 }
 
 export type HistoricalTrustContext = {
@@ -94,16 +130,20 @@ export type VerifyResult = {
   signals: TrustSignals
   historical_context: HistoricalTrustContext
   trust_receipt: SignedTrustReceipt
+  billed: BillingInfo
   oracle: OracleMeta
 }
 
 export type BillingInfo = {
-  mode: "account" | "payment_reference"
+  mode: "account" | "payment_reference" | "x402"
   cost_usdc: string
   cost_microusdc?: number
   remaining_balance_usdc?: string
   remaining_balance_microusdc?: number
   idempotent_replay?: boolean
+  payer?: string | null
+  transaction?: string
+  network?: string
 }
 
 export type BatchVerifyResult = {
@@ -257,6 +297,46 @@ type RequestOptions = {
   body?: unknown
 }
 
+export class OracleHttpError extends Error {
+  status: number
+  body: unknown
+  headers: Record<string, string>
+  paymentRequired: X402PaymentRequiredResponse | null
+
+  constructor(params: {
+    method: string
+    path: string
+    status: number
+    body: unknown
+    headers: Record<string, string>
+  }) {
+    super(`${params.method} ${params.path} failed: ${params.status} ${JSON.stringify(params.body)}`)
+    this.name = "OracleHttpError"
+    this.status = params.status
+    this.body = params.body
+    this.headers = params.headers
+    this.paymentRequired =
+      params.status === 402 && isX402PaymentRequiredResponse(params.body)
+        ? params.body
+        : null
+  }
+}
+
+function isX402PaymentRequiredResponse(value: unknown): value is X402PaymentRequiredResponse {
+  if (!value || typeof value !== "object") return false
+
+  const candidate = value as { x402Version?: unknown; accepts?: unknown }
+  return candidate.x402Version === 2 && Array.isArray(candidate.accepts)
+}
+
+function responseHeaders(response: Response) {
+  const headers: Record<string, string> = {}
+  response.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+  return headers
+}
+
 export class InterAIRiskOracleClient {
   baseUrl: string
   apiKey?: string
@@ -306,7 +386,13 @@ export class InterAIRiskOracleClient {
     }
 
     if (!response.ok) {
-      throw new Error(`${method} ${options.path} failed: ${response.status} ${JSON.stringify(json)}`)
+      throw new OracleHttpError({
+        method,
+        path: options.path,
+        status: response.status,
+        body: json,
+        headers: responseHeaders(response)
+      })
     }
 
     return json as T
