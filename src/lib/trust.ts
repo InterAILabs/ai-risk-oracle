@@ -2,14 +2,15 @@ import type { Signals } from "./signals.js"
 
 export function computeTrust(signals: Signals) {
   const weights = {
-    semantic_relevance: 0.3,
-    contradiction_risk: -0.2,
-    unsupported_specificity: -0.2,
-    numeric_consistency: 0.2,
-    overconfidence: -0.1
+    semantic_relevance: 0.38,
+    contradiction_risk: -0.25,
+    unsupported_specificity: -0.35,
+    numeric_consistency: 0.26,
+    overconfidence: -0.22
   }
 
   const rawScore =
+    0.35 +
     signals.semantic_relevance * weights.semantic_relevance +
     signals.contradiction_risk * weights.contradiction_risk +
     signals.unsupported_specificity * weights.unsupported_specificity +
@@ -20,8 +21,8 @@ export function computeTrust(signals: Signals) {
 
   let risk_level: "low" | "medium" | "high" = "medium"
 
-  if (trust_score > 0.75) risk_level = "low"
-  else if (trust_score < 0.4) risk_level = "high"
+  if (trust_score >= 0.6) risk_level = "low"
+  else if (trust_score < 0.25) risk_level = "high"
 
   const recommended_action =
     risk_level === "low"
