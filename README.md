@@ -369,6 +369,7 @@ npm run example:pre-payment
 npm run example:pre-tool
 npm run example:mcp-agent
 npm run example:a2a-agent
+npm run python:sdk
 ```
 
 - `examples/x402-client.ts` inspects the production `402` response and decodes `PAYMENT-REQUIRED`.
@@ -376,6 +377,7 @@ npm run example:a2a-agent
 - `examples/pre-tool-execution-check.ts` gates a tool execution on a trust receipt.
 - `examples/mcp-agent-verify.ts` calls the MCP tool bridge.
 - `examples/a2a-agent-verify.ts` calls the A2A JSON-RPC endpoint.
+- `examples/python_basic_agent.py` shows a dependency-free Python client that can read x402 payment requirements.
 
 The bearer-authenticated examples require `ORACLE_API_KEY`; use `/onboard` and funding first.
 
@@ -529,6 +531,16 @@ npm run example:basic
 npm run example:basic:prod
 npm run typecheck:examples
 ```
+
+## Python SDK
+
+The repository also includes a minimal dependency-free Python client under `python/interai_risk_oracle`.
+
+```bash
+PYTHONPATH=python python examples/python_basic_agent.py
+```
+
+The Python example works with `ORACLE_API_KEY` for bearer prepaid calls. Without an API key it demonstrates the paid endpoint's `402` x402 payment requirements.
 
 ## Notes
 

@@ -35,6 +35,7 @@
     "test": "npm run build && node tests/run.mjs",
     "contracts": "npm run build && node ./scripts/check-contracts.js",
     "benchmark": "npm run build && node ./benchmarks/run-benchmark.mjs",
+    "python:sdk": "node ./scripts/check-python-sdk.js",
     "package:check": "npm run build && node ./scripts/check-package.js",
     "deploy:check": "node ./scripts/check-production-config.js",
     "start": "node dist/server.js",

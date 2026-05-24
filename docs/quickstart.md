@@ -230,11 +230,18 @@ npm run example:pre-payment
 npm run example:pre-tool
 npm run example:mcp-agent
 npm run example:a2a-agent
+npm run python:sdk
 npm run smoke:sdk
 ```
 
 The agent-native examples use `ORACLE_API_KEY` for bearer prepaid calls. Create
 and fund an account first, or point them at a funded production account.
+
+Python usage is available without extra dependencies:
+
+```bash
+PYTHONPATH=python python examples/python_basic_agent.py
+```
 
 ## 8. Discover Machine Contracts
 
