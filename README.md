@@ -404,21 +404,27 @@ Run the public benchmark:
 npm run benchmark
 ```
 
-The benchmark currently covers 30 trust-layer scenarios across math, factual answers, agentic commerce, medical/legal/finance, tool execution, tool output, A2A handoff, numeric claims, trust receipts, and batch agent workflows.
+The benchmark currently covers 60 trust-layer scenarios across math, factual answers, finance, legal, medical, tool execution, agentic commerce, code migration, crypto/trading, MCP security, unsupported specific claims, ambiguous answers, trust receipts, and batch agent workflows. It prints a readable summary, accuracy by expected action, a confusion matrix, and failure details.
+
+To also write JSON for later comparison:
+
+```bash
+npm run benchmark -- --write-json
+```
 
 Current baseline:
 
 | Metric | Result |
 | --- | ---: |
-| Cases | 30 |
-| Passed | 30 |
-| Failed | 0 |
-| Accuracy | 100% |
-| False positives | 0 |
-| False negatives | 0 |
-| Expected accept / review / reject | 11 / 12 / 7 |
+| Cases | 60 |
+| Passed | 58 |
+| Failed | 2 |
+| Accuracy | 96.67% |
+| False positives | 1 |
+| False negatives | 1 |
+| Expected accept / review / reject | 20 / 23 / 17 |
 
-This benchmark is intentionally transparent and should keep expanding. Its purpose is to make calibration visible: which answers are accepted, which require review, and which are rejected before an agent trusts an output, executes a tool, or settles payment.
+Known misses in this baseline are intentionally visible: one overconfident wrong factual answer is reviewed instead of rejected, and one ambiguous answer is rejected instead of reviewed. The benchmark is not a truth guarantee; its purpose is to make calibration visible before an agent trusts an output, executes a tool, or settles payment.
 
 ## Local Verification
 

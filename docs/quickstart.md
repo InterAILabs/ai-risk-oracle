@@ -289,6 +289,8 @@ curl -sS http://localhost:3000/schemas/verify-result.json
 npm run benchmark
 ```
 
-The benchmark covers 30 trust-layer scenarios across supported, uncertain, and
-risky agent outputs. It reports calibration gaps, false positives, and false
-negatives without failing the build unless the script itself breaks.
+The benchmark covers 60 trust-layer scenarios across supported, uncertain, and
+risky agent outputs. It reports accuracy by expected action, a confusion matrix,
+calibration gaps, false positives, and false negatives without failing the build
+unless the script itself breaks. Use `npm run benchmark -- --write-json` to also
+write `benchmarks/results/latest.json`.

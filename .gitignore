@@ -4,6 +4,7 @@ node_modules/
 # build output
 dist/
 coverage/
+benchmarks/results/
 
 # local runtime data
 data/
