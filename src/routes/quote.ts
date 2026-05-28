@@ -15,6 +15,26 @@ const TOKEN = {
 
 export const quoteRoute: FastifyPluginAsync = async (app) => {
   app.post("/quote", async (req, reply) => {
+    const paymentMode = (process.env.PAYMENT_MODE || "file") as "file" | "onchain"
+    if (paymentMode !== "file") {
+      return reply.code(410).send({
+        error: "legacy_quote_deprecated",
+        status: "deprecated",
+        hint:
+          "Use x402 PAYMENT-REQUIRED/PAYMENT-SIGNATURE or bearer prepaid billing instead of /quote.",
+        pricing_url: "/pricing",
+        x402: {
+          verify_resource: "/verify",
+          verify_batch_resource: "/verify/batch",
+          discovery_url: "/.well-known/discovery-bundle.json"
+        },
+        bearer_prepaid: {
+          onboard_url: "/onboard",
+          topup_create_url: "/topup/create"
+        }
+      })
+    }
+
     const body =
       (req.body as {
         service?: string

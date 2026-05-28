@@ -80,6 +80,7 @@ async function runIntegrationChecks() {
   const previousDbFile = process.env.PAYMENTS_DB_FILE
   const previousDevTopup = process.env.DEV_TOPUP_ENABLED
   const previousAdminToken = process.env.ADMIN_TOKEN
+  const previousPaymentMode = process.env.PAYMENT_MODE
   const previousTrialEnabled = process.env.ONBOARDING_TRIAL_CREDIT_ENABLED
   const previousTrialUsdc = process.env.ONBOARDING_TRIAL_CREDIT_USDC
   const previousX402FacilitatorUrl = process.env.X402_FACILITATOR_URL
@@ -321,6 +322,22 @@ async function runIntegrationChecks() {
     check(
       pricing.json?.pricing?.protocols?.x402?.accepts?.[0]?.amount === "600",
       "pricing publica x402 atomic amount"
+    )
+
+    const currentPaymentMode = process.env.PAYMENT_MODE
+    process.env.PAYMENT_MODE = "onchain"
+    const onchainQuote = await http("POST", "/quote", {
+      body: { mode: "fast" }
+    })
+    if (currentPaymentMode == null) {
+      delete process.env.PAYMENT_MODE
+    } else {
+      process.env.PAYMENT_MODE = currentPaymentMode
+    }
+    assert.equal(onchainQuote.status, 410)
+    check(
+      onchainQuote.json?.error === "legacy_quote_deprecated",
+      "quote legacy queda deshabilitado en modo onchain"
     )
 
     const mcpInit = await http("POST", "/mcp", {
@@ -951,6 +968,12 @@ async function runIntegrationChecks() {
       delete process.env.ADMIN_TOKEN
     } else {
       process.env.ADMIN_TOKEN = previousAdminToken
+    }
+
+    if (previousPaymentMode == null) {
+      delete process.env.PAYMENT_MODE
+    } else {
+      process.env.PAYMENT_MODE = previousPaymentMode
     }
 
     if (previousTrialEnabled == null) {

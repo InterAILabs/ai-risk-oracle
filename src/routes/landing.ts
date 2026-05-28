@@ -28,9 +28,11 @@ function serviceSummary(baseUrl: string) {
         type: "Bearer API key",
         header: "Authorization: Bearer <api_key>"
       },
-      legacy: {
-        type: "X-Payment-Ref",
-        status: "compatibility_only"
+      x402: {
+        type: "HTTP 402 payment flow",
+        required_header: "PAYMENT-REQUIRED",
+        signature_header: "PAYMENT-SIGNATURE",
+        response_header: "PAYMENT-RESPONSE"
       }
     },
 

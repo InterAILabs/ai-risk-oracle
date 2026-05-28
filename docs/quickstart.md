@@ -103,8 +103,8 @@ The response includes:
 
 ## 4a. Inspect x402 Payment Requirements
 
-Paid endpoints also support x402. Without bearer auth or a legacy payment
-reference, the API returns `402` and a `PAYMENT-REQUIRED` header:
+Paid endpoints also support x402. Without bearer auth, the API returns `402`
+and a `PAYMENT-REQUIRED` header:
 
 ```bash
 curl -i -sS -X POST http://localhost:3000/verify \
@@ -267,6 +267,6 @@ curl -sS http://localhost:3000/schemas/verify-result.json
 npm run benchmark
 ```
 
-The baseline benchmark is deliberately small. It reports calibration gaps, false
-positives, and false negatives without failing the build unless the script
-itself breaks.
+The benchmark covers 30 trust-layer scenarios across supported, uncertain, and
+risky agent outputs. It reports calibration gaps, false positives, and false
+negatives without failing the build unless the script itself breaks.
