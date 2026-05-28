@@ -14,6 +14,7 @@ import {
   updateBalanceStmt
 } from "./statements.js"
 import type { TopupRecord } from "./types.js"
+import { usdcDecimalToMicrousdc } from "../../lib/money.js"
 
 function getAccountBalance(accountId: string) {
   const row = selectBalanceStmt.get(accountId) as
@@ -168,7 +169,7 @@ export function confirmTopupAndCredit(params: {
       return { ok: false as const, error: "topup_not_confirmable" }
     }
 
-    const microusdc = Math.round(Number(topup.amount) * 1_000_000)
+    const microusdc = usdcDecimalToMicrousdc(topup.amount)
     const now = Date.now()
 
     const balanceRow = selectBalanceStmt.get(topup.account_id) as

@@ -6,6 +6,7 @@ import {
 } from "../payments/fileStore.js"
 import { economicError } from "../lib/httpErrors.js"
 import { resolveAccountIdFromBodyOrBearer } from "../auth/resolveBearerAccount.js"
+import { usdcDecimalToMicrousdc } from "../lib/money.js"
 
 export const topupDevRoute: FastifyPluginAsync = async (app) => {
   app.post("/topup/dev/credit", async (req, reply) => {
@@ -34,9 +35,10 @@ export const topupDevRoute: FastifyPluginAsync = async (app) => {
     const { accountId } = target
 
     const amountUsdc = String(body.amount_usdc ?? "0.01")
-    const amountMicrousdc = Math.round(Number(amountUsdc) * 1_000_000)
-
-    if (!Number.isFinite(amountMicrousdc) || amountMicrousdc <= 0) {
+    let amountMicrousdc: number
+    try {
+      amountMicrousdc = usdcDecimalToMicrousdc(amountUsdc)
+    } catch {
       return reply.code(400).send(economicError("invalid_amount_usdc"))
     }
 

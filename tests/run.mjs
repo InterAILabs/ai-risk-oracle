@@ -7,6 +7,10 @@ import { Buffer } from "node:buffer"
 import { scoreResponse } from "../dist/engine/score.js"
 import { computeSignals } from "../dist/lib/signals.js"
 import { computeTrust } from "../dist/lib/trust.js"
+import {
+  microusdcToUsdcString,
+  usdcDecimalToMicrousdc
+} from "../dist/lib/money.js"
 import { createApp } from "../dist/server.js"
 
 const verificationCases = {
@@ -32,6 +36,20 @@ const verificationCases = {
 function check(condition, message) {
   assert.ok(condition, message)
   console.log(`[OK] ${message}`)
+}
+
+async function runMoneyChecks() {
+  assert.equal(usdcDecimalToMicrousdc("0.000001"), 1)
+  assert.equal(usdcDecimalToMicrousdc("0.01"), 10000)
+  assert.equal(usdcDecimalToMicrousdc("1.234567"), 1234567)
+  assert.equal(microusdcToUsdcString(1234567), "1.234567")
+
+  assert.throws(() => usdcDecimalToMicrousdc("1.2345678"), /invalid_usdc_amount/)
+  assert.throws(() => usdcDecimalToMicrousdc("abc"), /invalid_usdc_amount/)
+  assert.throws(() => usdcDecimalToMicrousdc("-1"), /invalid_usdc_amount/)
+  assert.throws(() => usdcDecimalToMicrousdc("0"), /invalid_usdc_amount/)
+
+  check(true, "money: USDC decimal parsing is integer-safe")
 }
 
 async function runScoringChecks() {
@@ -1043,6 +1061,7 @@ function verificationPayload(prompt, response) {
 }
 
 async function main() {
+  await runMoneyChecks()
   await runScoringChecks()
   await runIntegrationChecks()
   console.log("TEST SUITE OK")

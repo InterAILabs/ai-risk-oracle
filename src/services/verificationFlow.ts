@@ -18,6 +18,10 @@ import {
   RECEIPT_SIGNATURE_ALG,
   signReceipt
 } from "../lib/signing.js"
+import {
+  microusdcToUsdcString,
+  usdcDecimalToMicrousdc
+} from "../lib/money.js"
 
 export const ENGINE_VERSION = process.env.ORACLE_ENGINE_VERSION || "0.0.1"
 export const ORACLE_SIGNALS_VERSION = "signals-v1"
@@ -83,11 +87,7 @@ function normalizeRecommendedAction(
 }
 
 export function usdcAmountToMicrousdc(amount: string) {
-  const num = Number(amount)
-  if (!Number.isFinite(num) || num <= 0) {
-    throw new Error("invalid_usdc_amount")
-  }
-  return Math.round(num * 1_000_000)
+  return usdcDecimalToMicrousdc(amount)
 }
 
 export function chargeAndRecordUsage(params: {
@@ -130,9 +130,9 @@ export function buildInsufficientBalanceDetails(params: {
     cost_microusdc: params.costMicrousdc,
     cost_usdc: params.costUsdc,
     balance_microusdc: params.balanceMicrousdc,
-    balance_usdc: (params.balanceMicrousdc / 1_000_000).toFixed(6),
+    balance_usdc: microusdcToUsdcString(params.balanceMicrousdc),
     shortfall_microusdc: shortfallMicrousdc,
-    shortfall_usdc: (shortfallMicrousdc / 1_000_000).toFixed(6),
+    shortfall_usdc: microusdcToUsdcString(shortfallMicrousdc),
     topup: {
       create_url: "/topup/create",
       ...(params.includeDevCreditUrl ? { dev_credit_url: "/topup/dev/credit" } : {}),

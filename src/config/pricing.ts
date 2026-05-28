@@ -1,4 +1,9 @@
 // src/config/pricing.ts
+import {
+  microusdcToUsdcString,
+  usdcDecimalToMicrousdc
+} from "../lib/money.js"
+
 export const PRICING = {
   fast: {
     amount: "0.0006" as string,
@@ -9,8 +14,8 @@ export const PRICING = {
     usdc_decimals: 6
   },
   batch: {
-    base_amount: 0.0006,
-    per_item_amount: 0.0002,
+    base_amount: "0.000600" as string,
+    per_item_amount: "0.000200" as string,
     max_items: 100,
     usdc_decimals: 6
   }
@@ -29,6 +34,8 @@ export function getVerifyAmount(mode: VerificationMode = "fast_heuristic"): stri
 
 export function getBatchAmount(itemsCount: number): string {
   const safeCount = Math.max(1, Math.floor(itemsCount))
-  const total = PRICING.batch.base_amount + safeCount * PRICING.batch.per_item_amount
-  return total.toFixed(6)
+  const total =
+    usdcDecimalToMicrousdc(PRICING.batch.base_amount) +
+    safeCount * usdcDecimalToMicrousdc(PRICING.batch.per_item_amount)
+  return microusdcToUsdcString(total)
 }

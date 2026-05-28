@@ -1,4 +1,5 @@
 import { getBatchAmount, PRICING } from "../config/pricing.js"
+import { usdcDecimalToMicrousdc } from "./money.js"
 import { buildX402Accept } from "./x402.js"
 
 export function isEnabled(value: string | undefined, fallback = "false") {
@@ -9,10 +10,17 @@ export function isEnabled(value: string | undefined, fallback = "false") {
 export function getTrialOffer() {
   const enabled = isEnabled(process.env.ONBOARDING_TRIAL_CREDIT_ENABLED, "false")
   const amountUsdc = String(process.env.ONBOARDING_TRIAL_CREDIT_USDC ?? "0.003")
-  const amountMicrousdc = Math.max(0, Math.round(Number(amountUsdc) * 1_000_000))
-  const verifyCostMicrousdc = Math.round(Number(PRICING.fast.amount) * 1_000_000)
-  const semanticJudgeCostMicrousdc = Math.round(
-    Number(PRICING.semantic_judge.amount) * 1_000_000
+  let amountMicrousdc = 0
+  if (enabled) {
+    try {
+      amountMicrousdc = usdcDecimalToMicrousdc(amountUsdc)
+    } catch {
+      amountMicrousdc = 0
+    }
+  }
+  const verifyCostMicrousdc = usdcDecimalToMicrousdc(PRICING.fast.amount)
+  const semanticJudgeCostMicrousdc = usdcDecimalToMicrousdc(
+    PRICING.semantic_judge.amount
   )
   const estimatedVerifyCalls =
     verifyCostMicrousdc > 0
@@ -80,24 +88,24 @@ export function buildPublicPricing(baseUrl: string) {
       modes: {
         fast_heuristic: {
           cost_usdc: PRICING.fast.amount,
-          cost_microusdc: Math.round(Number(PRICING.fast.amount) * 1_000_000),
+          cost_microusdc: usdcDecimalToMicrousdc(PRICING.fast.amount),
           description: "Fast deterministic trust signals for high-volume gating."
         },
         semantic_judge: {
           cost_usdc: PRICING.semantic_judge.amount,
-          cost_microusdc: Math.round(Number(PRICING.semantic_judge.amount) * 1_000_000),
+          cost_microusdc: usdcDecimalToMicrousdc(PRICING.semantic_judge.amount),
           description:
             "Deeper deterministic semantic judge pass with support, caution, and risky-language checks."
         }
       },
       cost_usdc: PRICING.fast.amount,
-      cost_microusdc: Math.round(Number(PRICING.fast.amount) * 1_000_000)
+      cost_microusdc: usdcDecimalToMicrousdc(PRICING.fast.amount)
     },
     verify_batch: {
       service: "verify_batch",
       pricing_model: "base_plus_per_item",
-      base_cost_usdc: PRICING.batch.base_amount.toFixed(6),
-      per_item_cost_usdc: PRICING.batch.per_item_amount.toFixed(6),
+      base_cost_usdc: PRICING.batch.base_amount,
+      per_item_cost_usdc: PRICING.batch.per_item_amount,
       max_items: PRICING.batch.max_items,
       example_2_items_cost_usdc: getBatchAmount(2),
       example_10_items_cost_usdc: getBatchAmount(10)

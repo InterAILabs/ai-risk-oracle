@@ -14,6 +14,7 @@ import type {
 } from "@x402/core/types"
 
 import { getBatchAmount, PRICING } from "../config/pricing.js"
+import { usdcDecimalToMicrousdc } from "./money.js"
 
 const BASE_USDC_ADDRESS = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
 const BASE_NETWORK_ID = "eip155:8453"
@@ -42,7 +43,7 @@ function baseUrlFromRequest(req: FastifyRequest) {
 }
 
 function usdcToMicrousdc(amount: string) {
-  return String(Math.round(Number(amount) * 1_000_000))
+  return String(usdcDecimalToMicrousdc(amount))
 }
 
 function configuredPayTo() {

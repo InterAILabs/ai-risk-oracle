@@ -4,6 +4,7 @@ import type {
   TopupRecord,
   TrustReceiptRecord
 } from "./types.js"
+import { microusdcToUsdcString } from "../../lib/money.js"
 
 export type { AccountRecord, PaymentRecord, TopupRecord } from "./types.js"
 
@@ -57,7 +58,7 @@ export function normalizeBalanceRecord(
   return {
     account_id: String(row.account_id),
     balance_microusdc: Number(row.balance_microusdc),
-    balance_usdc: (Number(row.balance_microusdc) / 1_000_000).toFixed(6),
+    balance_usdc: microusdcToUsdcString(Number(row.balance_microusdc)),
     updated_at: Number(row.updated_at)
   }
 }

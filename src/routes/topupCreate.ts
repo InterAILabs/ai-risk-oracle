@@ -4,6 +4,7 @@ import { createTopup } from "../payments/fileStore.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
 import { resolveAccountIdFromBodyOrBearer } from "../auth/resolveBearerAccount.js"
+import { usdcDecimalToMicrousdc } from "../lib/money.js"
 
 export const topupCreateRoute: FastifyPluginAsync = async (app) => {
   app.post("/topup/create", async (req, reply) => {
@@ -27,6 +28,12 @@ export const topupCreateRoute: FastifyPluginAsync = async (app) => {
     const amount = body.amount_usdc
       ? String(body.amount_usdc)
       : String(process.env.DEFAULT_RECOMMENDED_TOPUP_USDC || "0.01")
+
+    try {
+      usdcDecimalToMicrousdc(amount)
+    } catch {
+      return reply.code(400).send(economicError("invalid_amount_usdc"))
+    }
 
     const id = randomUUID()
 

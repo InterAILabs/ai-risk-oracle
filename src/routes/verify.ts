@@ -27,7 +27,8 @@ import {
   ENGINE_VERSION,
   ORACLE_SIGNALS_VERSION,
   runVerification,
-  TRUST_SIGNING_ENABLED
+  TRUST_SIGNING_ENABLED,
+  usdcAmountToMicrousdc
 } from "../services/verificationFlow.js"
 
 export const verifyRoute: FastifyPluginAsync = async (app) => {
@@ -192,7 +193,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
               "insufficient_balance",
               buildInsufficientBalanceDetails({
                 service: "verify",
-                costMicrousdc: Math.round(Number(verifyAmount) * 1_000_000),
+                costMicrousdc: usdcAmountToMicrousdc(verifyAmount),
                 costUsdc: verifyAmount,
                 balanceMicrousdc: Number(debit.balance_microusdc ?? 0)
               })

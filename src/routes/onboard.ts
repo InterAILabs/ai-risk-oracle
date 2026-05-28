@@ -9,6 +9,7 @@ import {
 import { PRICING } from "../config/pricing.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { getTrialOffer, isEnabled } from "../lib/publicMeta.js"
+import { usdcDecimalToMicrousdc } from "../lib/money.js"
 
 function generateRawApiKey() {
   return `iao_live_${randomBytes(24).toString("hex")}`
@@ -77,9 +78,8 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
     }
 
     if (devAutoCreditEnabled) {
-      const amountMicrousdc = Math.round(Number(devAutoCreditUsdc) * 1_000_000)
-
-      if (Number.isFinite(amountMicrousdc) && amountMicrousdc > 0) {
+      try {
+        const amountMicrousdc = usdcDecimalToMicrousdc(devAutoCreditUsdc)
         creditAccount({
           ledgerId: randomUUID(),
           accountId: account.id,
@@ -92,6 +92,8 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
 
         devAutoCreditApplied = true
         devCreditedMicrousdc = amountMicrousdc
+      } catch {
+        devAutoCreditApplied = false
       }
     }
 

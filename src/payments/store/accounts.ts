@@ -19,6 +19,7 @@ import {
   touchApiKeyLastUsedStmt,
   updateBalanceStmt
 } from "./statements.js"
+import { microusdcToUsdcString } from "../../lib/money.js"
 
 function hashApiKey(rawKey: string) {
   return createHash("sha256").update(rawKey).digest("hex")
@@ -292,7 +293,7 @@ export function creditAccount(params: {
     return {
       account_id: accountId,
       balance_microusdc: next,
-      balance_usdc: (next / 1_000_000).toFixed(6),
+      balance_usdc: microusdcToUsdcString(next),
       credited_microusdc: amountMicrousdc
     }
   })()
@@ -336,7 +337,7 @@ export function debitAccountForUsage(params: {
           ok: true as const,
           account_id: accountId,
           remaining_balance_microusdc: current,
-          remaining_balance_usdc: (current / 1_000_000).toFixed(6),
+          remaining_balance_usdc: microusdcToUsdcString(current),
           debited_microusdc: 0,
           billed_cost_microusdc: existing.cost_microusdc,
           idempotent_replay: true as const
@@ -381,7 +382,7 @@ export function debitAccountForUsage(params: {
       ok: true as const,
       account_id: accountId,
       remaining_balance_microusdc: next,
-      remaining_balance_usdc: (next / 1_000_000).toFixed(6),
+      remaining_balance_usdc: microusdcToUsdcString(next),
       debited_microusdc: costMicrousdc,
       billed_cost_microusdc: costMicrousdc,
       idempotent_replay: false as const
@@ -436,7 +437,7 @@ export function listLedgerForAccount(accountId: string, limit = 20) {
     account_id: String(row.account_id),
     entry_type: row.entry_type,
     amount_microusdc: Number(row.amount_microusdc),
-    amount_usdc: (Number(row.amount_microusdc) / 1_000_000).toFixed(6),
+    amount_usdc: microusdcToUsdcString(Number(row.amount_microusdc)),
     reference: row.reference ? String(row.reference) : null,
     metadata: row.metadata_json ? JSON.parse(row.metadata_json) : null,
     created_at: Number(row.created_at)
@@ -462,7 +463,7 @@ export function listUsageForAccount(accountId: string, limit = 20) {
     service: String(row.service),
     units: Number(row.units),
     cost_microusdc: Number(row.cost_microusdc),
-    cost_usdc: (Number(row.cost_microusdc) / 1_000_000).toFixed(6),
+    cost_usdc: microusdcToUsdcString(Number(row.cost_microusdc)),
     reference: row.reference ? String(row.reference) : null,
     created_at: Number(row.created_at)
   }))

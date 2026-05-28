@@ -1040,7 +1040,7 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
                 ...economicError("insufficient_balance"),
                 ...buildInsufficientBalanceDetails({
                   service: "verify",
-                  costMicrousdc: Math.round(Number(verifyAmount) * 1_000_000),
+                  costMicrousdc: usdcAmountToMicrousdc(verifyAmount),
                   costUsdc: verifyAmount,
                   balanceMicrousdc: Number(debit.balance_microusdc ?? 0)
                 })

@@ -1,5 +1,6 @@
 import { createPublicClient, http, parseAbiItem, decodeEventLog } from "viem"
 import { base } from "viem/chains"
+import { usdcDecimalToMicrousdc } from "../lib/money.js"
 
 const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
 
@@ -63,9 +64,7 @@ export async function verifyUsdcPaymentOnBaseRpc(args: OnchainRpcVerifyInput) {
 
   const payToLower = args.payTo.toLowerCase()
 
-  const minUnits = BigInt(
-    Math.round(Number(args.amount) * 1_000_000)
-  )
+  const minUnits = BigInt(usdcDecimalToMicrousdc(args.amount))
 
   const paid = logs.some((ev) => {
     const toOk = ev.args.to.toLowerCase() === payToLower
