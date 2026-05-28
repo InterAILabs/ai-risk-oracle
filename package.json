@@ -46,6 +46,7 @@
     "smoke:idempotency": "node ./scripts/smoke-idempotency.js",
     "smoke:trust-signing": "node ./scripts/smoke-trust-signing.js",
     "smoke:sdk": "npm run build && node ./scripts/smoke-sdk.js",
+    "smoke:online": "node ./tools/smoke-online.mjs",
     "example": "node ./examples/test.js",
     "example:basic": "tsx ./examples/basic-agent.mjs",
     "example:basic:prod": "tsx ./examples/basic-agent-production.mjs",

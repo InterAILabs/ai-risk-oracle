@@ -62,6 +62,7 @@ InterAI Risk Oracle estimates risk; it does not guarantee factual truth.
 For the shortest external integration path, see [docs/quickstart.md](docs/quickstart.md).
 For endpoint details, schemas, A2A, MCP, and SDK usage, see [docs/api-reference.md](docs/api-reference.md).
 For release safety, see [docs/release-checklist.md](docs/release-checklist.md).
+For launch/adoption sequencing, see [docs/public-beta-plan.md](docs/public-beta-plan.md).
 
 ## Try In 2 Minutes
 
@@ -458,6 +459,12 @@ Check the npm package contents before publishing:
 
 ```bash
 npm run package:check
+```
+
+Check the deployed public service without creating accounts or spending balance:
+
+```bash
+npm run smoke:online
 ```
 
 Run the public benchmark baseline:

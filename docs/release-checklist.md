@@ -67,18 +67,22 @@ What the checks protect:
 - `smoke:trust-signing`: receipt signing and verification behavior.
 - `smoke:sdk`: SDK behavior against an in-process server.
 
+If the release candidate has already been deployed to a public environment, run:
+
+```bash
+npm run smoke:online
+```
+
+Set `BASE_URL=https://your-deployment.example` to check a non-default
+deployment. This validates health, readiness, pricing, discovery, schemas,
+x402 payment negotiation, MCP initialize/tools, and A2A payment-required
+behavior without creating accounts or consuming balance.
+
 ## 3. Production Manual Checks
 
 After deploy, manually check the live service:
 
-- `GET /health`
-- `GET /ready`
-- `GET /pricing`
-- `GET /.well-known/ai-service.json`
-- `GET /.well-known/agent.json`
-- `POST /mcp` with `initialize`
-- `POST /a2a` with `message/send`
-- `POST /verify` without auth returns `402`
+- `npm run smoke:online` passes against the deployed `BASE_URL`
 - `POST /verify` with bearer auth and no balance returns `insufficient_balance`
 - `POST /topup/create`
 - `POST /topup/confirm` with a real transaction or test environment
