@@ -9,6 +9,10 @@ import {
 import { extractBearerToken } from "../lib/auth.js"
 import { trackDiscoveryEvent, trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
+import {
+  idempotencyConflict,
+  idempotencyRequestHash
+} from "../lib/idempotency.js"
 import { buildPublicPricing } from "../lib/publicMeta.js"
 import {
   isReceiptSigningEnabled,
@@ -16,8 +20,10 @@ import {
   verifyReceiptSignature
 } from "../lib/signing.js"
 import {
+  createIdempotencyRecord,
   getAccount,
   getDiscoveryStats,
+  getIdempotencyRecord,
   getTrustReceiptById,
   resolveAccountByApiKey
 } from "../payments/fileStore.js"
@@ -1023,6 +1029,40 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
         const verifyAmount = getVerifyAmount(verificationMode)
         const idempotencyKey =
           typeof args.idempotency_key === "string" ? args.idempotency_key : undefined
+        const requestHash = idempotencyKey
+          ? idempotencyRequestHash({
+              service: "verify",
+              transport: "mcp",
+              prompt,
+              response,
+              domain,
+              mode: verificationMode
+            })
+          : null
+
+        if (idempotencyKey && requestHash) {
+          const existing = getIdempotencyRecord({
+            accountId: auth.resolved.account_id,
+            service: "verify",
+            idempotencyKey
+          })
+
+          if (existing) {
+            if (existing.request_hash !== requestHash) {
+              return reply.send(
+                jsonRpcError(
+                  requestId,
+                  -32009,
+                  "Idempotency conflict",
+                  idempotencyConflict("verify")
+                )
+              )
+            }
+
+            reply.header("X-Oracle-Idempotent-Replay", "true")
+            return reply.send(existing.response)
+          }
+        }
 
         const usageId = randomUUID()
         const debit = chargeAndRecordUsage({
@@ -1058,6 +1098,15 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
           )
         }
 
+        if (debit.idempotent_replay) {
+          return reply.send(
+            jsonRpcError(requestId, -32009, "Idempotency replay unavailable", {
+              error: "idempotency_response_unavailable",
+              service: "verify"
+            })
+          )
+        }
+
         const verification = runVerification({
           prompt,
           response,
@@ -1069,37 +1118,48 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
         })
         trackServiceEvent(req, "verify_success", "/mcp")
 
-        return reply.send(
-          jsonRpcResult(requestId, {
-            content: contentJson({
-              billed: {
-                mode: "account",
-                cost_usdc: verifyAmount,
-                cost_microusdc: debit.billed_cost_microusdc,
-                remaining_balance_usdc: debit.remaining_balance_usdc,
-                remaining_balance_microusdc: debit.remaining_balance_microusdc,
-                ...(debit.idempotent_replay ? { idempotent_replay: true } : {})
-              },
-              result: {
-                ...verification.result,
-                trust_score: verification.trust_score,
-                risk_level: verification.risk_level,
-                trust_recommended_action: verification.trust_recommended_action,
-                confidence_band: verification.confidence_band,
-                signals: verification.signals,
-                verification_mode: verification.verification_mode,
-                semantic_judge: verification.semantic_judge,
-                historical_context: verification.historical_context,
-                trust_receipt: verification.trust_receipt,
-                oracle: {
-                  version: ENGINE_VERSION,
-                  signals_version: ORACLE_SIGNALS_VERSION,
-                  trust_signing_enabled: TRUST_SIGNING_ENABLED
-                }
+        const responseBody = jsonRpcResult(requestId, {
+          content: contentJson({
+            billed: {
+              mode: "account",
+              cost_usdc: verifyAmount,
+              cost_microusdc: debit.billed_cost_microusdc,
+              remaining_balance_usdc: debit.remaining_balance_usdc,
+              remaining_balance_microusdc: debit.remaining_balance_microusdc
+            },
+            result: {
+              ...verification.result,
+              trust_score: verification.trust_score,
+              risk_level: verification.risk_level,
+              trust_recommended_action: verification.trust_recommended_action,
+              confidence_band: verification.confidence_band,
+              signals: verification.signals,
+              verification_mode: verification.verification_mode,
+              semantic_judge: verification.semantic_judge,
+              historical_context: verification.historical_context,
+              trust_receipt: verification.trust_receipt,
+              oracle: {
+                version: ENGINE_VERSION,
+                signals_version: ORACLE_SIGNALS_VERSION,
+                trust_signing_enabled: TRUST_SIGNING_ENABLED
               }
-            })
+            }
           })
-        )
+        })
+
+        if (idempotencyKey && requestHash) {
+          createIdempotencyRecord({
+            accountId: auth.resolved.account_id,
+            service: "verify",
+            idempotencyKey,
+            requestHash,
+            response: responseBody,
+            receiptIds: [verification.trust_receipt.receipt_id],
+            costMicrousdc: debit.billed_cost_microusdc
+          })
+        }
+
+        return reply.send(responseBody)
       }
 
       const items = Array.isArray(args.items) ? args.items : null
@@ -1139,6 +1199,38 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
       const idempotencyKey =
         typeof args.idempotency_key === "string" ? args.idempotency_key : undefined
       const batchAmount = getBatchAmount(normalizedItems.length)
+      const requestHash = idempotencyKey
+        ? idempotencyRequestHash({
+            service: "verify_batch",
+            transport: "mcp",
+            items: normalizedItems
+          })
+        : null
+
+      if (idempotencyKey && requestHash) {
+        const existing = getIdempotencyRecord({
+          accountId: auth.resolved.account_id,
+          service: "verify_batch",
+          idempotencyKey
+        })
+
+        if (existing) {
+          if (existing.request_hash !== requestHash) {
+            return reply.send(
+              jsonRpcError(
+                requestId,
+                -32009,
+                "Idempotency conflict",
+                idempotencyConflict("verify_batch")
+              )
+            )
+          }
+
+          reply.header("X-Oracle-Idempotent-Replay", "true")
+          return reply.send(existing.response)
+        }
+      }
+
       const usageId = randomUUID()
       const debit = chargeAndRecordUsage({
         usageId,
@@ -1175,6 +1267,15 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
         )
       }
 
+      if (debit.idempotent_replay) {
+        return reply.send(
+          jsonRpcError(requestId, -32009, "Idempotency replay unavailable", {
+            error: "idempotency_response_unavailable",
+            service: "verify_batch"
+          })
+        )
+      }
+
       const verification = runBatchVerification(normalizedItems, {
         accountId: auth.resolved.account_id,
         usageId,
@@ -1182,37 +1283,50 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
       })
       trackServiceEvent(req, "verify_batch_success", "/mcp")
 
-      return reply.send(
-        jsonRpcResult(requestId, {
-          content: contentJson({
-            billed: {
-              mode: "account",
-              cost_usdc: batchAmount,
-              cost_microusdc: debit.billed_cost_microusdc,
-              remaining_balance_usdc: debit.remaining_balance_usdc,
-              remaining_balance_microusdc: debit.remaining_balance_microusdc,
-              ...(debit.idempotent_replay ? { idempotent_replay: true } : {})
-            },
-            batch_size: verification.results.length,
-            results: verification.results.map((item) => ({
-              ...item.result,
-              trust_score: item.trust_score,
-              risk_level: item.risk_level,
-              trust_recommended_action: item.trust_recommended_action,
-              confidence_band: item.confidence_band,
-              signals: item.signals,
-              historical_context: item.historical_context,
-              trust_receipt: item.trust_receipt
-            })),
-            summary: verification.summary,
-            oracle: {
-              version: ENGINE_VERSION,
-              signals_version: ORACLE_SIGNALS_VERSION,
-              trust_signing_enabled: TRUST_SIGNING_ENABLED
-            }
-          })
+      const responseBody = jsonRpcResult(requestId, {
+        content: contentJson({
+          billed: {
+            mode: "account",
+            cost_usdc: batchAmount,
+            cost_microusdc: debit.billed_cost_microusdc,
+            remaining_balance_usdc: debit.remaining_balance_usdc,
+            remaining_balance_microusdc: debit.remaining_balance_microusdc
+          },
+          batch_size: verification.results.length,
+          results: verification.results.map((item) => ({
+            ...item.result,
+            trust_score: item.trust_score,
+            risk_level: item.risk_level,
+            trust_recommended_action: item.trust_recommended_action,
+            confidence_band: item.confidence_band,
+            signals: item.signals,
+            historical_context: item.historical_context,
+            trust_receipt: item.trust_receipt
+          })),
+          summary: verification.summary,
+          oracle: {
+            version: ENGINE_VERSION,
+            signals_version: ORACLE_SIGNALS_VERSION,
+            trust_signing_enabled: TRUST_SIGNING_ENABLED
+          }
         })
-      )
+      })
+
+      if (idempotencyKey && requestHash) {
+        createIdempotencyRecord({
+          accountId: auth.resolved.account_id,
+          service: "verify_batch",
+          idempotencyKey,
+          requestHash,
+          response: responseBody,
+          receiptIds: verification.results.map(
+            (item) => item.trust_receipt.receipt_id
+          ),
+          costMicrousdc: debit.billed_cost_microusdc
+        })
+      }
+
+      return reply.send(responseBody)
     }
 
     return reply.send(

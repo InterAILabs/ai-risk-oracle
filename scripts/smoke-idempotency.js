@@ -92,6 +92,30 @@ async function main() {
     })
     assert(verify2.ok, "segundo verify responde OK", verify2.json)
     assert(verify2.headers["x-oracle-idempotent-replay"] === "true", "segundo verify marca replay", verify2.headers)
+    assert(
+      verify2.json?.trust_receipt?.receipt_id ===
+        verify1.json?.trust_receipt?.receipt_id,
+      "segundo verify devuelve mismo receipt_id",
+      verify2.json
+    )
+    assert(
+      verify2.json?.trust_receipt?.request_hash ===
+        verify1.json?.trust_receipt?.request_hash,
+      "segundo verify devuelve mismo request_hash",
+      verify2.json
+    )
+
+    const verifyConflict = await http(app, "POST", "/verify", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "X-Idempotency-Key": verifyKey
+      },
+      body: {
+        ...verifyPayload,
+        response: "Lyon"
+      }
+    })
+    assert(verifyConflict.status === 409, "verify rechaza replay con body distinto", verifyConflict.json)
 
     const meAfterVerify = await http(app, "GET", "/me", {
       headers: {
@@ -128,6 +152,28 @@ async function main() {
     })
     assert(batch2.ok, "segundo verify/batch responde OK", batch2.json)
     assert(batch2.headers["x-oracle-idempotent-replay"] === "true", "segundo verify/batch marca replay", batch2.headers)
+    assert(
+      batch2.json?.results?.[0]?.trust_receipt?.receipt_id ===
+        batch1.json?.results?.[0]?.trust_receipt?.receipt_id &&
+        batch2.json?.results?.[1]?.trust_receipt?.receipt_id ===
+          batch1.json?.results?.[1]?.trust_receipt?.receipt_id,
+      "segundo verify/batch devuelve mismos receipt_ids",
+      batch2.json
+    )
+
+    const batchConflict = await http(app, "POST", "/verify/batch", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "X-Idempotency-Key": batchKey
+      },
+      body: {
+        items: [
+          { prompt: "2 + 2 = ?", response: "5", domain: "general" },
+          { prompt: "Capital of Spain?", response: "Madrid", domain: "general" }
+        ]
+      }
+    })
+    assert(batchConflict.status === 409, "verify/batch rechaza replay con body distinto", batchConflict.json)
 
     const meFinal = await http(app, "GET", "/me", {
       headers: {

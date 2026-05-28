@@ -699,7 +699,11 @@ async function runIntegrationChecks() {
     assert.equal(a2aReplay1.status, 200)
     assert.equal(a2aReplay2.status, 200)
     check(
-      a2aReplay2.json?.result?.parts?.[0]?.data?.billed?.idempotent_replay === true,
+      a2aReplay2.headers["x-oracle-idempotent-replay"] === "true" &&
+        a2aReplay2.json?.result?.parts?.[0]?.data?.result?.trust_receipt
+          ?.receipt_id ===
+          a2aReplay1.json?.result?.parts?.[0]?.data?.result?.trust_receipt
+            ?.receipt_id,
       "a2a repite idempotency sin doble cargo"
     )
   }
@@ -852,6 +856,29 @@ async function runIntegrationChecks() {
       verify2.headers["x-oracle-idempotent-replay"] === "true",
       "verify repite idempotency sin doble cargo"
     )
+    check(
+      verify2.json?.trust_receipt?.receipt_id ===
+        verify1.json?.trust_receipt?.receipt_id,
+      "verify replay devuelve mismo receipt_id"
+    )
+    check(
+      verify2.json?.trust_receipt?.request_hash ===
+        verify1.json?.trust_receipt?.request_hash,
+      "verify replay devuelve mismo request_hash"
+    )
+
+    const verifyConflict = await http("POST", "/verify", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "X-Idempotency-Key": verifyKey
+      },
+      body: verificationPayload("What is the capital of France?", "Lyon")
+    })
+    assert.equal(verifyConflict.status, 409)
+    check(
+      verifyConflict.json?.error === "idempotency_key_conflict",
+      "verify rechaza misma idempotency key con body distinto"
+    )
 
     const semanticVerify = await http("POST", "/verify", {
       headers: {
@@ -893,32 +920,41 @@ async function runIntegrationChecks() {
       "trust/reputation devuelve breakdown por dominio"
     )
 
+    const a2aKey = `a2a-idempotency-${Date.now()}`
+    const a2aBody = {
+      jsonrpc: "2.0",
+      id: "a2a-verify-1",
+      method: "message/send",
+      params: {
+        message: {
+          role: "user",
+          messageId: "client-message-1",
+          parts: [
+            {
+              kind: "data",
+              data: verificationPayload("What is the capital of France?", "Paris")
+            }
+          ]
+        },
+        metadata: {
+          idempotency_key: a2aKey
+        }
+      }
+    }
     const a2aVerify = await http("POST", "/a2a", {
       headers: {
         Authorization: `Bearer ${apiKey}`
       },
-      body: {
-        jsonrpc: "2.0",
-        id: "a2a-verify-1",
-        method: "message/send",
-        params: {
-          message: {
-            role: "user",
-            messageId: "client-message-1",
-            parts: [
-              {
-                kind: "data",
-                data: verificationPayload("What is the capital of France?", "Paris")
-              }
-            ]
-          },
-          metadata: {
-            idempotency_key: `a2a-idempotency-${Date.now()}`
-          }
-        }
-      }
+      body: a2aBody
+    })
+    const a2aVerifyReplay = await http("POST", "/a2a", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: a2aBody
     })
     assert.equal(a2aVerify.status, 200)
+    assert.equal(a2aVerifyReplay.status, 200)
     check(
       a2aVerify.json?.result?.parts?.[0]?.data?.result?.trust_receipt?.receipt_id,
       "a2a devuelve trust_receipt en respuesta sincronica"
@@ -928,27 +964,50 @@ async function runIntegrationChecks() {
         ?.prior_to_current === true,
       "a2a devuelve historical_context"
     )
+    check(
+      a2aVerifyReplay.headers["x-oracle-idempotent-replay"] === "true" &&
+        a2aVerifyReplay.json?.result?.parts?.[0]?.data?.result?.trust_receipt
+          ?.receipt_id ===
+          a2aVerify.json?.result?.parts?.[0]?.data?.result?.trust_receipt
+            ?.receipt_id,
+      "a2a replay devuelve mismo receipt_id"
+    )
 
+    const mcpKey = `mcp-verify-${Date.now()}`
+    const mcpBody = {
+      jsonrpc: "2.0",
+      id: "mcp-verify-1",
+      method: "tools/call",
+      params: {
+        name: "oracle.verify_response",
+        arguments: {
+          prompt: "What is the capital of France?",
+          response: "Paris",
+          domain: "general",
+          idempotency_key: mcpKey
+        }
+      }
+    }
     const mcpVerify = await http("POST", "/mcp", {
       headers: {
         Authorization: `Bearer ${apiKey}`
       },
-      body: {
-        jsonrpc: "2.0",
-        id: "mcp-verify-1",
-        method: "tools/call",
-        params: {
-          name: "oracle.verify_response",
-          arguments: {
-            prompt: "What is the capital of France?",
-            response: "Paris",
-            domain: "general",
-            idempotency_key: `mcp-verify-${Date.now()}`
-          }
-        }
-      }
+      body: mcpBody
+    })
+    const mcpVerifyReplay = await http("POST", "/mcp", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: mcpBody
     })
     assert.equal(mcpVerify.status, 200)
+    assert.equal(mcpVerifyReplay.status, 200)
+    const mcpResult = JSON.parse(
+      String(mcpVerify.json?.result?.content?.[0]?.text || "{}")
+    )
+    const mcpReplayResult = JSON.parse(
+      String(mcpVerifyReplay.json?.result?.content?.[0]?.text || "{}")
+    )
     check(
       String(mcpVerify.json?.result?.content?.[0]?.text || "").includes("trust_receipt"),
       "mcp tools/call devuelve resultado de verify"
@@ -956,6 +1015,12 @@ async function runIntegrationChecks() {
     check(
       String(mcpVerify.json?.result?.content?.[0]?.text || "").includes("historical_context"),
       "mcp tools/call devuelve historical_context"
+    )
+    check(
+      mcpVerifyReplay.headers["x-oracle-idempotent-replay"] === "true" &&
+        mcpReplayResult?.result?.trust_receipt?.receipt_id ===
+          mcpResult?.result?.trust_receipt?.receipt_id,
+      "mcp replay devuelve mismo receipt_id"
     )
 
     const batchKey = `batch-idempotency-${Date.now()}`
@@ -984,6 +1049,30 @@ async function runIntegrationChecks() {
     check(
       batch2.headers["x-oracle-idempotent-replay"] === "true",
       "verify/batch repite idempotency sin doble cargo"
+    )
+    check(
+      batch2.json?.results?.[0]?.trust_receipt?.receipt_id ===
+        batch1.json?.results?.[0]?.trust_receipt?.receipt_id &&
+        batch2.json?.results?.[1]?.trust_receipt?.receipt_id ===
+          batch1.json?.results?.[1]?.trust_receipt?.receipt_id,
+      "verify/batch replay devuelve mismos receipt_ids"
+    )
+    const batchConflict = await http("POST", "/verify/batch", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "X-Idempotency-Key": batchKey
+      },
+      body: {
+        items: [
+          verificationPayload("2 + 2 = ?", "5"),
+          verificationPayload("Capital of Spain?", "Madrid")
+        ]
+      }
+    })
+    assert.equal(batchConflict.status, 409)
+    check(
+      batchConflict.json?.error === "idempotency_key_conflict",
+      "verify/batch rechaza misma idempotency key con body distinto"
     )
     check(
       batch1.json?.results?.[0]?.trust_receipt?.receipt_id,

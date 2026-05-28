@@ -102,6 +102,22 @@ function ensureSchema() {
     ON usage(account_id, reference)
     WHERE reference IS NOT NULL;
 
+    CREATE TABLE IF NOT EXISTS idempotency_records (
+      account_id TEXT NOT NULL,
+      service TEXT NOT NULL,
+      idempotency_key TEXT NOT NULL,
+      request_hash TEXT NOT NULL,
+      response_json TEXT NOT NULL,
+      receipt_ids_json TEXT NOT NULL DEFAULT '[]',
+      cost_microusdc INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY(account_id, service, idempotency_key),
+      FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_idempotency_records_created
+    ON idempotency_records(created_at DESC);
+
     CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_credit_topup_reference_unique
     ON ledger(account_id, reference, entry_type)
     WHERE reference IS NOT NULL AND entry_type = 'credit';

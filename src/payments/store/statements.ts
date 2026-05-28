@@ -122,6 +122,46 @@ export const selectUsageByReferenceStmt = db.prepare(`
   LIMIT 1
 `)
 
+export const insertIdempotencyRecordStmt = db.prepare(`
+  INSERT INTO idempotency_records (
+    account_id,
+    service,
+    idempotency_key,
+    request_hash,
+    response_json,
+    receipt_ids_json,
+    cost_microusdc,
+    created_at
+  )
+  VALUES (
+    @account_id,
+    @service,
+    @idempotency_key,
+    @request_hash,
+    @response_json,
+    @receipt_ids_json,
+    @cost_microusdc,
+    @created_at
+  )
+`)
+
+export const selectIdempotencyRecordStmt = db.prepare(`
+  SELECT
+    account_id,
+    service,
+    idempotency_key,
+    request_hash,
+    response_json,
+    receipt_ids_json,
+    cost_microusdc,
+    created_at
+  FROM idempotency_records
+  WHERE account_id = ?
+    AND service = ?
+    AND idempotency_key = ?
+  LIMIT 1
+`)
+
 export const insertApiKeyStmt = db.prepare(`
   INSERT INTO api_keys (id, account_id, name, key_prefix, key_hash, status, created_at)
   VALUES (@id, @account_id, @name, @key_prefix, @key_hash, @status, @created_at)

@@ -42,6 +42,10 @@ import {
   getDiscoveryStats,
   recordDiscoveryEvent
 } from "./store/discovery.js"
+import {
+  createIdempotencyRecord,
+  getIdempotencyRecord
+} from "./store/idempotency.js"
 import type {
   DiscoveryEventRecord,
   PaymentRecord,
@@ -61,6 +65,7 @@ export {
   consume,
   createAccount,
   createApiKey,
+  createIdempotencyRecord,
   createTopup,
   createTrustReceipt,
   createQuote,
@@ -71,6 +76,7 @@ export {
   getApiKeyByIdForAccount,
   getApiKeyByRaw,
   getDiscoveryStats,
+  getIdempotencyRecord,
   getPayment,
   getPaymentStats,
   getTopup,

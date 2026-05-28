@@ -5,7 +5,9 @@ import {
   consume,
   confirmOnchainPayment,
   getAccount,
-  resolveAccountByApiKey
+  resolveAccountByApiKey,
+  createIdempotencyRecord,
+  getIdempotencyRecord
 } from "../payments/fileStore.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 import {
@@ -15,6 +17,10 @@ import {
 import { extractBearerToken } from "../lib/auth.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
+import {
+  idempotencyConflict,
+  idempotencyRequestHash
+} from "../lib/idempotency.js"
 import {
   buildX402PaymentRequired,
   paymentSignatureFromRequest,
@@ -177,6 +183,39 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         return reply.code(402).send(economicError("account_not_active"))
       }
 
+      const prompt = body?.prompt ?? ""
+      const response = body?.response ?? ""
+      const domain = body?.domain ?? "general"
+      const requestHash = idempotencyKey
+        ? idempotencyRequestHash({
+            service: "verify",
+            prompt,
+            response,
+            domain,
+            mode: verificationMode
+          })
+        : null
+
+      if (idempotencyKey && requestHash) {
+        const existing = getIdempotencyRecord({
+          accountId: resolved.account_id,
+          service: "verify",
+          idempotencyKey
+        })
+
+        if (existing) {
+          if (existing.request_hash !== requestHash) {
+            return reply
+              .code(409)
+              .send(idempotencyConflict("verify"))
+          }
+
+          reply.header("X-Oracle-Idempotent-Replay", "true")
+          reply.header("X-Oracle-Cost-MicroUSDC", String(existing.cost_microusdc))
+          return existing.response
+        }
+      }
+
       const usageId = randomUUID()
       const debit = chargeAndRecordUsage({
         usageId,
@@ -204,9 +243,15 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         return reply.code(402).send(economicError(String(debit.error)))
       }
 
-      const prompt = body?.prompt ?? ""
-      const response = body?.response ?? ""
-      const domain = body?.domain ?? "general"
+      if (debit.idempotent_replay) {
+        return reply.code(409).send({
+          error: "idempotency_response_unavailable",
+          service: "verify",
+          hint:
+            "This key was billed before response replay storage existed or before the first response was saved."
+        })
+      }
+
       const verification = runVerification({
         prompt,
         response,
@@ -258,7 +303,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
 
       trackServiceEvent(req, "verify_success", "/verify")
 
-      return {
+      const responseBody = {
         ...verification.result,
         verdict: verification.trust_recommended_action,
         trust_score: verification.trust_score,
@@ -281,6 +326,20 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         verification_mode: verification.verification_mode,
         semantic_judge: verification.semantic_judge
       }
+
+      if (idempotencyKey && requestHash) {
+        createIdempotencyRecord({
+          accountId: resolved.account_id,
+          service: "verify",
+          idempotencyKey,
+          requestHash,
+          response: responseBody,
+          receiptIds: [verification.trust_receipt.receipt_id],
+          costMicrousdc: debit.billed_cost_microusdc
+        })
+      }
+
+      return responseBody
     }
 
     const ref = paymentRef as string

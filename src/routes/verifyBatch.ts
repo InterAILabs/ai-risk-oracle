@@ -5,13 +5,19 @@ import {
   consume,
   confirmOnchainPayment,
   getAccount,
-  resolveAccountByApiKey
+  resolveAccountByApiKey,
+  createIdempotencyRecord,
+  getIdempotencyRecord
 } from "../payments/fileStore.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
 import { getBatchAmount } from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
+import {
+  idempotencyConflict,
+  idempotencyRequestHash
+} from "../lib/idempotency.js"
 import {
   buildX402PaymentRequired,
   paymentSignatureFromRequest,
@@ -176,6 +182,38 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
       }
 
       const costMicrousdc = usdcAmountToMicrousdc(batchAmount)
+      const normalizedItems = body.items.map((item) => ({
+        prompt: item.prompt ?? "",
+        response: item.response ?? "",
+        domain: item.domain ?? "general"
+      }))
+      const requestHash = idempotencyKey
+        ? idempotencyRequestHash({
+            service: "verify_batch",
+            items: normalizedItems
+          })
+        : null
+
+      if (idempotencyKey && requestHash) {
+        const existing = getIdempotencyRecord({
+          accountId: resolved.account_id,
+          service: "verify_batch",
+          idempotencyKey
+        })
+
+        if (existing) {
+          if (existing.request_hash !== requestHash) {
+            return reply
+              .code(409)
+              .send(idempotencyConflict("verify_batch"))
+          }
+
+          reply.header("X-Oracle-Idempotent-Replay", "true")
+          reply.header("X-Oracle-Cost-MicroUSDC", String(existing.cost_microusdc))
+          return existing.response
+        }
+      }
+
       const usageId = randomUUID()
       const debit = chargeAndRecordUsage({
         usageId,
@@ -204,7 +242,16 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
         return reply.code(402).send(economicError(String(debit.error)))
       }
 
-      const verification = runBatchVerification(body.items, {
+      if (debit.idempotent_replay) {
+        return reply.code(409).send({
+          error: "idempotency_response_unavailable",
+          service: "verify_batch",
+          hint:
+            "This key was billed before response replay storage existed or before the first response was saved."
+        })
+      }
+
+      const verification = runBatchVerification(normalizedItems, {
         accountId: resolved.account_id,
         usageId,
         paymentRef: null
@@ -241,7 +288,7 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
 
       trackServiceEvent(req, "verify_batch_success", "/verify/batch")
 
-      return {
+      const responseBody = {
         ok: true,
         batch_size: verification.results.length,
         billed: {
@@ -273,6 +320,22 @@ export const verifyBatchRoute: FastifyPluginAsync = async (app) => {
           trust_signing_enabled: TRUST_SIGNING_ENABLED
         }
       }
+
+      if (idempotencyKey && requestHash) {
+        createIdempotencyRecord({
+          accountId: resolved.account_id,
+          service: "verify_batch",
+          idempotencyKey,
+          requestHash,
+          response: responseBody,
+          receiptIds: verification.results.map(
+            (item) => item.trust_receipt.receipt_id
+          ),
+          costMicrousdc: debit.billed_cost_microusdc
+        })
+      }
+
+      return responseBody
     }
 
     const ref = paymentRef as string
