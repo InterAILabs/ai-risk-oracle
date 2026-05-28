@@ -135,7 +135,8 @@ export const onboardRoute: FastifyPluginAsync = async (app) => {
         credit_applied: trialCreditApplied,
         credited_usdc: trialCreditApplied ? trialOffer.amount_usdc : "0",
         credited_microusdc: trialCreditedMicrousdc,
-        estimated_verify_calls: trialOffer.estimated_verify_calls
+        estimated_verify_calls: trialOffer.estimated_verify_calls,
+        estimated_calls_by_mode: trialOffer.estimated_calls_by_mode
       },
       dev: {
         auto_credit_enabled: devAutoCreditEnabled,

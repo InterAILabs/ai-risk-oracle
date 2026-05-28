@@ -755,6 +755,11 @@ async function runIntegrationChecks() {
       trialOnboard.json?.balance?.balance_usdc === "0.001200",
       "onboard trial acredita saldo esperado"
     )
+    check(
+      typeof trialOnboard.json?.trial?.estimated_calls_by_mode?.semantic_judge ===
+        "number",
+      "onboard trial publica estimacion por modo"
+    )
     if (previousTrialEnabled == null) {
       delete process.env.ONBOARDING_TRIAL_CREDIT_ENABLED
     } else {
