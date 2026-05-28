@@ -19,6 +19,11 @@ db.pragma("synchronous = NORMAL")
 db.pragma("foreign_keys = ON")
 db.pragma("busy_timeout = 5000")
 
+export function checkDatabaseReady() {
+  const row = db.prepare("SELECT 1 AS ok").get() as { ok?: number } | undefined
+  return row?.ok === 1
+}
+
 function ensureSchema() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS topups (

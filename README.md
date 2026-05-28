@@ -368,9 +368,9 @@ Set `X402_FACILITATOR_URL` to choose the facilitator; otherwise the default x402
 `POST /verify` accepts `mode`.
 
 - `fast_heuristic`: default, low-cost deterministic consistency and trust-signal check.
-- `semantic_judge`: deeper deterministic semantic pass that adds alignment, support, caution, and risky-language checks to the response as `semantic_judge`.
+- `semantic_judge`: deeper deterministic semantic pass that adds alignment, support, caution, high-stakes action, source, payment/tool-risk, and risky-language checks to the response as `semantic_judge`.
 
-`semantic_judge` is priced higher because it is the contract surface for deeper judge-style verification. Today it is deterministic and local; it is designed so a future LLM-as-judge or evidence-backed implementation can replace the internals without changing client payloads.
+`semantic_judge` is priced higher because it is the contract surface for deeper judge-style verification. Today it is deterministic and local (`SEMANTIC_JUDGE_PROVIDER=local` by default); it is designed so a future LLM-as-judge or evidence-backed implementation can replace the internals without changing client payloads.
 
 ## Agent-Native Examples
 
@@ -505,7 +505,21 @@ curl -X GET http://localhost:3000/stats \
   -H "X-Admin-Token: YOUR_ADMIN_TOKEN"
 ```
 
-`/stats` now includes lightweight discovery telemetry for:
+For operational summaries, use:
+
+```bash
+curl -X GET http://localhost:3000/admin/stats \
+  -H "X-Admin-Token: YOUR_ADMIN_TOKEN"
+
+curl -X GET "http://localhost:3000/admin/accounts?limit=50" \
+  -H "X-Admin-Token: YOUR_ADMIN_TOKEN"
+```
+
+`/admin/stats` returns account totals, total balance, total usage, receipt
+counts, top-up status counts, recent discovery events, and latest usage/receipt
+timestamps. `/admin/accounts` returns account summaries without raw API keys.
+
+`/stats` includes lightweight discovery telemetry for:
 - `/`
 - `/service.json`
 - `/.well-known/ai-service.json`

@@ -266,6 +266,7 @@ export function runVerification(
     ? runSemanticJudge({
         prompt: input.prompt,
         response: input.response,
+        domain: input.domain,
         signals: baseSignals
       })
     : null

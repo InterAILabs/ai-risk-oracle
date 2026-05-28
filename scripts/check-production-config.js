@@ -4,6 +4,14 @@ function isEnabled(value, fallback = "false") {
   return ["true", "1", "yes", "on"].includes(String(value ?? fallback).toLowerCase())
 }
 
+function requiredNumber(name) {
+  const raw = process.env[name]
+  check(raw !== undefined && raw !== "", `${name} is explicitly configured`)
+  const value = Number(raw)
+  check(Number.isFinite(value), `${name} is numeric`)
+  return value
+}
+
 function check(condition, message) {
   assert.ok(condition, message)
   console.log(`[OK] ${message}`)
@@ -17,6 +25,7 @@ function main() {
   const signingSecret = String(process.env.ORACLE_SIGNING_SECRET || "")
   const x402PayTo = String(process.env.X402_PAY_TO || "")
   const x402FacilitatorUrl = String(process.env.X402_FACILITATOR_URL || "")
+  const trialCreditEnabled = process.env.ONBOARDING_TRIAL_CREDIT_ENABLED
 
   check(paymentMode === "onchain", "PAYMENT_MODE is onchain")
   check(/^0x[a-fA-F0-9]{40}$/.test(topupAddress), "TOPUP_RECEIVE_ADDRESS looks like an EVM address")
@@ -34,6 +43,34 @@ function main() {
   check(
     !isEnabled(process.env.ONBOARDING_DEV_AUTO_CREDIT_ENABLED),
     "ONBOARDING_DEV_AUTO_CREDIT_ENABLED is disabled"
+  )
+  check(
+    ["true", "false"].includes(String(trialCreditEnabled ?? "").toLowerCase()),
+    "ONBOARDING_TRIAL_CREDIT_ENABLED is explicitly true or false"
+  )
+
+  const bodyLimitBytes = requiredNumber("BODY_LIMIT_BYTES")
+  check(
+    bodyLimitBytes >= 1_000 && bodyLimitBytes <= 1_000_000,
+    "BODY_LIMIT_BYTES is within production bounds"
+  )
+
+  const requestTimeoutMs = requiredNumber("REQUEST_TIMEOUT_MS")
+  check(
+    requestTimeoutMs >= 1_000 && requestTimeoutMs <= 30_000,
+    "REQUEST_TIMEOUT_MS is within production bounds"
+  )
+
+  const rateLimitCapacity = requiredNumber("RL_CAPACITY")
+  check(
+    Number.isInteger(rateLimitCapacity) && rateLimitCapacity >= 1 && rateLimitCapacity <= 10_000,
+    "RL_CAPACITY is within production bounds"
+  )
+
+  const rateLimitRefill = requiredNumber("RL_REFILL_PER_SEC")
+  check(
+    rateLimitRefill > 0 && rateLimitRefill <= 1_000,
+    "RL_REFILL_PER_SEC is within production bounds"
   )
 
   console.log("PRODUCTION CONFIG CHECK OK")

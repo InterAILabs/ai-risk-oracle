@@ -82,10 +82,15 @@ export type OracleMeta = {
 export type SemanticJudgeResult = {
   judge_version: "semantic-judge-v1"
   mode: "semantic_judge"
+  provider: "local"
   semantic_alignment: number
   support_score: number
   caution_score: number
+  judge_score: number
   risk_delta: number
+  judge_risk_factors: string[]
+  judge_notes: string[]
+  judge_recommended_action: "accept" | "review" | "reject"
   checks: string[]
 }
 

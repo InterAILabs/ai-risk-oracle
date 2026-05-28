@@ -33,6 +33,7 @@ import { agentCardRoute } from "./routes/agentCard.js"
 import { a2aRoute } from "./routes/a2a.js"
 import { discoveryBundleRoute } from "./routes/discoveryBundle.js"
 import { mcpRoute } from "./routes/mcp.js"
+import { adminRoute } from "./routes/admin.js"
 
 declare module "fastify" {
   interface FastifyReply {
@@ -107,6 +108,7 @@ async function registerRoutes(app: ReturnType<typeof buildApp>) {
   await app.register(landingRoute)
   await app.register(healthRoute)
   await app.register(statsRoute)
+  await app.register(adminRoute)
   await app.register(pricingRoute)
   await app.register(quoteRoute)
   await app.register(verifyRoute)

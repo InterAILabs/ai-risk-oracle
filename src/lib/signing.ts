@@ -41,6 +41,12 @@ export function isReceiptSigningEnabled() {
   return getSigningSecret() !== null
 }
 
+export function isReceiptSigningRequired() {
+  return ["true", "1", "yes", "on"].includes(
+    String(process.env.ORACLE_SIGNING_REQUIRED || "false").toLowerCase()
+  )
+}
+
 export function verifyReceiptSignature(input: {
   payload: unknown
   signature: string

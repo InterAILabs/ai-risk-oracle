@@ -111,9 +111,10 @@ For a deeper single-response check, set:
 ```
 
 That tier returns an additional `semantic_judge` object with alignment, support,
-caution, and risky-language checks. It is priced separately from the default
-`fast_heuristic` tier; inspect `GET /pricing` before using it in automated
-workflows.
+caution, local judge risk factors, notes, recommended action, and risky-language
+checks. It is priced separately from the default `fast_heuristic` tier; inspect
+`GET /pricing` before using it in automated workflows. The default provider is
+deterministic and local (`SEMANTIC_JUDGE_PROVIDER=local`).
 
 ## 4a. Inspect x402 Payment Requirements
 

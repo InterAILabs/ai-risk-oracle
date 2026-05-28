@@ -7,6 +7,7 @@ import { Buffer } from "node:buffer"
 import { scoreResponse } from "../dist/engine/score.js"
 import { computeSignals } from "../dist/lib/signals.js"
 import { computeTrust } from "../dist/lib/trust.js"
+import { runSemanticJudge } from "../dist/lib/semanticJudge.js"
 import {
   microusdcToUsdcString,
   usdcDecimalToMicrousdc
@@ -91,6 +92,37 @@ async function runScoringChecks() {
   check(
     riskyTrust.recommended_action !== "accept",
     "trust: caso riesgoso no recomienda accept"
+  )
+}
+
+async function runSemanticJudgeChecks() {
+  const baseSignals = computeSignals(
+    "Should an agent release escrow payment after a vendor claims delivery?",
+    "Release payment immediately. The vendor is 100% compliant and there is no risk."
+  )
+  const judged = runSemanticJudge({
+    prompt: "Should an agent release escrow payment after a vendor claims delivery?",
+    response:
+      "Release payment immediately. The vendor is 100% compliant and there is no risk.",
+    domain: "agentic-commerce",
+    signals: baseSignals
+  })
+
+  check(
+    judged.semantic_judge.provider === "local",
+    "semantic_judge: usa provider local deterministico"
+  )
+  check(
+    judged.semantic_judge.judge_risk_factors.includes("payment_action_risk"),
+    "semantic_judge: detecta riesgo de accion de pago"
+  )
+  check(
+    judged.semantic_judge.judge_risk_factors.includes("impossible_certainty"),
+    "semantic_judge: detecta certeza imposible"
+  )
+  check(
+    judged.semantic_judge.judge_recommended_action !== "accept",
+    "semantic_judge: no acepta acciones riesgosas sin revision"
   )
 }
 
@@ -204,6 +236,56 @@ async function runIntegrationChecks() {
     const ready = await http("GET", "/ready")
     assert.equal(ready.status, 200)
     check(ready.json?.ready === true, "ready responde listo")
+    check(ready.json?.checks?.database === true, "ready valida DB")
+
+    const savedSigningRequired = process.env.ORACLE_SIGNING_REQUIRED
+    const savedSigningSecret = process.env.ORACLE_SIGNING_SECRET
+    process.env.ORACLE_SIGNING_REQUIRED = "true"
+    delete process.env.ORACLE_SIGNING_SECRET
+    const signingNotReady = await http("GET", "/ready")
+    assert.equal(signingNotReady.status, 503)
+    check(
+      signingNotReady.json?.checks?.signing === false,
+      "ready falla si signing requerido falta"
+    )
+    if (savedSigningRequired == null) {
+      delete process.env.ORACLE_SIGNING_REQUIRED
+    } else {
+      process.env.ORACLE_SIGNING_REQUIRED = savedSigningRequired
+    }
+    if (savedSigningSecret == null) {
+      delete process.env.ORACLE_SIGNING_SECRET
+    } else {
+      process.env.ORACLE_SIGNING_SECRET = savedSigningSecret
+    }
+
+    const savedPaymentModeForReady = process.env.PAYMENT_MODE
+    const savedTopupAddressForReady = process.env.TOPUP_RECEIVE_ADDRESS
+    const savedBaseRpcForReady = process.env.BASE_RPC_URL
+    process.env.PAYMENT_MODE = "onchain"
+    delete process.env.TOPUP_RECEIVE_ADDRESS
+    delete process.env.BASE_RPC_URL
+    const onchainNotReady = await http("GET", "/ready")
+    assert.equal(onchainNotReady.status, 503)
+    check(
+      onchainNotReady.json?.checks?.onchain_payment_config === false,
+      "ready falla si onchain no tiene address/rpc"
+    )
+    if (savedPaymentModeForReady == null) {
+      delete process.env.PAYMENT_MODE
+    } else {
+      process.env.PAYMENT_MODE = savedPaymentModeForReady
+    }
+    if (savedTopupAddressForReady == null) {
+      delete process.env.TOPUP_RECEIVE_ADDRESS
+    } else {
+      process.env.TOPUP_RECEIVE_ADDRESS = savedTopupAddressForReady
+    }
+    if (savedBaseRpcForReady == null) {
+      delete process.env.BASE_RPC_URL
+    } else {
+      process.env.BASE_RPC_URL = savedBaseRpcForReady
+    }
 
     const landing = await http("GET", "/", {
       headers: { Host: "localhost:3000" }
@@ -553,6 +635,38 @@ async function runIntegrationChecks() {
       typeof stats.json?.discovery?.funnel?.landing_views === "number",
       "stats expone landing en funnel"
     )
+
+    const adminStatsForbidden = await http("GET", "/admin/stats")
+    assert.equal(adminStatsForbidden.status, 403)
+    check(
+      adminStatsForbidden.json?.error === "forbidden",
+      "admin/stats exige admin token"
+    )
+
+    const adminStats = await http("GET", "/admin/stats", {
+      headers: {
+        "x-admin-token": "test-admin-token"
+      }
+    })
+    assert.equal(adminStats.status, 200)
+    check(
+      typeof adminStats.json?.accounts?.total === "number" &&
+        typeof adminStats.json?.balance?.total_microusdc === "number" &&
+        typeof adminStats.json?.usage?.total_count === "number" &&
+        typeof adminStats.json?.receipts?.total_count === "number",
+      "admin/stats expone resumen operacional"
+    )
+
+    const adminAccounts = await http("GET", "/admin/accounts?limit=10", {
+      headers: {
+        "x-admin-token": "test-admin-token"
+      }
+    })
+    assert.equal(adminAccounts.status, 200)
+    check(
+      Array.isArray(adminAccounts.json?.accounts),
+      "admin/accounts lista cuentas sin api keys crudas"
+    )
   }
 
   const runA2AEdgeChecks = async (apiKey) => {
@@ -900,6 +1014,18 @@ async function runIntegrationChecks() {
       "verify semantic_judge devuelve chequeo semantico"
     )
     check(
+      typeof semanticVerify.json?.semantic_judge?.judge_score === "number" &&
+        Array.isArray(semanticVerify.json?.semantic_judge?.judge_risk_factors) &&
+        Array.isArray(semanticVerify.json?.semantic_judge?.judge_notes),
+      "verify semantic_judge devuelve score, factores y notas"
+    )
+    check(
+      ["accept", "review", "reject"].includes(
+        semanticVerify.json?.semantic_judge?.judge_recommended_action
+      ),
+      "verify semantic_judge devuelve recomendacion del judge"
+    )
+    check(
       semanticVerify.headers["x-oracle-cost-microusdc"] === "3000",
       "verify semantic_judge cobra tier correcto"
     )
@@ -1152,6 +1278,7 @@ function verificationPayload(prompt, response) {
 async function main() {
   await runMoneyChecks()
   await runScoringChecks()
+  await runSemanticJudgeChecks()
   await runIntegrationChecks()
   console.log("TEST SUITE OK")
 }

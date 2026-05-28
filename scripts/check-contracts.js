@@ -9,6 +9,8 @@ const REQUIRED_OPENAPI_PATHS = [
   "/pricing",
   "/verify",
   "/verify/batch",
+  "/admin/stats",
+  "/admin/accounts",
   "/trust/receipts",
   "/trust/receipts/{receiptId}",
   "/trust/reputation",
@@ -80,6 +82,7 @@ async function main() {
     check(openapi.openapi === "3.0.3", "openapi version is stable")
     check(openapi.info?.title === "InterAI Risk Oracle", "openapi title is present")
     check(Boolean(openapi.components?.securitySchemes?.bearerAuth), "openapi declares bearer auth")
+    check(Boolean(openapi.components?.securitySchemes?.AdminToken), "openapi declares admin token auth")
 
     for (const pathName of REQUIRED_OPENAPI_PATHS) {
       check(Boolean(openapi.paths?.[pathName]), `openapi documents ${pathName}`)

@@ -136,7 +136,8 @@ Important response fields:
 - `trust_receipt`: canonical evidence payload plus signature metadata.
 - `verification_mode`: `fast_heuristic` or `semantic_judge`.
 - `semantic_judge`: present when `mode` is `semantic_judge`; includes semantic
-  alignment, support score, caution score, risk delta, and checks performed.
+  alignment, support score, caution score, judge score, local judge risk
+  factors, notes, recommended action, risk delta, and checks performed.
 
 ### `POST /verify/batch`
 
@@ -220,6 +221,38 @@ Request:
   "signature_alg": "hmac-sha256"
 }
 ```
+
+## Admin Endpoints
+
+Admin endpoints require:
+
+```http
+X-Admin-Token: YOUR_ADMIN_TOKEN
+```
+
+### `GET /admin/stats`
+
+Returns an operational summary without exposing secrets:
+
+- account totals by status
+- total balance
+- total usage and latest usage timestamp
+- total receipts and latest receipt timestamp
+- pending, confirmed, and expired top-up counts
+- recent discovery events
+
+### `GET /admin/accounts`
+
+Returns account summaries without raw API keys.
+
+Query:
+
+```text
+limit=50
+```
+
+Each account includes `account_id`, `name`, `status`, balance, creation time,
+usage count, and receipt count.
 
 ## Schemas
 

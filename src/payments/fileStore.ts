@@ -43,6 +43,10 @@ import {
   recordDiscoveryEvent
 } from "./store/discovery.js"
 import {
+  getAdminStats,
+  listAdminAccounts
+} from "./store/admin.js"
+import {
   createIdempotencyRecord,
   getIdempotencyRecord
 } from "./store/idempotency.js"
@@ -52,6 +56,7 @@ import type {
   PaymentStatus,
   TrustReceiptRecord
 } from "./store/types.js"
+import { checkDatabaseReady } from "./store/db.js"
 
 export type {
   DiscoveryEventRecord,
@@ -60,6 +65,7 @@ export type {
   TrustReceiptRecord
 } from "./store/types.js"
 export {
+  checkDatabaseReady,
   confirmOnchainPayment,
   confirmTopupAndCredit,
   consume,
@@ -68,6 +74,7 @@ export {
   createIdempotencyRecord,
   createTopup,
   createTrustReceipt,
+  getAdminStats,
   createQuote,
   creditAccount,
   debitAccountForUsage,
@@ -88,6 +95,7 @@ export {
   hasUsageReference,
   isTxUsed,
   listLedgerForAccount,
+  listAdminAccounts,
   listTrustReceipts,
   listUsageForAccount,
   markPaid,

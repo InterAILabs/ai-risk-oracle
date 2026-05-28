@@ -307,19 +307,38 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
           required: [
             "judge_version",
             "mode",
+            "provider",
             "semantic_alignment",
             "support_score",
             "caution_score",
+            "judge_score",
             "risk_delta",
+            "judge_risk_factors",
+            "judge_notes",
+            "judge_recommended_action",
             "checks"
           ],
           properties: {
             judge_version: { type: "string", enum: ["semantic-judge-v1"] },
             mode: { type: "string", enum: ["semantic_judge"] },
+            provider: { type: "string", enum: ["local"] },
             semantic_alignment: { type: "number", minimum: 0, maximum: 1 },
             support_score: { type: "number", minimum: 0, maximum: 1 },
             caution_score: { type: "number", minimum: 0, maximum: 1 },
+            judge_score: { type: "number", minimum: 0, maximum: 1 },
             risk_delta: { type: "number", minimum: 0, maximum: 1 },
+            judge_risk_factors: {
+              type: "array",
+              items: { type: "string" }
+            },
+            judge_notes: {
+              type: "array",
+              items: { type: "string" }
+            },
+            judge_recommended_action: {
+              type: "string",
+              enum: ["accept", "review", "reject"]
+            },
             checks: {
               type: "array",
               items: { type: "string" }

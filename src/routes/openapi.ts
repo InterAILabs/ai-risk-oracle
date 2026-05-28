@@ -124,6 +124,11 @@ export async function openApiRoute(app: FastifyInstance) {
           bearerAuth: {
             type: "http",
             scheme: "bearer"
+          },
+          AdminToken: {
+            type: "apiKey",
+            in: "header",
+            name: "X-Admin-Token"
           }
         },
         schemas: {
@@ -198,12 +203,38 @@ export async function openApiRoute(app: FastifyInstance) {
                     schema: {
                       type: "object",
                       additionalProperties: false,
-                      required: ["ok", "ready", "service", "version"],
+                      required: ["ok", "ready", "service", "version", "checks"],
                       properties: {
                         ok: { type: "boolean", const: true },
                         ready: { type: "boolean", const: true },
                         service: { type: "string" },
-                        version: { type: "string" }
+                        version: { type: "string" },
+                        checks: {
+                          type: "object",
+                          additionalProperties: { type: "boolean" }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "503": {
+                description: "Service is alive but not production-ready",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["ok", "ready", "service", "version", "checks"],
+                      properties: {
+                        ok: { type: "boolean", const: false },
+                        ready: { type: "boolean", const: false },
+                        service: { type: "string" },
+                        version: { type: "string" },
+                        checks: {
+                          type: "object",
+                          additionalProperties: { type: "boolean" }
+                        }
                       }
                     }
                   }
@@ -264,6 +295,42 @@ export async function openApiRoute(app: FastifyInstance) {
               "200": {
                 description:
                   "Public pricing, trial, top-up and idempotency metadata for self-serve integration"
+              }
+            }
+          }
+        },
+        "/admin/stats": {
+          get: {
+            security: [{ AdminToken: [] }],
+            responses: {
+              "200": {
+                description:
+                  "Admin operational summary with account, balance, usage, receipt, top-up, and discovery totals"
+              },
+              "403": {
+                description: "Invalid admin token"
+              }
+            }
+          }
+        },
+        "/admin/accounts": {
+          get: {
+            security: [{ AdminToken: [] }],
+            parameters: [
+              {
+                name: "limit",
+                in: "query",
+                required: false,
+                schema: { type: "integer", minimum: 1, maximum: 200 }
+              }
+            ],
+            responses: {
+              "200": {
+                description:
+                  "Admin account summaries without raw API keys"
+              },
+              "403": {
+                description: "Invalid admin token"
               }
             }
           }

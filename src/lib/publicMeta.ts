@@ -95,7 +95,7 @@ export function buildPublicPricing(baseUrl: string) {
           cost_usdc: PRICING.semantic_judge.amount,
           cost_microusdc: usdcDecimalToMicrousdc(PRICING.semantic_judge.amount),
           description:
-            "Deeper deterministic semantic judge pass with support, caution, and risky-language checks."
+            "Deeper deterministic local judge pass with support, caution, risky-language, high-stakes action, source, and payment/tool-risk checks."
         }
       },
       cost_usdc: PRICING.fast.amount,
