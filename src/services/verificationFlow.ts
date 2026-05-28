@@ -4,7 +4,9 @@ import {
   getTrustHistoryForAccountDomain
 } from "../payments/fileStore.js"
 import { scoreResponse } from "../engine/score.js"
+import type { VerificationMode } from "../config/pricing.js"
 import { computeSignals, type Signals } from "../lib/signals.js"
+import { runSemanticJudge, type SemanticJudgeResult } from "../lib/semanticJudge.js"
 import { computeTrust } from "../lib/trust.js"
 import {
   buildTrustReceipt,
@@ -28,6 +30,7 @@ export type VerificationInput = {
   accountId: string | null
   usageId: string | null
   paymentRef: string | null
+  mode?: VerificationMode
 }
 
 export type BatchVerificationInput = {
@@ -43,6 +46,8 @@ export type VerificationComputation = {
   risk_level: "low" | "medium" | "high"
   trust_recommended_action: "accept" | "review" | "reject"
   confidence_band: ConfidenceBand
+  verification_mode: VerificationMode
+  semantic_judge: SemanticJudgeResult | null
   historical_context: HistoricalTrustContext
   trust_receipt: ReturnType<typeof buildTrustReceipt> & {
     signature: string | null
@@ -256,7 +261,15 @@ export function runVerification(
     domain: input.domain
   })
 
-  const signals = computeSignals(input.prompt, input.response)
+  const baseSignals = computeSignals(input.prompt, input.response)
+  const semantic = input.mode === "semantic_judge"
+    ? runSemanticJudge({
+        prompt: input.prompt,
+        response: input.response,
+        signals: baseSignals
+      })
+    : null
+  const signals = semantic?.signals ?? baseSignals
   const trust = computeTrust(signals)
   const confidence_band = computeConfidenceBand(signals)
   const historical_context =
@@ -284,6 +297,8 @@ export function runVerification(
       trust.recommended_action
     ),
     confidence_band,
+    verification_mode: input.mode ?? "fast_heuristic",
+    semantic_judge: semantic?.semantic_judge ?? null,
     historical_context,
     trust_receipt
   }

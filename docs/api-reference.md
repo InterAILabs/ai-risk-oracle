@@ -112,7 +112,8 @@ Request:
 {
   "prompt": "What is the capital of France?",
   "response": "Paris",
-  "domain": "general"
+  "domain": "general",
+  "mode": "fast_heuristic"
 }
 ```
 
@@ -133,6 +134,9 @@ Important response fields:
 - `signals`: machine-readable signal breakdown.
 - `historical_context`: prior account/domain trust history when available.
 - `trust_receipt`: canonical evidence payload plus signature metadata.
+- `verification_mode`: `fast_heuristic` or `semantic_judge`.
+- `semantic_judge`: present when `mode` is `semantic_judge`; includes semantic
+  alignment, support score, caution score, risk delta, and checks performed.
 
 ### `POST /verify/batch`
 
@@ -243,6 +247,7 @@ Current defaults:
 
 ```text
 verify: 0.0006 USDC
+semantic_judge: 0.0030 USDC
 verify_batch: 0.0006 USDC base + 0.0002 USDC per item
 ```
 

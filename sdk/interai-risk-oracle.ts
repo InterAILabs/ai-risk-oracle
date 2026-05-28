@@ -2,6 +2,7 @@ export type VerifyInput = {
   prompt: string
   response: string
   domain?: string
+  mode?: VerificationMode
 }
 
 export type BatchVerifyInput = {
@@ -18,6 +19,8 @@ export type RiskLevel = "low" | "medium" | "high"
 export type RecommendedAction = "accept" | "review" | "reject"
 
 export type ConfidenceBand = "low" | "medium" | "high"
+
+export type VerificationMode = "fast_heuristic" | "semantic_judge"
 
 export type TrustSignals = {
   semantic_relevance: number
@@ -72,7 +75,18 @@ export type VerifyAnalysis = {
 export type OracleMeta = {
   version: string
   signals_version: string
+  verification_mode?: VerificationMode
   trust_signing_enabled: boolean
+}
+
+export type SemanticJudgeResult = {
+  judge_version: "semantic-judge-v1"
+  mode: "semantic_judge"
+  semantic_alignment: number
+  support_score: number
+  caution_score: number
+  risk_delta: number
+  checks: string[]
 }
 
 export type X402PaymentRequirements = {
@@ -133,6 +147,8 @@ export type VerifyResult = {
   claims_supported: number
   claims_uncertain: number
   signals: TrustSignals
+  verification_mode: VerificationMode
+  semantic_judge?: SemanticJudgeResult | null
   historical_context: HistoricalTrustContext
   trust_receipt: SignedTrustReceipt
   billed: BillingInfo
@@ -543,7 +559,8 @@ export class InterAIRiskOracleClient {
       body: {
         prompt: input.prompt,
         response: input.response,
-        domain: input.domain ?? "general"
+        domain: input.domain ?? "general",
+        ...(input.mode ? { mode: input.mode } : {})
       }
     })
   }

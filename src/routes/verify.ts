@@ -8,7 +8,10 @@ import {
   resolveAccountByApiKey
 } from "../payments/fileStore.js"
 import { verifyUsdcPaymentOnBaseRpc } from "../payments/onchainBaseUsdc.js"
-import { PRICING } from "../config/pricing.js"
+import {
+  getVerifyAmount,
+  normalizeVerificationMode
+} from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
 import { trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
@@ -34,7 +37,10 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         prompt?: string
         response?: string
         domain?: string
+        mode?: string
       } | undefined) ?? {}
+    const verificationMode = normalizeVerificationMode(body.mode)
+    const verifyAmount = getVerifyAmount(verificationMode)
     const paymentRef = req.headers["x-payment-ref"] as string | undefined
     const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined
     const authHeader = req.headers["authorization"] as string | undefined
@@ -47,7 +53,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         buildX402PaymentRequired({
           req,
           service: "verify",
-          amountUsdc: PRICING.fast.amount
+          amountUsdc: verifyAmount
         }),
         {
           hint:
@@ -81,7 +87,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         req,
         reply,
         service: "verify",
-        amountUsdc: PRICING.fast.amount
+        amountUsdc: verifyAmount
       })
 
       if (!x402.ok) {
@@ -95,6 +101,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         prompt,
         response,
         domain,
+        mode: verificationMode,
         accountId: null,
         usageId: null,
         paymentRef: `x402:${x402.settlement.settle.transaction}`
@@ -102,7 +109,8 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
 
       reply.header("X-Oracle-Auth-Mode", "x402")
       reply.header("X-Oracle-Billing-Mode", "x402")
-      reply.header("X-Oracle-Cost", PRICING.fast.amount)
+      reply.header("X-Oracle-Verification-Mode", verificationMode)
+      reply.header("X-Oracle-Cost", verifyAmount)
       reply.header("X-Oracle-Cost-MicroUSDC", x402.settlement.paymentRequirements.amount)
       reply.header("X-Oracle-Currency", "USDC")
       reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
@@ -135,7 +143,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         trust_receipt: verification.trust_receipt,
         billed: {
           mode: "x402",
-          cost_usdc: PRICING.fast.amount,
+          cost_usdc: verifyAmount,
           cost_microusdc: Number(x402.settlement.paymentRequirements.amount),
           payer: x402.settlement.settle.payer || null,
           transaction: x402.settlement.settle.transaction,
@@ -144,8 +152,11 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         oracle: {
           version: ENGINE_VERSION,
           signals_version: ORACLE_SIGNALS_VERSION,
+          verification_mode: verification.verification_mode,
           trust_signing_enabled: TRUST_SIGNING_ENABLED
-        }
+        },
+        verification_mode: verification.verification_mode,
+        semantic_judge: verification.semantic_judge
       }
     }
 
@@ -170,7 +181,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         usageId,
         accountId: resolved.account_id,
         service: "verify",
-        costUsdc: PRICING.fast.amount,
+        costUsdc: verifyAmount,
         reference: idempotencyKey
       })
 
@@ -181,8 +192,8 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
               "insufficient_balance",
               buildInsufficientBalanceDetails({
                 service: "verify",
-                costMicrousdc: Math.round(Number(PRICING.fast.amount) * 1_000_000),
-                costUsdc: PRICING.fast.amount,
+                costMicrousdc: Math.round(Number(verifyAmount) * 1_000_000),
+                costUsdc: verifyAmount,
                 balanceMicrousdc: Number(debit.balance_microusdc ?? 0)
               })
             )
@@ -199,6 +210,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         prompt,
         response,
         domain,
+        mode: verificationMode,
         accountId: resolved.account_id,
         usageId,
         paymentRef: null
@@ -206,7 +218,8 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
 
       reply.header("X-Oracle-Auth-Mode", "bearer")
       reply.header("X-Oracle-Billing-Mode", "account")
-      reply.header("X-Oracle-Cost", PRICING.fast.amount)
+      reply.header("X-Oracle-Verification-Mode", verificationMode)
+      reply.header("X-Oracle-Cost", verifyAmount)
       reply.header("X-Oracle-Cost-MicroUSDC", String(debit.billed_cost_microusdc))
       reply.header("X-Oracle-Currency", "USDC")
       reply.header("X-Oracle-Engine-Version", ENGINE_VERSION)
@@ -261,8 +274,11 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
         oracle: {
           version: ENGINE_VERSION,
           signals_version: ORACLE_SIGNALS_VERSION,
+          verification_mode: verification.verification_mode,
           trust_signing_enabled: TRUST_SIGNING_ENABLED
-        }
+        },
+        verification_mode: verification.verification_mode,
+        semantic_judge: verification.semantic_judge
       }
     }
 
@@ -328,6 +344,7 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
       prompt,
       response,
       domain,
+      mode: verificationMode,
       accountId: null,
       usageId: null,
       paymentRef: ref
@@ -365,8 +382,11 @@ export const verifyRoute: FastifyPluginAsync = async (app) => {
       oracle: {
         version: ENGINE_VERSION,
         signals_version: ORACLE_SIGNALS_VERSION,
+        verification_mode: verification.verification_mode,
         trust_signing_enabled: TRUST_SIGNING_ENABLED
-      }
+      },
+      verification_mode: verification.verification_mode,
+      semantic_judge: verification.semantic_judge
     }
   })
 }

@@ -29,6 +29,10 @@ export function buildPublicPricing(baseUrl: string) {
     service: "verify",
     amountUsdc: PRICING.fast.amount
   })
+  const semanticJudgeAccept = buildX402Accept({
+    service: "verify",
+    amountUsdc: PRICING.semantic_judge.amount
+  })
   const batchAccept = buildX402Accept({
     service: "verify_batch",
     amountUsdc: getBatchAmount(1)
@@ -52,7 +56,7 @@ export function buildPublicPricing(baseUrl: string) {
           verify: `${baseUrl}/verify`,
           verify_batch: `${baseUrl}/verify/batch`
         },
-        accepts: [verifyAccept, batchAccept]
+        accepts: [verifyAccept, semanticJudgeAccept, batchAccept]
       }
     },
     auth: {
@@ -61,6 +65,20 @@ export function buildPublicPricing(baseUrl: string) {
     },
     verify: {
       service: "verify",
+      default_mode: "fast_heuristic",
+      modes: {
+        fast_heuristic: {
+          cost_usdc: PRICING.fast.amount,
+          cost_microusdc: Math.round(Number(PRICING.fast.amount) * 1_000_000),
+          description: "Fast deterministic trust signals for high-volume gating."
+        },
+        semantic_judge: {
+          cost_usdc: PRICING.semantic_judge.amount,
+          cost_microusdc: Math.round(Number(PRICING.semantic_judge.amount) * 1_000_000),
+          description:
+            "Deeper deterministic semantic judge pass with support, caution, and risky-language checks."
+        }
+      },
       cost_usdc: PRICING.fast.amount,
       cost_microusdc: Math.round(Number(PRICING.fast.amount) * 1_000_000)
     },

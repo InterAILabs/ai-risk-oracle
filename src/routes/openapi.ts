@@ -29,7 +29,12 @@ const verifyRequestSchema = {
   properties: {
     prompt: { type: "string" },
     response: { type: "string" },
-    domain: { type: "string", default: "general" }
+    domain: { type: "string", default: "general" },
+    mode: {
+      type: "string",
+      enum: ["fast_heuristic", "semantic_judge"],
+      default: "fast_heuristic"
+    }
   },
   required: ["prompt", "response"]
 } as const

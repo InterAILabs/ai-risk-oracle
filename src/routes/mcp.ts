@@ -1,6 +1,11 @@
 import { randomUUID } from "crypto"
 import { FastifyPluginAsync, FastifyRequest } from "fastify"
-import { getBatchAmount, PRICING } from "../config/pricing.js"
+import {
+  getBatchAmount,
+  getVerifyAmount,
+  normalizeVerificationMode,
+  PRICING
+} from "../config/pricing.js"
 import { extractBearerToken } from "../lib/auth.js"
 import { trackDiscoveryEvent, trackServiceEvent } from "../lib/discovery.js"
 import { economicError } from "../lib/httpErrors.js"
@@ -62,6 +67,10 @@ const TOOL_DEFS = [
         prompt: { type: "string" },
         response: { type: "string" },
         domain: { type: "string" },
+        mode: {
+          type: "string",
+          enum: ["fast_heuristic", "semantic_judge"]
+        },
         idempotency_key: { type: "string" }
       },
       required: ["prompt", "response"]
@@ -1010,6 +1019,8 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
         const prompt = String(args.prompt ?? "")
         const response = String(args.response ?? "")
         const domain = String(args.domain ?? "general")
+        const verificationMode = normalizeVerificationMode(args.mode)
+        const verifyAmount = getVerifyAmount(verificationMode)
         const idempotencyKey =
           typeof args.idempotency_key === "string" ? args.idempotency_key : undefined
 
@@ -1018,7 +1029,7 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
           usageId,
           accountId: auth.resolved.account_id,
           service: "verify",
-          costUsdc: PRICING.fast.amount,
+          costUsdc: verifyAmount,
           reference: idempotencyKey
         })
 
@@ -1029,8 +1040,8 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
                 ...economicError("insufficient_balance"),
                 ...buildInsufficientBalanceDetails({
                   service: "verify",
-                  costMicrousdc: Math.round(Number(PRICING.fast.amount) * 1_000_000),
-                  costUsdc: PRICING.fast.amount,
+                  costMicrousdc: Math.round(Number(verifyAmount) * 1_000_000),
+                  costUsdc: verifyAmount,
                   balanceMicrousdc: Number(debit.balance_microusdc ?? 0)
                 })
               })
@@ -1051,6 +1062,7 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
           prompt,
           response,
           domain,
+          mode: verificationMode,
           accountId: auth.resolved.account_id,
           usageId,
           paymentRef: null
@@ -1062,7 +1074,7 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
             content: contentJson({
               billed: {
                 mode: "account",
-                cost_usdc: PRICING.fast.amount,
+                cost_usdc: verifyAmount,
                 cost_microusdc: debit.billed_cost_microusdc,
                 remaining_balance_usdc: debit.remaining_balance_usdc,
                 remaining_balance_microusdc: debit.remaining_balance_microusdc,
@@ -1075,6 +1087,8 @@ export const mcpRoute: FastifyPluginAsync = async (app) => {
                 trust_recommended_action: verification.trust_recommended_action,
                 confidence_band: verification.confidence_band,
                 signals: verification.signals,
+                verification_mode: verification.verification_mode,
+                semantic_judge: verification.semantic_judge,
                 historical_context: verification.historical_context,
                 trust_receipt: verification.trust_receipt,
                 oracle: {

@@ -226,6 +226,7 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
         "signals",
         "historical_context",
         "trust_receipt",
+        "verification_mode",
         "oracle"
       ],
       properties: {
@@ -296,13 +297,50 @@ export const schemasRoute: FastifyPluginAsync = async (app) => {
         signals: trustSignalsSchema,
         historical_context: historicalContextSchema,
         trust_receipt: trustReceiptWithSignatureSchema,
+        verification_mode: {
+          type: "string",
+          enum: ["fast_heuristic", "semantic_judge"]
+        },
+        semantic_judge: {
+          type: ["object", "null"],
+          additionalProperties: false,
+          required: [
+            "judge_version",
+            "mode",
+            "semantic_alignment",
+            "support_score",
+            "caution_score",
+            "risk_delta",
+            "checks"
+          ],
+          properties: {
+            judge_version: { type: "string", enum: ["semantic-judge-v1"] },
+            mode: { type: "string", enum: ["semantic_judge"] },
+            semantic_alignment: { type: "number", minimum: 0, maximum: 1 },
+            support_score: { type: "number", minimum: 0, maximum: 1 },
+            caution_score: { type: "number", minimum: 0, maximum: 1 },
+            risk_delta: { type: "number", minimum: 0, maximum: 1 },
+            checks: {
+              type: "array",
+              items: { type: "string" }
+            }
+          }
+        },
         oracle: {
           type: "object",
           additionalProperties: false,
-          required: ["version", "signals_version", "trust_signing_enabled"],
+          required: [
+            "version",
+            "signals_version",
+            "trust_signing_enabled"
+          ],
           properties: {
             version: { type: "string" },
             signals_version: { type: "string" },
+            verification_mode: {
+              type: "string",
+              enum: ["fast_heuristic", "semantic_judge"]
+            },
             trust_signing_enabled: { type: "boolean" }
           }
         }

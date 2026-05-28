@@ -27,6 +27,7 @@ Use it when a downstream action is more expensive than the verification: before 
 - x402 `402 Payment Required`, `PAYMENT-SIGNATURE`, facilitator verify/settle, and `PAYMENT-RESPONSE`
 - Idempotent billing with `X-Idempotency-Key`
 - Single and batch verification
+- Verification tiers: `fast_heuristic` and `semantic_judge`
 - Historical account/domain trust context in verification responses
 - Onchain topups on Base USDC
 - Account traceability via `/me`, `/ledger`, `/usage`
@@ -154,7 +155,8 @@ curl -X POST http://localhost:3000/verify \
   -d '{
     "prompt": "What is the capital of France?",
     "response": "Paris",
-    "domain": "general"
+    "domain": "general",
+    "mode": "fast_heuristic"
   }'
 ```
 
@@ -343,7 +345,9 @@ curl -X POST http://localhost:3000/a2a \
 - Unit: microusdc (`1e-6 USDC`)
 - Model: prepaid balance
 - Debit: per request
-- Example verify cost: `0.0006 USDC`
+- `fast_heuristic` verify cost: `0.0006 USDC`
+- `semantic_judge` verify cost: `0.0030 USDC`
+- `verify_batch` cost: `0.0006 USDC` base + `0.0002 USDC` per item
 
 ## x402 Status
 
@@ -358,6 +362,15 @@ Paid endpoints support the x402 v2 server flow while keeping bearer prepaid bill
 - `/pricing` exposes the same `protocols.x402.accepts` metadata for discovery
 
 Set `X402_FACILITATOR_URL` to choose the facilitator; otherwise the default x402 facilitator URL from the official client is used.
+
+## Verification Tiers
+
+`POST /verify` accepts `mode`.
+
+- `fast_heuristic`: default, low-cost deterministic consistency and trust-signal check.
+- `semantic_judge`: deeper deterministic semantic pass that adds alignment, support, caution, and risky-language checks to the response as `semantic_judge`.
+
+`semantic_judge` is priced higher because it is the contract surface for deeper judge-style verification. Today it is deterministic and local; it is designed so a future LLM-as-judge or evidence-backed implementation can replace the internals without changing client payloads.
 
 ## Agent-Native Examples
 

@@ -86,7 +86,8 @@ curl -sS -X POST http://localhost:3000/verify \
   -d '{
     "prompt": "What is the capital of France?",
     "response": "Paris",
-    "domain": "general"
+    "domain": "general",
+    "mode": "fast_heuristic"
   }'
 ```
 
@@ -100,6 +101,19 @@ The response includes:
 - `signals`
 - `historical_context`
 - `trust_receipt`
+
+For a deeper single-response check, set:
+
+```json
+{
+  "mode": "semantic_judge"
+}
+```
+
+That tier returns an additional `semantic_judge` object with alignment, support,
+caution, and risky-language checks. It is priced separately from the default
+`fast_heuristic` tier; inspect `GET /pricing` before using it in automated
+workflows.
 
 ## 4a. Inspect x402 Payment Requirements
 

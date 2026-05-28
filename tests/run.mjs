@@ -323,6 +323,10 @@ async function runIntegrationChecks() {
       pricing.json?.pricing?.protocols?.x402?.accepts?.[0]?.amount === "600",
       "pricing publica x402 atomic amount"
     )
+    check(
+      pricing.json?.pricing?.verify?.modes?.semantic_judge?.cost_microusdc === 3000,
+      "pricing publica modo semantic_judge"
+    )
 
     const currentPaymentMode = process.env.PAYMENT_MODE
     process.env.PAYMENT_MODE = "onchain"
@@ -821,6 +825,30 @@ async function runIntegrationChecks() {
       "verify repite idempotency sin doble cargo"
     )
 
+    const semanticVerify = await http("POST", "/verify", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "X-Idempotency-Key": `semantic-verify-${Date.now()}`
+      },
+      body: {
+        ...verificationPayload(
+          "Should an agent release payment after checking delivery?",
+          "Check delivery, match the invoice, and review exceptions before release."
+        ),
+        mode: "semantic_judge"
+      }
+    })
+    assert.equal(semanticVerify.status, 200)
+    check(
+      semanticVerify.json?.verification_mode === "semantic_judge" &&
+        semanticVerify.json?.semantic_judge?.judge_version === "semantic-judge-v1",
+      "verify semantic_judge devuelve chequeo semantico"
+    )
+    check(
+      semanticVerify.headers["x-oracle-cost-microusdc"] === "3000",
+      "verify semantic_judge cobra tier correcto"
+    )
+
     const reputationAfterVerify = await http("GET", "/trust/reputation?domains_limit=5", {
       headers: {
         Authorization: `Bearer ${apiKey}`
@@ -945,7 +973,7 @@ async function runIntegrationChecks() {
     })
     assert.equal(me.status, 200)
     check(
-      me.json?.balance?.balance_usdc === "0.016600",
+      me.json?.balance?.balance_usdc === "0.013600",
       "billing final conserva el saldo esperado"
     )
   } finally {
