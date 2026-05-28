@@ -53,6 +53,8 @@
     "example:semantic-judge": "tsx ./examples/semantic-judge-trial.ts",
     "example:pre-payment": "tsx ./examples/pre-payment-verification.ts",
     "example:pre-tool": "tsx ./examples/pre-tool-execution-check.ts",
+    "example:agent-before-payment": "tsx ./examples/agent-before-payment.mjs",
+    "example:agent-before-tool": "tsx ./examples/agent-before-tool-execution.mjs",
     "example:mcp-agent": "tsx ./examples/mcp-agent-verify.ts",
     "example:a2a-agent": "tsx ./examples/a2a-agent-verify.ts"
   },

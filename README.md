@@ -19,6 +19,16 @@ This is not a human-facing app. It is a machine-to-machine primitive.
 
 Use it when a downstream action is more expensive than the verification: before paying another agent, executing a tool, accepting a tool output, storing a claim, or returning a sensitive answer.
 
+## Current Limits
+
+InterAI Risk Oracle estimates risk; it does not guarantee factual truth.
+
+- `fast_heuristic` is fast, deterministic, and cheap. It is useful for gating and traceability, not universal fact-checking.
+- `semantic_judge` is a richer deterministic local judge today, not an external LLM or evidence-backed authority.
+- The service does not replace human review in medical, legal, financial, safety-critical, or irreversible workflows.
+- A trust receipt proves what the oracle evaluated and recommended at a point in time; it does not prove the underlying answer is true.
+- The strongest current value is machine-to-machine gating, receipts, idempotent billing, signing, discovery, and operational traceability.
+
 ## Core Capabilities
 
 - Bearer API key authentication
@@ -76,7 +86,7 @@ The unauthenticated response returns `402` plus `PAYMENT-REQUIRED`. Bearer API-k
 1. Install dependencies and start the API:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -379,6 +389,8 @@ The repository includes copyable integration patterns:
 ```bash
 npm run example:x402
 npm run example:semantic-judge
+npm run example:agent-before-tool
+npm run example:agent-before-payment
 npm run example:pre-payment
 npm run example:pre-tool
 npm run example:mcp-agent
@@ -388,6 +400,8 @@ npm run python:sdk
 
 - `examples/x402-client.ts` inspects the production `402` response and decodes `PAYMENT-REQUIRED`.
 - `examples/semantic-judge-trial.ts` creates a trial account and spends the trial credit on one `semantic_judge` verification.
+- `examples/agent-before-tool-execution.mjs` shows an agent gating a risky tool call on `accept` / `review` / `reject`.
+- `examples/agent-before-payment.mjs` shows an agent using idempotency and a public trust receipt before releasing funds.
 - `examples/pre-payment-verification.ts` gates a payment decision on a trust receipt.
 - `examples/pre-tool-execution-check.ts` gates a tool execution on a trust receipt.
 - `examples/mcp-agent-verify.ts` calls the MCP tool bridge.

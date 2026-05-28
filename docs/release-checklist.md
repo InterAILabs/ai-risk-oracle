@@ -1,7 +1,7 @@
 # Release Checklist
 
-Use this before publishing the package, making the repository public, or cutting
-a deployment intended for external integrators.
+Use this before publishing the package, making the repository public, cutting a
+GitHub release, or deploying a version intended for external agents.
 
 ## 1. Local Safety
 
@@ -11,91 +11,121 @@ Confirm the working tree only contains intentional changes:
 git status --short
 ```
 
-Do not publish local secrets, databases, logs, or generated scratch files.
-
-Must not be included:
+Never publish local secrets or generated runtime files:
 
 - `.env`
 - `data.db`, `data.db-shm`, `data.db-wal`
 - `server.out.log`, `server.err.log`
+- `*.log`
+- `*.zip`
 - `node_modules`
-- test databases or temp files
+- local test databases or temp files
 
-## 2. Required Checks
-
-Run the product-facing checks:
+Run:
 
 ```bash
-npm run package:check
 npm run secrets:check
-npm run contracts
-npm run typecheck:examples
-npm run smoke:sdk
-npm test
-npm run deploy:check
 ```
 
-What each check protects:
+If a sensitive file is tracked by mistake, remove it from tracking without
+deleting it locally:
 
-- `package:check`: validates the npm package contents before publish.
-- `secrets:check`: scans tracked files for private keys, real tokens, and non-placeholder secret-like env assignments.
-- `contracts`: validates SDK export, OpenAPI paths, schemas, pricing, and discovery bundle.
-- `typecheck:examples`: validates package-style TypeScript SDK consumption.
-- `smoke:sdk`: validates the SDK against a live in-process server.
-- `test`: validates scoring, billing, idempotency, A2A, MCP, receipts, and core routes.
-- `deploy:check`: validates production env safety flags and required onchain/signing config.
+```bash
+git rm --cached <file>
+```
 
-## 3. Public Contract Review
+## 2. Required Local Commands
 
-Inspect these files before release:
+Run these before every release candidate:
 
-- `README.md`
-- `docs/quickstart.md`
-- `docs/api-reference.md`
-- `package.json`
-- `sdk/interai-risk-oracle.ts`
+```bash
+npm ci
+npm run build
+npm test
+npm run contracts
+npm run benchmark
+npm run secrets:check
+npm run python:sdk
+npm run package:check
+npm run deploy:check
+npm run smoke:idempotency
+npm run smoke:trust-signing
+npm run smoke:sdk
+```
 
-Check that examples use stable endpoints, bearer auth, and idempotency keys.
+What the checks protect:
+
+- `build`: TypeScript server and SDK output.
+- `test`: scoring, billing, idempotency, readiness, admin, A2A, MCP, receipts, and core routes.
+- `contracts`: SDK export, OpenAPI paths, schemas, pricing, and discovery bundle.
+- `benchmark`: public calibration report across trust-layer scenarios.
+- `secrets:check`: tracked-file secret scan.
+- `python:sdk`: dependency-free Python example syntax when Python is available.
+- `package:check`: npm package dry-run and unsafe file exclusion.
+- `deploy:check`: production env safety flags and required onchain/signing config.
+- `smoke:idempotency`: replay semantics and receipt stability.
+- `smoke:trust-signing`: receipt signing and verification behavior.
+- `smoke:sdk`: SDK behavior against an in-process server.
+
+## 3. Production Manual Checks
+
+After deploy, manually check the live service:
+
+- `GET /health`
+- `GET /ready`
+- `GET /pricing`
+- `GET /.well-known/ai-service.json`
+- `GET /.well-known/agent.json`
+- `POST /mcp` with `initialize`
+- `POST /a2a` with `message/send`
+- `POST /verify` without auth returns `402`
+- `POST /verify` with bearer auth and no balance returns `insufficient_balance`
+- `POST /topup/create`
+- `POST /topup/confirm` with a real transaction or test environment
+- replaying the same top-up transaction fails
+- public receipt lookup via `GET /trust/receipts/:receiptId`
 
 ## 4. Environment Review
 
-Production-safe defaults:
+Production-safe values:
 
 ```env
 PAYMENT_MODE=onchain
 DEV_TOPUP_ENABLED=false
 ALLOW_FAKE_TOPUP_CONFIRM=false
 ONBOARDING_DEV_AUTO_CREDIT_ENABLED=false
+ONBOARDING_TRIAL_CREDIT_ENABLED=false
+BODY_LIMIT_BYTES=32000
+REQUEST_TIMEOUT_MS=6000
+RL_CAPACITY=120
+RL_REFILL_PER_SEC=2
 ```
 
-Required for onchain top-ups:
+Required:
 
 ```env
 TOPUP_RECEIVE_ADDRESS=0x...
 BASE_RPC_URL=https://...
-```
-
-Optional but recommended for signed trust receipts:
-
-```env
+ADMIN_TOKEN=...
 ORACLE_SIGNING_SECRET=...
 ```
 
-`npm run deploy:check` expects production-like environment variables and fails
-if dev funding, fake top-up confirmation, or weak defaults are enabled.
+Use a long, non-default `ADMIN_TOKEN` and a long `ORACLE_SIGNING_SECRET`.
 
-## 5. Package Dry Run
+## 5. Public Contract Review
 
-`npm run package:check` already performs a dry run and validates required files.
-If you want to inspect the raw npm output:
+Inspect these files before release:
 
-```bash
-npm pack --dry-run
-```
+- `README.md`
+- `docs/quickstart.md`
+- `docs/api-reference.md`
+- `docs/release-checklist.md`
+- `package.json`
+- `sdk/interai-risk-oracle.ts`
+- `src/routes/openapi.ts`
+- `src/routes/schemas.ts`
 
-The package should include compiled `dist` files, docs, README, and
-`package.json`. It should not include local databases, `.env`, logs, tests, or
-`node_modules`.
+Check that examples use stable endpoints, bearer auth, and idempotency keys.
 
 ## 6. Release Notes
 
@@ -105,6 +135,7 @@ For every release, summarize:
 - API contract changes
 - pricing or billing changes
 - trust receipt/schema changes
+- production config changes
 - migration notes for integrators
 
 If any public response field changes, treat it as a contract change and update
