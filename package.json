@@ -50,6 +50,7 @@
     "example:basic": "tsx ./examples/basic-agent.mjs",
     "example:basic:prod": "tsx ./examples/basic-agent-production.mjs",
     "example:x402": "tsx ./examples/x402-client.ts",
+    "example:semantic-judge": "tsx ./examples/semantic-judge-trial.ts",
     "example:pre-payment": "tsx ./examples/pre-payment-verification.ts",
     "example:pre-tool": "tsx ./examples/pre-tool-execution-check.ts",
     "example:mcp-agent": "tsx ./examples/mcp-agent-verify.ts",

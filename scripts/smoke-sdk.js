@@ -49,6 +49,24 @@ async function main() {
       throw new Error("sdk_smoke_missing_trust_receipt")
     }
 
+    const semanticJudge = await client.verify(
+      {
+        prompt: "Should the agent release payment after checking delivery?",
+        response:
+          "Check delivery evidence, match the invoice, verify the receipt, and review exceptions before release.",
+        domain: "agentic-commerce",
+        mode: "semantic_judge"
+      },
+      `sdk-smoke-semantic-${Date.now()}`
+    )
+
+    if (
+      semanticJudge?.verification_mode !== "semantic_judge" ||
+      semanticJudge?.semantic_judge?.judge_version !== "semantic-judge-v1"
+    ) {
+      throw new Error("sdk_smoke_semantic_judge_failed")
+    }
+
     const bundle = await client.getDiscoveryBundle()
 
     if (bundle?.interfaces?.a2a?.endpoint == null) {

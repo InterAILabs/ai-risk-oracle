@@ -136,6 +136,14 @@ For a decoded TypeScript example:
 npm run example:x402
 ```
 
+To try the higher-value semantic tier against the live deployment with onboarding
+trial credit. The default public trial currently covers one `semantic_judge`
+call or several `fast_heuristic` calls:
+
+```bash
+npm run example:semantic-judge
+```
+
 ## 5. Verify A Batch
 
 ```bash

@@ -316,6 +316,11 @@ async function runIntegrationChecks() {
       "pricing publica trial"
     )
     check(
+      typeof pricing.json?.pricing?.trial?.estimated_calls_by_mode?.semantic_judge ===
+        "number",
+      "pricing publica trial por modo"
+    )
+    check(
       pricing.json?.pricing?.protocols?.x402?.accepts?.[0]?.scheme === "exact",
       "pricing publica x402 exact accepts"
     )

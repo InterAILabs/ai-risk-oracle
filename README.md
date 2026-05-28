@@ -378,6 +378,7 @@ The repository includes copyable integration patterns:
 
 ```bash
 npm run example:x402
+npm run example:semantic-judge
 npm run example:pre-payment
 npm run example:pre-tool
 npm run example:mcp-agent
@@ -386,6 +387,7 @@ npm run python:sdk
 ```
 
 - `examples/x402-client.ts` inspects the production `402` response and decodes `PAYMENT-REQUIRED`.
+- `examples/semantic-judge-trial.ts` creates a trial account and spends the trial credit on one `semantic_judge` verification.
 - `examples/pre-payment-verification.ts` gates a payment decision on a trust receipt.
 - `examples/pre-tool-execution-check.ts` gates a tool execution on a trust receipt.
 - `examples/mcp-agent-verify.ts` calls the MCP tool bridge.

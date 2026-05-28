@@ -11,16 +11,27 @@ export function getTrialOffer() {
   const amountUsdc = String(process.env.ONBOARDING_TRIAL_CREDIT_USDC ?? "0.003")
   const amountMicrousdc = Math.max(0, Math.round(Number(amountUsdc) * 1_000_000))
   const verifyCostMicrousdc = Math.round(Number(PRICING.fast.amount) * 1_000_000)
+  const semanticJudgeCostMicrousdc = Math.round(
+    Number(PRICING.semantic_judge.amount) * 1_000_000
+  )
   const estimatedVerifyCalls =
     verifyCostMicrousdc > 0
       ? Math.floor(amountMicrousdc / verifyCostMicrousdc)
+      : 0
+  const estimatedSemanticJudgeCalls =
+    semanticJudgeCostMicrousdc > 0
+      ? Math.floor(amountMicrousdc / semanticJudgeCostMicrousdc)
       : 0
 
   return {
     enabled,
     amount_usdc: amountUsdc,
     amount_microusdc: amountMicrousdc,
-    estimated_verify_calls: estimatedVerifyCalls
+    estimated_verify_calls: estimatedVerifyCalls,
+    estimated_calls_by_mode: {
+      fast_heuristic: estimatedVerifyCalls,
+      semantic_judge: estimatedSemanticJudgeCalls
+    }
   }
 }
 
