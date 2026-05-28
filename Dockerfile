@@ -1,21 +1,25 @@
-FROM node:22-alpine
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# copiar package files
 COPY package*.json ./
+RUN npm ci
 
-# instalar dependencias
-RUN npm install
-
-# copiar el resto del proyecto
-COPY . .
-
-# compilar typescript
+COPY tsconfig*.json ./
+COPY src ./src
+COPY sdk ./sdk
 RUN npm run build
 
-# exponer puerto
+FROM node:22-alpine AS runtime
+
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3000
 
-# iniciar servidor
 CMD ["npm", "run", "start"]
