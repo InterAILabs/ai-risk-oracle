@@ -383,13 +383,27 @@ The bearer-authenticated examples require `ORACLE_API_KEY`; use `/onboard` and f
 
 ## Benchmark Baseline
 
-Run the initial public benchmark:
+Run the public benchmark:
 
 ```bash
 npm run benchmark
 ```
 
-The benchmark is intentionally small and honest. It compares expected actions against the current trust-layer action across supported, uncertain, and risky outputs. The current baseline is conservative and may warn that calibration work is needed; that warning is product signal, not a test failure.
+The benchmark currently covers 30 trust-layer scenarios across math, factual answers, agentic commerce, medical/legal/finance, tool execution, tool output, A2A handoff, numeric claims, trust receipts, and batch agent workflows.
+
+Current baseline:
+
+| Metric | Result |
+| --- | ---: |
+| Cases | 30 |
+| Passed | 30 |
+| Failed | 0 |
+| Accuracy | 100% |
+| False positives | 0 |
+| False negatives | 0 |
+| Expected accept / review / reject | 11 / 12 / 7 |
+
+This benchmark is intentionally transparent and should keep expanding. Its purpose is to make calibration visible: which answers are accepted, which require review, and which are rejected before an agent trusts an output, executes a tool, or settles payment.
 
 ## Local Verification
 

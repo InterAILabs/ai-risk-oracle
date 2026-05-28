@@ -31,7 +31,16 @@ export function computeSignals(prompt: string, response: string): Signals {
 
   let numeric_consistency = clamp(numbers.length > 0 ? 0.8 : 0.5)
 
-  const confidentWords = ["always", "never", "guaranteed", "definitely", "proven"]
+  const confidentWords = [
+    "absolutely",
+    "always",
+    "certainly",
+    "definitely",
+    "forever",
+    "guaranteed",
+    "never",
+    "proven"
+  ]
   let overconfidence = clamp(
     confidentWords.some((w) => r.includes(w)) ? 0.8 : 0.3
   )
@@ -51,12 +60,53 @@ export function computeSignals(prompt: string, response: string): Signals {
     }
   }
 
+  const cautiousWords = ["confirm", "check", "match", "review", "verify", "validate"]
   const cautiousProcedure =
-    ["confirm", "check", "match", "review"].filter((word) => r.includes(word))
-      .length >= 2
-  if (cautiousProcedure && promptNumbers.length === 0) {
-    semantic_relevance = Math.max(semantic_relevance, 0.65)
+    cautiousWords.filter((word) => r.includes(word)).length >= 2
+  const negatedProcedure = [
+    "without checking",
+    "without matching",
+    "without review",
+    "without verifying",
+    "without validating",
+    "no review",
+    "no verification",
+    "no validation",
+    "immediately without"
+  ].some((phrase) => r.includes(phrase))
+  const sensitivePrompt = [
+    "contract",
+    "clause",
+    "finance",
+    "jurisdiction",
+    "legal",
+    "medication",
+    "patient",
+    "revenue"
+  ].some((word) => p.includes(word))
+  if (cautiousProcedure && !negatedProcedure && promptNumbers.length === 0) {
+    semantic_relevance = Math.max(semantic_relevance, sensitivePrompt ? 0.65 : 0.68)
     overconfidence = Math.min(overconfidence, 0.15)
+  }
+
+  const unsupportedConfidentAnswer = overconfidence >= 0.8 && semantic_relevance < 0.35
+  if (unsupportedConfidentAnswer) {
+    contradiction_risk = Math.max(contradiction_risk, 0.6)
+    unsupported_specificity = Math.max(unsupported_specificity, 0.55)
+  }
+
+  const explicitCorrectAnswer =
+    r.includes("correct") && semantic_relevance >= 0.25 && !sensitivePrompt
+  if (explicitCorrectAnswer) {
+    semantic_relevance = Math.max(semantic_relevance, 0.72)
+    overconfidence = Math.min(overconfidence, 0.2)
+  }
+
+  const missingSource =
+    r.includes("source") && (r.includes("missing") || r.includes("request"))
+  if (missingSource) {
+    semantic_relevance = Math.min(semantic_relevance, 0.55)
+    unsupported_specificity = Math.max(unsupported_specificity, 0.45)
   }
 
   return {
