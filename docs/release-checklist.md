@@ -27,6 +27,7 @@ Run the product-facing checks:
 
 ```bash
 npm run package:check
+npm run secrets:check
 npm run contracts
 npm run typecheck:examples
 npm run smoke:sdk
@@ -37,6 +38,7 @@ npm run deploy:check
 What each check protects:
 
 - `package:check`: validates the npm package contents before publish.
+- `secrets:check`: scans tracked files for private keys, real tokens, and non-placeholder secret-like env assignments.
 - `contracts`: validates SDK export, OpenAPI paths, schemas, pricing, and discovery bundle.
 - `typecheck:examples`: validates package-style TypeScript SDK consumption.
 - `smoke:sdk`: validates the SDK against a live in-process server.
