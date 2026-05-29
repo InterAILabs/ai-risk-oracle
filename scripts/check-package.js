@@ -23,8 +23,11 @@ function main() {
   const requiredFiles = [
     "package.json",
     "README.md",
+    "CHANGELOG.md",
     "docs/quickstart.md",
     "docs/api-reference.md",
+    "docs/benchmark-baseline.md",
+    "docs/public-beta-plan.md",
     "docs/release-checklist.md",
     "dist/sdk/interai-risk-oracle.js",
     "dist/sdk/interai-risk-oracle.d.ts"

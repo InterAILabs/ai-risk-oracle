@@ -120,9 +120,12 @@ Use a long, non-default `ADMIN_TOKEN` and a long `ORACLE_SIGNING_SECRET`.
 
 Inspect these files before release:
 
+- `CHANGELOG.md`
 - `README.md`
 - `docs/quickstart.md`
 - `docs/api-reference.md`
+- `docs/benchmark-baseline.md`
+- `docs/public-beta-plan.md`
 - `docs/release-checklist.md`
 - `package.json`
 - `sdk/interai-risk-oracle.ts`
@@ -144,3 +147,30 @@ For every release, summarize:
 
 If any public response field changes, treat it as a contract change and update
 OpenAPI, schemas, docs, examples, and contract checks together.
+
+## 7. Tag And Release
+
+Only tag a beta when `main` is clean, pushed, CI is green, and production smoke
+has passed.
+
+Suggested beta tag:
+
+```bash
+git tag -a v0.0.1-beta.1 -m "v0.0.1-beta.1"
+git push origin v0.0.1-beta.1
+```
+
+Suggested release title:
+
+```text
+v0.0.1-beta.1 - Public Beta Candidate
+```
+
+Release notes should include:
+
+- deployment URL
+- benchmark baseline
+- known limits
+- SDK/package status
+- smoke commands run
+- migration notes, if any

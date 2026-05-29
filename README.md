@@ -63,6 +63,8 @@ For the shortest external integration path, see [docs/quickstart.md](docs/quicks
 For endpoint details, schemas, A2A, MCP, and SDK usage, see [docs/api-reference.md](docs/api-reference.md).
 For release safety, see [docs/release-checklist.md](docs/release-checklist.md).
 For launch/adoption sequencing, see [docs/public-beta-plan.md](docs/public-beta-plan.md).
+For benchmark calibration, see [docs/benchmark-baseline.md](docs/benchmark-baseline.md).
+For release history, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Try In 2 Minutes
 
@@ -440,6 +442,8 @@ Current baseline:
 | Expected accept / review / reject | 20 / 23 / 17 |
 
 Known misses in this baseline are intentionally visible: one overconfident wrong factual answer is reviewed instead of rejected, and one ambiguous answer is rejected instead of reviewed. The benchmark is not a truth guarantee; its purpose is to make calibration visible before an agent trusts an output, executes a tool, or settles payment.
+
+The release baseline is documented in [docs/benchmark-baseline.md](docs/benchmark-baseline.md).
 
 ## Local Verification
 
