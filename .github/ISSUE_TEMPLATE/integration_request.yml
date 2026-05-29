@@ -1,0 +1,53 @@
+name: Integration request
+description: Ask for help integrating the oracle into an agent or workflow.
+title: "[Integration]: "
+labels:
+  - integration
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What agent or workflow are you trying to gate with the oracle?
+      placeholder: "Example: verify another agent's output before releasing payment."
+    validations:
+      required: true
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Preferred interface
+      options:
+        - HTTP API
+        - x402
+        - MCP
+        - A2A
+        - TypeScript SDK
+        - Python client
+        - Not sure yet
+    validations:
+      required: true
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Decision being gated
+      options:
+        - Tool execution
+        - Payment settlement
+        - User-facing answer
+        - Database/storage write
+        - Code execution or migration
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Include framework, runtime, expected volume, and any constraints. Redact secrets.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I did not include API keys, admin tokens, private transaction details, or sensitive user data.
+          required: true

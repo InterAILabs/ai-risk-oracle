@@ -1,8 +1,17 @@
 {
   "name": "ai-risk-oracle",
-  "version": "0.0.1",
+  "version": "0.0.1-beta.2",
   "description": "AI-to-AI risk, trust receipt, and prepaid verification primitive for autonomous agents.",
+  "license": "Apache-2.0",
   "type": "module",
+  "homepage": "https://ai-risk-oracle.fly.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InterAILabs/ai-risk-oracle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/InterAILabs/ai-risk-oracle/issues"
+  },
   "main": "./dist/sdk/interai-risk-oracle.js",
   "types": "./dist/sdk/interai-risk-oracle.d.ts",
   "exports": {
@@ -19,6 +28,8 @@
     "dist",
     "README.md",
     "CHANGELOG.md",
+    "LICENSE",
+    "SECURITY.md",
     "docs"
   ],
   "keywords": [

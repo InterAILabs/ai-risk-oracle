@@ -24,6 +24,8 @@ function main() {
     "package.json",
     "README.md",
     "CHANGELOG.md",
+    "LICENSE",
+    "SECURITY.md",
     "docs/quickstart.md",
     "docs/api-reference.md",
     "docs/benchmark-baseline.md",

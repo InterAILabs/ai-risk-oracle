@@ -1,0 +1,68 @@
+name: Bug report
+description: Report a reproducible problem in the oracle, SDK, docs, or examples.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include API keys, admin tokens, private transaction details, database files, or exploit details for security issues.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - HTTP API
+        - x402
+        - MCP
+        - A2A
+        - TypeScript SDK
+        - Python client
+        - Billing/top-up
+        - Trust receipts/signing
+        - Documentation/examples
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Minimal reproduction steps with secrets redacted.
+      placeholder: |
+        1. Call ...
+        2. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Local or production, Node version, SDK/client, and relevant config with values redacted.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, API keys, tokens, private transaction details, and local database/log contents.
+          required: true

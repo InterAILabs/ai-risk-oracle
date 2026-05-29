@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security reporting
+    url: https://github.com/InterAILabs/ai-risk-oracle/security/advisories
+    about: Report vulnerabilities privately when available. Do not disclose exploit details in public issues.
+  - name: Live service health
+    url: https://ai-risk-oracle.fly.dev/health
+    about: Check whether the hosted oracle is responding.

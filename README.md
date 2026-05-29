@@ -1,5 +1,9 @@
 # InterAI Risk Oracle
 
+[![CI](https://github.com/InterAILabs/ai-risk-oracle/actions/workflows/ci.yml/badge.svg)](https://github.com/InterAILabs/ai-risk-oracle/actions/workflows/ci.yml)
+[![Release tag](https://img.shields.io/github/v/tag/InterAILabs/ai-risk-oracle?label=release)](https://github.com/InterAILabs/ai-risk-oracle/tags)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
 Paid trust-verification infrastructure for autonomous agents.
 
 InterAI Risk Oracle issues machine-readable trust receipts before agents trust outputs, execute tools, or settle payments.
@@ -65,6 +69,7 @@ For release safety, see [docs/release-checklist.md](docs/release-checklist.md).
 For launch/adoption sequencing, see [docs/public-beta-plan.md](docs/public-beta-plan.md).
 For benchmark calibration, see [docs/benchmark-baseline.md](docs/benchmark-baseline.md).
 For release history, see [CHANGELOG.md](CHANGELOG.md).
+For security reporting, see [SECURITY.md](SECURITY.md).
 
 ## Try In 2 Minutes
 
@@ -583,6 +588,7 @@ If you make the GitHub repository public, the project becomes easier to discover
 - keep the landing page focused on fast technical evaluation and visible discovery contracts
 - add repository topics such as `a2a`, `ai-agents`, `agent-infrastructure`, `typescript`, `fastify`, `trust`, `billing`, `risk-oracle`
 - set the repository homepage to `https://ai-risk-oracle.fly.dev/`
+- keep [LICENSE](LICENSE), [SECURITY.md](SECURITY.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [SUPPORT.md](SUPPORT.md) visible
 
 ## SDK
 

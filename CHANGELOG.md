@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.0.1-beta.2
+
+Public repository readiness update.
+
+### Added
+
+- Apache-2.0 license for clear public use and contribution terms.
+- Security policy with private-reporting guidance and production safety scope.
+- Contribution and support guides for beta integrators.
+- GitHub issue templates for bug reports and integration requests.
+- Pull request template with public contract and safety checks.
+- README badges for CI, release tag, and license.
+
+### Changed
+
+- Package metadata now includes license, repository, homepage, and bugs URLs.
+- Package checks now require license/security docs in the packed artifact.
+
 ## v0.0.1-beta.1
 
 This is the first public-beta release candidate for InterAI Risk Oracle as a
