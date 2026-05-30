@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interai.example/schemas/trust-receipt.schema.json",
+  "title": "InterAI Trust Receipt",
+  "type": "object",
+  "required": ["trust_receipt_id", "decision_id", "issued_at", "risk_level", "recommended_action"],
+  "properties": {
+    "trust_receipt_id": { "type": "string" },
+    "decision_id": { "type": "string" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "use_case": { "type": "string" },
+    "risk_level": { "type": "string" },
+    "recommended_action": { "type": "string" },
+    "policy_summary": { "type": "object", "additionalProperties": true },
+    "signals": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    }
+  },
+  "additionalProperties": true
+}
+

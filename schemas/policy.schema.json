@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interai.example/schemas/policy.schema.json",
+  "title": "InterAI Policy",
+  "type": "object",
+  "properties": {
+    "max_risk_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "require_trust_receipt": { "type": "boolean" },
+    "review_on_missing_context": { "type": "boolean" }
+  },
+  "additionalProperties": true
+}
+

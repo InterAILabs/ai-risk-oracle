@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interai.example/schemas/verify-response.schema.json",
+  "title": "InterAI Verify Response",
+  "type": "object",
+  "required": ["decision_id", "score", "risk_level", "signals", "recommended_action"],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "risk_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "signals": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "recommended_action": {
+      "type": "string",
+      "enum": ["accept", "review", "reject"]
+    },
+    "trust_receipt_id": { "type": "string" }
+  },
+  "additionalProperties": true
+}
+

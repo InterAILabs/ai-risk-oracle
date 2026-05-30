@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interai.example/schemas/verify-request.schema.json",
+  "title": "InterAI Verify Request",
+  "type": "object",
+  "required": ["use_case", "action"],
+  "properties": {
+    "use_case": {
+      "type": "string",
+      "examples": ["agent-before-tool-execution", "agent-before-payment"]
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "policy": {
+      "$ref": "policy.schema.json"
+    }
+  },
+  "additionalProperties": false
+}
+

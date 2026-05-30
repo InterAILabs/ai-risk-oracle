@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interai.example/schemas/discovery.schema.json",
+  "title": "InterAI Discovery Metadata",
+  "type": "object",
+  "required": ["service_name", "base_url", "capabilities", "authentication"],
+  "properties": {
+    "service_name": { "type": "string" },
+    "base_url": { "type": "string", "format": "uri" },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "authentication": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": true
+}
+
