@@ -1,0 +1,16 @@
+{
+  "name": "@interai/risk-oracle",
+  "version": "0.0.0-public-beta",
+  "description": "Hosted API client for InterAI Risk Oracle.",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "keywords": [
+    "interai",
+    "risk-oracle",
+    "autonomous-agents",
+    "trust-receipts"
+  ]
+}
+

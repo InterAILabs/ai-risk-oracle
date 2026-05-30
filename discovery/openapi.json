@@ -1,0 +1,48 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "InterAI Risk Oracle Public API",
+    "version": "0.0.0-public-beta",
+    "description": "Public hosted API contracts for InterAI Risk Oracle."
+  },
+  "servers": [
+    {
+      "url": "https://api.interai.example/v1"
+    }
+  ],
+  "paths": {
+    "/verify": {
+      "post": {
+        "summary": "Verify an autonomous action before execution",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "../schemas/verify-request.schema.json" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification decision",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/verify-response.schema.json" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
+

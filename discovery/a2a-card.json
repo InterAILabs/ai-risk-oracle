@@ -1,0 +1,17 @@
+{
+  "name": "InterAI Risk Oracle",
+  "description": "Agent-to-agent verification service for pre-execution risk decisions.",
+  "url": "https://api.interai.example/v1",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "skills": [
+    {
+      "id": "verify-before-execution",
+      "name": "Verify Before Execution",
+      "description": "Return a risk decision and optional trust receipt for a proposed agent action."
+    }
+  ]
+}
+

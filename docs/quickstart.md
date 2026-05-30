@@ -1,0 +1,44 @@
+# Quickstart
+
+This guide shows how an autonomous agent can verify an action before execution
+using the hosted InterAI Risk Oracle API.
+
+## 1. Get API Access
+
+Request beta access from beta@interai.example and keep your credential in your
+own secret manager.
+
+## 2. Verify Before Execution
+
+```bash
+curl -sS -X POST https://api.interai.example/v1/verify \
+  -H "Authorization: Bearer <interai_credential>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "use_case": "agent-before-tool-execution",
+    "action": {
+      "type": "tool_call",
+      "name": "send_payment",
+      "description": "Send payment after autonomous vendor delivery"
+    },
+    "context": {
+      "agent_id": "agent_123",
+      "environment": "production"
+    },
+    "policy": {
+      "max_risk_level": "medium",
+      "require_trust_receipt": true
+    }
+  }'
+```
+
+## 3. Use The Decision
+
+- `accept`: proceed automatically.
+- `review`: pause and route to human or policy review.
+- `reject`: block execution.
+
+## 4. Store The Receipt
+
+If `trust_receipt_id` is present, store it with the downstream action record.
+Receipts help prove that verification happened before execution.

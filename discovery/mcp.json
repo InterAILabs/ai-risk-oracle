@@ -1,0 +1,12 @@
+{
+  "name": "interai-risk-oracle",
+  "description": "Hosted verification layer for autonomous execution checks.",
+  "tools": [
+    {
+      "name": "verify_autonomous_action",
+      "description": "Verify a proposed autonomous action before execution.",
+      "input_schema": "../schemas/verify-request.schema.json"
+    }
+  ]
+}
+

@@ -1,0 +1,27 @@
+{
+  "service_name": "InterAI Risk Oracle",
+  "base_url": "https://api.interai.example/v1",
+  "description": "Hosted verification and trust infrastructure for autonomous agents.",
+  "capabilities": [
+    "autonomous_execution_verification",
+    "pre_tool_execution_check",
+    "pre_payment_verification",
+    "pre_trade_verification",
+    "trust_receipts",
+    "policy_decisions"
+  ],
+  "authentication": {
+    "type": "bearer",
+    "header": "Authorization"
+  },
+  "pricing": {
+    "model": "hosted_beta",
+    "details": "Contact InterAILabs for beta pricing."
+  },
+  "docs_url": "https://interai.example/docs",
+  "contact": {
+    "email": "beta@interai.example",
+    "url": "https://interai.example/contact"
+  }
+}
+
