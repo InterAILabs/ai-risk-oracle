@@ -11,16 +11,26 @@ const decision = await fetch(`${baseUrl}/verify`, {
     use_case: "agent-before-payment",
     action: {
       type: "payment",
+      name: "release_vendor_payment",
       description: "Release vendor payment after delivery",
-      amount_usd: 125
+      amount_usd: 125,
+      currency: "USD",
+      irreversible: false,
+      external_side_effect: true
     },
     context: {
       agent_id: "buyer_agent_001",
-      counterparty_id: "vendor_agent_456"
+      environment: "production",
+      counterparty_id: "vendor_agent_456",
+      user_confirmation: false
     },
     policy: {
       max_risk_level: "medium",
-      require_trust_receipt: true
+      require_trust_receipt: true,
+      amount_usd_limit: 500,
+      blocked_action_types: ["irreversible_transfer"],
+      require_human_review_above: 0.75,
+      require_user_confirmation_for_irreversible: true
     }
   })
 })
@@ -28,6 +38,6 @@ const decision = await fetch(`${baseUrl}/verify`, {
 const body = await decision.json()
 console.log(body)
 
-if (body.recommended_action !== "accept") {
+if (body.recommended_action !== "allow") {
   throw new Error(`Payment paused: ${body.recommended_action}`)
 }

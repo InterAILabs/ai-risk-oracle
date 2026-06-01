@@ -1,7 +1,7 @@
 {
   "name": "@interai/risk-oracle",
   "version": "0.0.0-public-beta",
-  "description": "Hosted API client for InterAI Risk Oracle.",
+  "description": "Hosted autonomous execution gateway client for InterAI Risk Oracle.",
   "type": "module",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -9,7 +9,9 @@
   "keywords": [
     "interai",
     "risk-oracle",
+    "autonomous-execution",
     "autonomous-agents",
+    "policy-enforcement",
     "trust-receipts"
   ]
 }

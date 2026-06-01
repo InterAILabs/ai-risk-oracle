@@ -10,7 +10,7 @@
     {
       "id": "verify-before-execution",
       "name": "Verify Before Execution",
-      "description": "Return a risk decision and optional trust receipt for a proposed agent action."
+      "description": "Return allow, review_required, or block with policy enforcement and a trust receipt for a proposed agent action."
     }
   ]
 }

@@ -16,7 +16,7 @@ stored for audit, replay protection, and downstream governance.
 Autonomous systems increasingly call tools, move funds, accept third-party
 outputs, and trigger workflows without constant human review. A verification
 layer gives those systems a pre-execution checkpoint: inspect the planned action,
-evaluate risk, and decide whether to accept, review, or reject.
+evaluate risk, and decide whether to allow, require review, or block.
 
 ## Core Use Cases
 
@@ -67,20 +67,28 @@ const decision = await oracle.verify({
   use_case: "agent-before-payment",
   action: {
     type: "payment",
+    name: "release_vendor_payment",
     description: "Release payment to a vendor agent",
-    amount_usd: 125
+    amount_usd: 125,
+    currency: "USD",
+    irreversible: false,
+    external_side_effect: true
   },
   context: {
     agent_id: "agent_123",
-    counterparty_id: "vendor_agent_456"
+    environment: "production",
+    counterparty_id: "vendor_agent_456",
+    user_confirmation: false
   },
   policy: {
     max_risk_level: "medium",
-    require_trust_receipt: true
+    require_trust_receipt: true,
+    amount_usd_limit: 500,
+    require_human_review_above: 0.75
   }
 })
 
-if (decision.recommended_action === "accept") {
+if (decision.recommended_action === "allow") {
   // Continue with the downstream action.
 }
 ```
@@ -90,21 +98,21 @@ if (decision.recommended_action === "accept") {
 ```json
 {
   "decision_id": "dec_01JZPUBLICEXAMPLE",
-  "score": 0.82,
-  "risk_level": "low",
-  "signals": [
-    {
-      "name": "counterparty_reputation",
-      "value": "positive",
-      "weight": 0.32
-    },
-    {
-      "name": "action_amount",
-      "value": "within_policy",
-      "weight": 0.18
-    }
-  ],
-  "recommended_action": "accept",
+  "request_contract": "autonomous_execution",
+  "score": 0.42,
+  "risk_level": "medium",
+  "signals": {
+    "has_external_side_effect": true,
+    "is_irreversible": false,
+    "involves_money": true,
+    "amount_usd": 125,
+    "environment": "production",
+    "action_type": "payment",
+    "autonomous_execution_detected": true
+  },
+  "recommended_action": "review_required",
+  "policy_result": "review_required",
+  "policy_violations": [],
   "trust_receipt_id": "tr_01JZPUBLICEXAMPLE"
 }
 ```

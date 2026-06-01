@@ -12,8 +12,25 @@ const client = new InterAIRiskOracleClient({
 
 const decision = await client.verify({
   use_case: "agent-before-tool-execution",
-  action: { type: "tool_call", description: "Send account notice" },
-  context: { agent_id: "agent_123" },
-  policy: { max_risk_level: "medium", require_trust_receipt: true }
+  action: {
+    type: "tool_call",
+    name: "send_account_notice",
+    description: "Send account notice",
+    external_side_effect: true
+  },
+  context: {
+    agent_id: "agent_123",
+    environment: "production",
+    user_confirmation: false
+  },
+  policy: {
+    max_risk_level: "medium",
+    require_trust_receipt: true,
+    require_human_review_above: 0.75
+  }
 })
+
+if (decision.recommended_action === "allow") {
+  // Execute the downstream action.
+}
 ```

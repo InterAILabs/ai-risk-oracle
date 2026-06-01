@@ -2,6 +2,11 @@
   "service_name": "InterAI Risk Oracle",
   "base_url": "https://ai-risk-oracle.fly.dev",
   "description": "Hosted verification and trust infrastructure for autonomous agents.",
+  "positioning": {
+    "category": "autonomous_execution_gateway",
+    "thesis": "Before an agent executes, InterAI verifies.",
+    "primary_contract": "autonomous_execution"
+  },
   "capabilities": [
     "autonomous_execution_verification",
     "pre_tool_execution_check",
@@ -18,6 +23,16 @@
     "model": "hosted_beta",
     "details": "Contact InterAILabs for beta pricing."
   },
+  "decision_values": ["allow", "review_required", "block"],
+  "policy_fields": [
+    "max_risk_level",
+    "require_trust_receipt",
+    "amount_usd_limit",
+    "blocked_action_types",
+    "allowed_action_types",
+    "require_human_review_above",
+    "require_user_confirmation_for_irreversible"
+  ],
   "docs_url": "https://github.com/InterAILabs/ai-risk-oracle",
   "contact": {
     "url": "https://github.com/InterAILabs/ai-risk-oracle/issues"
