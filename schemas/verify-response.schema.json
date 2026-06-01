@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://interai.example/schemas/verify-response.schema.json",
+  "$id": "https://raw.githubusercontent.com/InterAILabs/ai-risk-oracle/main/schemas/verify-response.schema.json",
   "title": "InterAI Verify Response",
   "type": "object",
   "required": ["decision_id", "score", "risk_level", "signals", "recommended_action"],
@@ -23,4 +23,3 @@
   },
   "additionalProperties": true
 }
-

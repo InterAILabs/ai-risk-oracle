@@ -31,7 +31,7 @@ evaluate risk, and decide whether to accept, review, or reject.
 Use the hosted API. Do not run a local backend from this repository.
 
 ```bash
-curl -sS -X POST https://api.interai.example/v1/verify \
+curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
   -H "Authorization: Bearer <interai_credential>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -59,7 +59,7 @@ curl -sS -X POST https://api.interai.example/v1/verify \
 import { InterAIRiskOracleClient } from "./sdk/typescript/index"
 
 const oracle = new InterAIRiskOracleClient({
-  baseUrl: "https://api.interai.example/v1",
+  baseUrl: "https://ai-risk-oracle.fly.dev",
   apiKey: "replace-with-your-credential"
 })
 
@@ -146,6 +146,6 @@ hosted service internals are proprietary and not open source.
 
 InterAI Risk Oracle is currently available through hosted beta access.
 
-- Docs: https://interai.example/docs
-- Contact: beta@interai.example
-- Security: security@interai.example
+- Docs: https://github.com/InterAILabs/ai-risk-oracle
+- Contact: https://github.com/InterAILabs/ai-risk-oracle/issues
+- Security: use GitHub private vulnerability reporting or Security Advisories.

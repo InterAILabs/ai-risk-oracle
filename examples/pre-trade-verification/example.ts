@@ -1,4 +1,4 @@
-const baseUrl = "https://api.interai.example/v1"
+const baseUrl = "https://ai-risk-oracle.fly.dev"
 const credential = "replace-with-your-credential"
 
 const response = await fetch(`${baseUrl}/verify`, {

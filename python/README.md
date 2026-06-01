@@ -6,7 +6,7 @@ Minimal hosted API client for InterAI Risk Oracle.
 from interai_risk_oracle import InterAIRiskOracleClient
 
 client = InterAIRiskOracleClient(
-    base_url="https://api.interai.example/v1",
+    base_url="https://ai-risk-oracle.fly.dev",
     api_key="replace-with-your-credential",
 )
 
