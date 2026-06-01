@@ -7,6 +7,7 @@
     "issue_trust_receipt",
     "recommend_execution_action"
   ],
+  "decision_values": ["allow", "review_required", "block"],
   "default_action": "POST /verify"
 }
 

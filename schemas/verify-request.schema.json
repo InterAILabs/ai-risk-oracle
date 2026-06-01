@@ -2,24 +2,55 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/InterAILabs/ai-risk-oracle/main/schemas/verify-request.schema.json",
   "title": "InterAI Verify Request",
-  "type": "object",
-  "required": ["use_case", "action"],
-  "properties": {
-    "use_case": {
-      "type": "string",
-      "examples": ["agent-before-tool-execution", "agent-before-payment"]
-    },
-    "action": {
+  "oneOf": [
+    {
+      "title": "Autonomous Execution Request",
       "type": "object",
-      "additionalProperties": true
+      "required": ["use_case", "action"],
+      "properties": {
+        "use_case": {
+          "type": "string",
+          "examples": ["agent-before-tool-execution", "agent-before-payment"]
+        },
+        "action": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "amount_usd": { "type": "number", "minimum": 0 },
+            "currency": { "type": "string" },
+            "irreversible": { "type": "boolean" },
+            "external_side_effect": { "type": "boolean" }
+          },
+          "additionalProperties": true
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "agent_id": { "type": "string" },
+            "environment": { "type": "string" },
+            "counterparty_id": { "type": "string" },
+            "user_confirmation": { "type": "boolean" }
+          },
+          "additionalProperties": true
+        },
+        "policy": {
+          "$ref": "policy.schema.json"
+        }
+      },
+      "additionalProperties": false
     },
-    "context": {
+    {
+      "title": "Legacy Verify Request",
       "type": "object",
-      "additionalProperties": true
-    },
-    "policy": {
-      "$ref": "policy.schema.json"
+      "properties": {
+        "prompt": { "type": "string" },
+        "response": { "type": "string" },
+        "domain": { "type": "string" }
+      },
+      "required": ["prompt", "response"],
+      "additionalProperties": false
     }
-  },
-  "additionalProperties": false
+  ]
 }

@@ -1,5 +1,14 @@
-export type RiskLevel = "low" | "medium" | "high" | "critical"
-export type RecommendedAction = "accept" | "review" | "reject"
+export type RiskLevel = "low" | "medium" | "high"
+export type GatewayAction = "allow" | "review_required" | "block"
+export type LegacyAction = "accept" | "review" | "reject"
+export type RecommendedAction = GatewayAction | LegacyAction
+export type RequestContract = "autonomous_execution" | "legacy_verify"
+
+export type PolicyViolation = {
+  code: string
+  message: string
+  severity: GatewayAction
+}
 
 export type VerifyRequest = {
   use_case: string
@@ -10,11 +19,15 @@ export type VerifyRequest = {
 
 export type VerifyResponse = {
   decision_id: string
+  request_contract: RequestContract
   score: number
   risk_level: RiskLevel
-  signals: Array<Record<string, unknown>>
+  signals: Record<string, unknown>
   recommended_action: RecommendedAction
-  trust_receipt_id?: string
+  policy_result?: GatewayAction
+  policy_violations?: PolicyViolation[]
+  trust_receipt_id: string
+  trust_receipt?: Record<string, unknown>
 }
 
 export type InterAIClientOptions = {

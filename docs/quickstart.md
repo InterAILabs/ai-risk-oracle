@@ -34,9 +34,9 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
 
 ## 3. Use The Decision
 
-- `accept`: proceed automatically.
-- `review`: pause and route to human or policy review.
-- `reject`: block execution.
+- `allow`: proceed automatically.
+- `review_required`: pause and route to human or policy review.
+- `block`: block execution.
 
 ## 4. Store The Receipt
 
