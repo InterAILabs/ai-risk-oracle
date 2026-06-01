@@ -1,7 +1,7 @@
 {
   "name": "InterAI Risk Oracle",
   "description": "Before an agent executes, InterAI verifies.",
-  "url": "https://api.interai.example/v1",
+  "url": "https://ai-risk-oracle.fly.dev",
   "capabilities": [
     "verify_autonomous_action",
     "issue_trust_receipt",

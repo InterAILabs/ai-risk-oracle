@@ -5,13 +5,13 @@ using the hosted InterAI Risk Oracle API.
 
 ## 1. Get API Access
 
-Request beta access from beta@interai.example and keep your credential in your
-own secret manager.
+Request beta access through the public repository support channel and keep your
+credential in your own secret manager.
 
 ## 2. Verify Before Execution
 
 ```bash
-curl -sS -X POST https://api.interai.example/v1/verify \
+curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
   -H "Authorization: Bearer <interai_credential>" \
   -H "Content-Type: application/json" \
   -d '{

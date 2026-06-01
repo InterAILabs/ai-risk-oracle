@@ -1,7 +1,7 @@
 {
   "name": "InterAI Risk Oracle",
   "description": "Agent-to-agent verification service for pre-execution risk decisions.",
-  "url": "https://api.interai.example/v1",
+  "url": "https://ai-risk-oracle.fly.dev",
   "capabilities": {
     "streaming": false,
     "pushNotifications": false

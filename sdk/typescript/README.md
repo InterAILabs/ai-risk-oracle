@@ -6,7 +6,7 @@ Minimal hosted API client for InterAI Risk Oracle.
 import { InterAIRiskOracleClient } from "@interai/risk-oracle"
 
 const client = new InterAIRiskOracleClient({
-  baseUrl: "https://api.interai.example/v1",
+  baseUrl: "https://ai-risk-oracle.fly.dev",
   apiKey: "replace-with-your-credential"
 })
 

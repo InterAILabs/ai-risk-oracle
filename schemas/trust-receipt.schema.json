@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://interai.example/schemas/trust-receipt.schema.json",
+  "$id": "https://raw.githubusercontent.com/InterAILabs/ai-risk-oracle/main/schemas/trust-receipt.schema.json",
   "title": "InterAI Trust Receipt",
   "type": "object",
   "required": ["trust_receipt_id", "decision_id", "issued_at", "risk_level", "recommended_action"],
@@ -19,4 +19,3 @@
   },
   "additionalProperties": true
 }
-

@@ -3,7 +3,7 @@
 Base URL:
 
 ```text
-https://api.interai.example/v1
+https://ai-risk-oracle.fly.dev
 ```
 
 ## Authentication
