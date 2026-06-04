@@ -8,13 +8,13 @@ the action should pass through an independent verification checkpoint.
 
 1. Agent proposes an action.
 2. InterAI verifies the action, context, and policy constraints.
-3. InterAI returns a score, risk level, signals, recommendation, and receipt.
+3. InterAI returns a risk score, risk level, signals, policy result, recommendation, and receipt.
 4. The agent proceeds, pauses, or blocks the action.
 
 ## Recommended Controls
 
 - Require verification for high-impact tools.
-- Treat `review` as a pause, not an approval.
+- Treat `review_required` as a pause, not an approval.
+- Treat `block` as a hard stop.
 - Store `trust_receipt_id` with the downstream execution record.
 - Use stable operation IDs in your own system to prevent duplicate execution.
-

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/InterAILabs/ai-risk-oracle/main/schemas/verify-request.schema.json",
-  "title": "InterAI Verify Request",
+  "title": "InterAI Autonomous Execution Verify Request",
   "type": "object",
   "required": ["use_case", "action"],
   "properties": {
@@ -11,14 +11,35 @@
     },
     "action": {
       "type": "object",
+      "required": ["type", "description"],
+      "properties": {
+        "type": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "amount_usd": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string" },
+        "irreversible": { "type": "boolean" },
+        "external_side_effect": { "type": "boolean" }
+      },
       "additionalProperties": true
     },
     "context": {
       "type": "object",
+      "properties": {
+        "agent_id": { "type": "string" },
+        "environment": { "type": "string" },
+        "counterparty_id": { "type": "string" },
+        "user_confirmation": { "type": "boolean" }
+      },
       "additionalProperties": true
     },
     "policy": {
       "$ref": "policy.schema.json"
+    },
+    "domain": { "type": "string" },
+    "mode": {
+      "type": "string",
+      "enum": ["fast_heuristic", "semantic_judge"]
     }
   },
   "additionalProperties": false

@@ -8,7 +8,8 @@
     "pre_payment_verification",
     "pre_trade_verification",
     "trust_receipts",
-    "policy_decisions"
+    "policy_decisions",
+    "allow_review_block_recommendations"
   ],
   "authentication": {
     "type": "bearer",
@@ -16,10 +17,10 @@
   },
   "pricing": {
     "model": "hosted_beta",
-    "details": "Contact InterAILabs for beta pricing."
+    "details": "Contact interailabs@gmail.com for beta pricing."
   },
   "docs_url": "https://github.com/InterAILabs/ai-risk-oracle",
   "contact": {
-    "url": "https://github.com/InterAILabs/ai-risk-oracle/issues"
+    "email": "interailabs@gmail.com"
   }
 }

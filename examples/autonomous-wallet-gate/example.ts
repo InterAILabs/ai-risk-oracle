@@ -12,15 +12,21 @@ const response = await fetch(`${baseUrl}/verify`, {
     action: {
       type: "wallet_transaction",
       description: "Authorize an autonomous wallet transfer",
-      amount_usd: 75
+      amount_usd: 75,
+      currency: "USD",
+      irreversible: false,
+      external_side_effect: true
     },
     context: {
       wallet_policy_id: "wallet_policy_beta",
-      environment: "production"
+      environment: "production",
+      user_confirmation: false
     },
     policy: {
       max_risk_level: "low",
-      require_trust_receipt: true
+      require_trust_receipt: true,
+      amount_usd_limit: 100,
+      require_human_review_above: 0.5
     }
   })
 })

@@ -5,8 +5,7 @@
   "capabilities": [
     "verify_autonomous_action",
     "issue_trust_receipt",
-    "recommend_execution_action"
+    "recommend_allow_review_or_block"
   ],
   "default_action": "POST /verify"
 }
-

@@ -11,7 +11,7 @@ Start with:
 - [docs/api-reference.md](docs/api-reference.md)
 - [discovery/ai-service.json](discovery/ai-service.json)
 
-For beta access, contact beta@interai.example.
+For beta access, contact interailabs@gmail.com.
 
 ## What To Include
 
