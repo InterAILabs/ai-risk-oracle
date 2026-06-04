@@ -5,7 +5,7 @@ autonomous systems. Please report vulnerabilities privately.
 
 ## Reporting A Vulnerability
 
-Contact security@interai.example with:
+Contact interailabs@gmail.com with:
 
 - affected endpoint, schema, SDK, or discovery document
 - minimal reproduction steps without real secrets

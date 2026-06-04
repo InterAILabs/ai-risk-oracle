@@ -12,15 +12,22 @@ const response = await fetch(`${baseUrl}/verify`, {
     action: {
       type: "trade",
       description: "Submit autonomous portfolio rebalance order",
-      amount_usd: 500
+      amount_usd: 500,
+      currency: "USD",
+      irreversible: false,
+      external_side_effect: true
     },
     context: {
       agent_id: "trading_agent_001",
-      environment: "paper"
+      environment: "paper",
+      user_confirmation: false
     },
     policy: {
       max_risk_level: "medium",
-      require_trust_receipt: true
+      require_trust_receipt: true,
+      amount_usd_limit: 1000,
+      allowed_action_types: ["trade"],
+      require_human_review_above: 0.75
     }
   })
 })

@@ -16,7 +16,7 @@ stored for audit, replay protection, and downstream governance.
 Autonomous systems increasingly call tools, move funds, accept third-party
 outputs, and trigger workflows without constant human review. A verification
 layer gives those systems a pre-execution checkpoint: inspect the planned action,
-evaluate risk, and decide whether to accept, review, or reject.
+evaluate risk, and decide whether to allow, require review, or block execution.
 
 ## Core Use Cases
 
@@ -39,16 +39,24 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
     "action": {
       "type": "tool_call",
       "name": "send_invoice_payment",
-      "description": "Pay a vendor agent after delivery validation"
+      "description": "Pay a vendor agent after delivery validation",
+      "amount_usd": 250,
+      "currency": "USD",
+      "irreversible": false,
+      "external_side_effect": true
     },
     "context": {
       "agent_id": "agent_123",
       "environment": "production",
-      "amount_usd": 250
+      "counterparty_id": "vendor_agent_456",
+      "user_confirmation": false
     },
     "policy": {
       "max_risk_level": "medium",
-      "require_trust_receipt": true
+      "require_trust_receipt": true,
+      "amount_usd_limit": 500,
+      "blocked_action_types": ["irreversible_transfer"],
+      "require_human_review_above": 0.75
     }
   }'
 ```
@@ -67,20 +75,29 @@ const decision = await oracle.verify({
   use_case: "agent-before-payment",
   action: {
     type: "payment",
+    name: "release_vendor_payment",
     description: "Release payment to a vendor agent",
-    amount_usd: 125
+    amount_usd: 125,
+    currency: "USD",
+    irreversible: false,
+    external_side_effect: true
   },
   context: {
     agent_id: "agent_123",
-    counterparty_id: "vendor_agent_456"
+    environment: "production",
+    counterparty_id: "vendor_agent_456",
+    user_confirmation: false
   },
   policy: {
     max_risk_level: "medium",
-    require_trust_receipt: true
+    require_trust_receipt: true,
+    amount_usd_limit: 500,
+    blocked_action_types: ["irreversible_transfer"],
+    require_human_review_above: 0.75
   }
 })
 
-if (decision.recommended_action === "accept") {
+if (decision.recommended_action === "allow") {
   // Continue with the downstream action.
 }
 ```
@@ -89,23 +106,26 @@ if (decision.recommended_action === "accept") {
 
 ```json
 {
-  "decision_id": "dec_01JZPUBLICEXAMPLE",
-  "score": 0.82,
-  "risk_level": "low",
-  "signals": [
-    {
-      "name": "counterparty_reputation",
-      "value": "positive",
-      "weight": 0.32
-    },
-    {
-      "name": "action_amount",
-      "value": "within_policy",
-      "weight": 0.18
-    }
-  ],
-  "recommended_action": "accept",
-  "trust_receipt_id": "tr_01JZPUBLICEXAMPLE"
+  "decision_id": "tr_01JZPUBLICEXAMPLE",
+  "request_contract": "autonomous_execution",
+  "score": 0.42,
+  "risk_level": "medium",
+  "signals": {
+    "has_external_side_effect": true,
+    "is_irreversible": false,
+    "involves_money": true,
+    "amount_usd": 125,
+    "requires_user_confirmation": true,
+    "has_counterparty": true,
+    "environment": "production",
+    "action_type": "payment",
+    "autonomous_execution_detected": true
+  },
+  "recommended_action": "review_required",
+  "policy_result": "review_required",
+  "policy_violations": [],
+  "trust_receipt_id": "tr_01JZPUBLICEXAMPLE",
+  "trust_receipt": {}
 }
 ```
 
@@ -147,5 +167,5 @@ hosted service internals are proprietary and not open source.
 InterAI Risk Oracle is currently available through hosted beta access.
 
 - Docs: https://github.com/InterAILabs/ai-risk-oracle
-- Contact: https://github.com/InterAILabs/ai-risk-oracle/issues
-- Security: use GitHub private vulnerability reporting or Security Advisories.
+- Contact: interailabs@gmail.com
+- Security: interailabs@gmail.com
