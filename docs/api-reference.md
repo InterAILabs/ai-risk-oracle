@@ -61,13 +61,15 @@ Important response fields:
 - `policy_violations`: machine-readable policy violations.
 - `trust_receipt_id`: receipt identifier when receipt creation is enabled.
 
-## GET /trust-receipts/{id}
+## GET /trust/receipts/{receiptId}
 
-Retrieves public receipt metadata for an authorized account or integration.
+Retrieves the canonical public trust receipt representation by receipt ID.
 
-## GET /discovery
+## GET /.well-known/ai-service.json
 
-Returns public discovery metadata for agent and developer integrations.
+Returns public discovery metadata for agent and developer integrations. The
+hosted API also exposes discovery aliases such as `/.well-known/ai-risk-oracle`,
+`/.well-known/openapi.json`, `/openapi.json`, and `/discovery.json`.
 
 ## Errors
 

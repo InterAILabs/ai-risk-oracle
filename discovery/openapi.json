@@ -14,7 +14,7 @@
     "/verify": {
       "post": {
         "summary": "Verify an autonomous action before execution",
-        "description": "Accepts the autonomous_execution request contract and returns a risk score, policy result, recommended action, machine-readable signals, and trust receipt metadata.",
+        "description": "Receives the autonomous_execution request contract and returns a risk score, policy result, recommended action, machine-readable signals, and trust receipt metadata.",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,

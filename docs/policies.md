@@ -18,7 +18,7 @@ Example:
 
 Common policy controls:
 
-- maximum acceptable risk level
+- maximum allowed risk level
 - receipt requirement
 - amount limit
 - allowed or blocked action types
