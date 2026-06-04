@@ -13,7 +13,7 @@ stored for audit, replay protection, and downstream governance.
 
 ## Why Autonomous Agents Need Execution Verification
 
-Autonomous systems increasingly call tools, move funds, accept third-party
+Autonomous systems increasingly call tools, move funds, consume third-party
 outputs, and trigger workflows without constant human review. A verification
 layer gives those systems a pre-execution checkpoint: inspect the planned action,
 evaluate risk, and decide whether to allow, require review, or block execution.
@@ -103,6 +103,8 @@ if (decision.recommended_action === "allow") {
 ```
 
 ## Example Response
+
+`score` is a risk score from 0 to 1. Higher values mean higher execution risk.
 
 ```json
 {

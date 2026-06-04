@@ -13,8 +13,8 @@
     "recommended_action": { "type": "string" },
     "policy_summary": { "type": "object", "additionalProperties": true },
     "signals": {
-      "type": "array",
-      "items": { "type": "object", "additionalProperties": true }
+      "type": "object",
+      "additionalProperties": true
     }
   },
   "additionalProperties": true

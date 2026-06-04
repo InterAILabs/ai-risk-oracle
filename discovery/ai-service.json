@@ -9,7 +9,7 @@
     "pre_trade_verification",
     "trust_receipts",
     "policy_decisions",
-    "allow_review_block_recommendations"
+    "allow_review_required_block_recommendations"
   ],
   "authentication": {
     "type": "bearer",

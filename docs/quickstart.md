@@ -43,6 +43,9 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
 
 ## 3. Use The Decision
 
+The response `score` is a risk score from 0 to 1. Higher values mean higher
+execution risk.
+
 - `allow`: proceed automatically.
 - `review_required`: pause and route to human or policy review.
 - `block`: block execution.
