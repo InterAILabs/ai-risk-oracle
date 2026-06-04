@@ -171,6 +171,7 @@ surfaces without exposing service internals.
 ## Examples
 
 - [3 decisions in 90 seconds](docs/demo.md)
+- [Tester readiness pack](docs/tester-readiness.md)
 - [Agent before tool execution](examples/agent-before-tool-execution/README.md)
 - [Agent before payment](examples/agent-before-payment/README.md)
 - [Autonomous wallet gate](examples/autonomous-wallet-gate/README.md)
