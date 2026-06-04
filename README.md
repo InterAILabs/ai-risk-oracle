@@ -26,6 +26,24 @@ evaluate risk, and decide whether to allow, require review, or block execution.
 - Pre-trade verification
 - High-risk tool call governance
 
+## Who Is This For?
+
+- agent builders
+- autonomous workflow platforms
+- wallet/payment agents
+- tool-using AI systems
+- governance and audit layers
+
+## What This Repository Is / Is Not
+
+This repository is for public integration materials: SDKs, schemas, examples,
+OpenAPI, A2A/MCP discovery metadata, and hosted API docs. The production
+verification engine is hosted and proprietary.
+
+Use the SDKs, schemas, examples, and discovery metadata to integrate with the
+hosted API. Do not expect to run the production verification engine from this
+repo.
+
 ## Quickstart
 
 Use the hosted API. Do not run a local backend from this repository.
@@ -152,6 +170,7 @@ surfaces without exposing service internals.
 
 ## Examples
 
+- [3 decisions in 90 seconds](docs/demo.md)
 - [Agent before tool execution](examples/agent-before-tool-execution/README.md)
 - [Agent before payment](examples/agent-before-payment/README.md)
 - [Autonomous wallet gate](examples/autonomous-wallet-gate/README.md)
