@@ -1,6 +1,6 @@
 {
   "name": "InterAI Risk Oracle",
-  "description": "Before an agent executes, InterAI verifies.",
+  "description": "Autonomous Execution Gateway for pre-execution verification of autonomous agents. Before an agent executes, InterAI verifies.",
   "url": "https://ai-risk-oracle.fly.dev",
   "capabilities": [
     "verify_autonomous_action",

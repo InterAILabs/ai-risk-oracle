@@ -1,7 +1,7 @@
 {
   "service_name": "InterAI Risk Oracle",
   "base_url": "https://ai-risk-oracle.fly.dev",
-  "description": "Hosted verification and trust infrastructure for autonomous agents.",
+  "description": "Autonomous Execution Gateway for pre-execution verification of autonomous agents. Before an agent executes, InterAI verifies.",
   "capabilities": [
     "autonomous_execution_verification",
     "pre_tool_execution_check",
