@@ -13,14 +13,30 @@
   ],
   "authentication": {
     "type": "bearer",
-    "header": "Authorization"
+    "header": "Authorization",
+    "obtained_via": "POST https://ai-risk-oracle.fly.dev/onboard"
   },
   "pricing": {
-    "model": "hosted_beta",
-    "details": "Contact interailabs@gmail.com for beta pricing."
+    "model": "self_serve_hosted",
+    "pricing_url": "https://ai-risk-oracle.fly.dev/pricing",
+    "onboard_url": "https://ai-risk-oracle.fly.dev/onboard",
+    "x402_supported": true,
+    "details": "Agents and integrators can discover pricing, onboarding, and verification endpoints directly from hosted metadata."
+  },
+  "autonomous_adoption": {
+    "url": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json",
+    "purpose": "Machine-readable guidance for agents and builders deciding when and how to use InterAI before execution"
   },
   "docs_url": "https://github.com/InterAILabs/ai-risk-oracle",
   "contact": {
-    "email": "interailabs@gmail.com"
+    "email": "interailabs@gmail.com",
+    "intended_for": [
+      "support",
+      "security",
+      "enterprise",
+      "partnerships",
+      "manual integration help"
+    ],
+    "not_required_for_default_self_serve_path": true
   }
 }

@@ -91,8 +91,8 @@ Response summary:
 }
 ```
 
-What the agent should do next: pause execution and request human/operator
-review.
+What the agent should do next: pause execution and route to a supervisor agent,
+policy system, wallet rule, governance queue, or human operator.
 
 ## 3. Irreversible Transfer -> block
 
@@ -148,5 +148,6 @@ trust receipt.
 ## What Should The Agent Do Next?
 
 - allow: execute the action and store the trust receipt.
-- review_required: pause execution and request human/operator review.
+- review_required: pause execution and route to a supervisor agent, policy
+  system, wallet rule, governance queue, or human operator.
 - block: abort the action, log the decision, and store the trust receipt.

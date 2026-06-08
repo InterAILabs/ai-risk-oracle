@@ -29,3 +29,7 @@ Common policy controls:
 
 Policy enforcement can escalate a decision to `review_required` or `block`; it
 does not downgrade a risky backend decision into a safer action.
+
+`review_required` means the current agent should not execute autonomously under
+the current policy. The reviewer may be another agent, a policy system, a wallet
+rule, a governance queue, or a human operator.

@@ -5,6 +5,8 @@ Before an agent executes, InterAI verifies.
 InterAI Risk Oracle is a hosted Autonomous Execution Gateway for pre-execution
 verification of autonomous agents. It checks a proposed action before execution
 and returns a machine-readable decision: `allow`, `review_required`, or `block`.
+Humans and agents can discover pricing, onboarding, and verification endpoints
+directly from hosted metadata.
 
 ## What You Can Test Today
 
@@ -83,7 +85,8 @@ Use this case when an agent wants to release funds in production:
 }
 ```
 
-Agent behavior: pause execution and request review.
+Agent behavior: pause execution and route to a supervisor agent, policy system,
+wallet rule, governance queue, or human operator.
 
 ### 3. Irreversible Transfer
 
@@ -123,7 +126,9 @@ if one was issued.
 ## Decision Handling
 
 - `allow`: execute and store the receipt.
-- `review_required`: pause and request human or operator review.
+- `review_required`: the current agent should not execute autonomously under
+  the current policy; route to a supervisor agent, policy system, wallet rule,
+  governance queue, or human operator.
 - `block`: abort and log.
 
 ## What InterAI Does Not Promise Yet
@@ -142,6 +147,13 @@ if one was issued.
 - Where does onboarding feel slow or confusing?
 - Which action types matter most for your agents?
 
-## Beta Access
+## Self-Serve Access And Support
 
-Request beta/API access at interailabs@gmail.com.
+Use hosted self-serve discovery first:
+
+- Pricing: https://ai-risk-oracle.fly.dev/pricing
+- Onboard: https://ai-risk-oracle.fly.dev/onboard
+- Adoption contract: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+
+For support, security, enterprise access, partnerships, or manual integration
+help, contact interailabs@gmail.com.

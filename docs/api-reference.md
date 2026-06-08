@@ -12,6 +12,16 @@ https://ai-risk-oracle.fly.dev
 Authorization: Bearer <interai_credential>
 ```
 
+Humans and agents can discover pricing and onboarding directly:
+
+```text
+GET https://ai-risk-oracle.fly.dev/pricing
+POST https://ai-risk-oracle.fly.dev/onboard
+```
+
+Email is for support, security, enterprise access, partnerships, or manual
+integration help; it is not the default API access path.
+
 ## POST /verify
 
 Verifies a proposed autonomous action before execution.
@@ -60,6 +70,10 @@ Important response fields:
 - `policy_result`: `allow`, `review_required`, or `block`.
 - `policy_violations`: machine-readable policy violations.
 - `trust_receipt_id`: receipt identifier when receipt creation is enabled.
+
+`review_required` means the current agent should not execute autonomously under
+the current policy. The reviewer may be another agent, a policy system, a wallet
+rule, a governance queue, or a human operator.
 
 ## GET /trust/receipts/{receiptId}
 

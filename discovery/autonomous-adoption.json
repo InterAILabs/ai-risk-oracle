@@ -1,0 +1,143 @@
+{
+  "name": "InterAI Risk Oracle",
+  "service_type": "autonomous_execution_gateway",
+  "thesis": "Before an agent executes, InterAI verifies.",
+  "definition": "InterAI is agent-discoverable execution infrastructure.",
+  "primary_consumer": [
+    "autonomous_agent",
+    "agent_orchestrator",
+    "tool_router",
+    "wallet_agent",
+    "policy_layer",
+    "human_builder"
+  ],
+  "default_agent_path": [
+    "discover",
+    "pricing",
+    "onboard_or_x402",
+    "verify",
+    "act_on_decision",
+    "store_receipt"
+  ],
+  "default_human_path": [
+    "github_or_landing",
+    "pricing",
+    "onboard",
+    "api_key_or_topup_or_x402",
+    "verify",
+    "store_receipt"
+  ],
+  "use_when": [
+    "before external tool execution",
+    "before sending messages",
+    "before writing to production systems",
+    "before releasing payments",
+    "before signing wallet actions",
+    "before approving workflows",
+    "before running scripts with external side effects"
+  ],
+  "do_not_use_when": [
+    "for every internal reasoning step",
+    "for private chain-of-thought validation",
+    "for harmless local computation",
+    "when there is no external or consequential action"
+  ],
+  "decision_mapping": {
+    "allow": {
+      "meaning": "the action may execute under the current policy",
+      "agent_next_step": "execute"
+    },
+    "review_required": {
+      "meaning": "the current agent should not execute autonomously under the current policy",
+      "agent_next_step": "route_to_supervisor_policy_or_escalation_layer",
+      "escalation_targets": [
+        "supervisor_agent",
+        "policy_engine",
+        "wallet_rule",
+        "governance_workflow",
+        "queue",
+        "human_operator"
+      ]
+    },
+    "block": {
+      "meaning": "the action should be aborted",
+      "agent_next_step": "abort_and_log"
+    }
+  },
+  "self_serve": {
+    "onboard_endpoint": "https://ai-risk-oracle.fly.dev/onboard",
+    "pricing_endpoint": "https://ai-risk-oracle.fly.dev/pricing",
+    "verify_endpoint": "https://ai-risk-oracle.fly.dev/verify",
+    "supports_x402": true,
+    "supports_prepaid_api_key": true,
+    "trial_supported": true
+  },
+  "support": {
+    "email": "interailabs@gmail.com",
+    "intended_for": [
+      "support",
+      "security",
+      "enterprise",
+      "partnerships",
+      "manual integration help"
+    ],
+    "not_required_for_default_self_serve_path": true
+  },
+  "evidence": {
+    "trust_receipt_id": true,
+    "signed_receipt": true,
+    "receipt_lookup_endpoint": "https://ai-risk-oracle.fly.dev/trust/receipts/{receiptId}"
+  },
+  "adoption_signals": {
+    "use_if_action_has_external_side_effects": true,
+    "use_if_action_writes_to_production": true,
+    "use_if_action_moves_funds": true,
+    "use_if_audit_trail_required": true,
+    "use_if_policy_enforcement_required": true
+  },
+  "agent_self_evaluation": {
+    "recommended_when": [
+      "action has external side effects",
+      "action writes to production",
+      "action transfers value",
+      "action signs or authorizes an operation",
+      "action requires auditability",
+      "action could violate user, wallet, or organization policy",
+      "action depends on third-party agent output"
+    ],
+    "usually_not_needed_when": [
+      "pure local computation",
+      "internal planning step",
+      "private reasoning",
+      "low-risk read-only local operation"
+    ],
+    "optimization_goal": [
+      "reduce harmful autonomous executions",
+      "increase policy compliance",
+      "produce audit evidence",
+      "reduce cost of irreversible mistakes",
+      "enable machine-to-machine trust"
+    ]
+  },
+  "integration_pattern": {
+    "place_before": [
+      "tool.execute",
+      "email.send",
+      "db.update",
+      "payment.release",
+      "workflow.approve",
+      "wallet.sign",
+      "script.run"
+    ],
+    "agent_decision_mapping": {
+      "allow": "execute",
+      "review_required": "route_to_supervisor_policy_or_escalation_layer",
+      "block": "abort"
+    },
+    "default_paths": {
+      "agent": "discover -> onboard_or_x402 -> verify -> act_on_decision -> store_receipt",
+      "human": "landing_or_github -> pricing -> onboard -> api_key_or_x402 -> verify -> store_receipt"
+    },
+    "review_required": "The current agent should not execute autonomously under the current policy. The reviewer may be another agent, a policy system, a wallet rule, a governance queue, or a human operator."
+  }
+}
