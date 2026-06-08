@@ -31,3 +31,5 @@ const response = await fetch(`${baseUrl}/verify`, {
 })
 
 console.log(await response.json())
+
+export {}
