@@ -35,6 +35,37 @@
           }
         }
       }
+    },
+    "/.well-known/autonomous-adoption.json": {
+      "get": {
+        "summary": "Get autonomous adoption contract",
+        "description": "Machine-readable guidance for agents and builders deciding when and how to use InterAI before execution.",
+        "responses": {
+          "200": {
+            "description": "Autonomous adoption contract"
+          }
+        }
+      }
+    },
+    "/pricing": {
+      "get": {
+        "summary": "Get self-serve pricing metadata",
+        "responses": {
+          "200": {
+            "description": "Pricing, x402, trial, and onboarding metadata"
+          }
+        }
+      }
+    },
+    "/onboard": {
+      "post": {
+        "summary": "Create a self-serve API key account",
+        "responses": {
+          "200": {
+            "description": "Account and API key created"
+          }
+        }
+      }
     }
   },
   "components": {

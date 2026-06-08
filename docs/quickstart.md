@@ -5,8 +5,16 @@ using the hosted InterAI Risk Oracle API.
 
 ## 1. Get API Access
 
-Request beta access at interailabs@gmail.com and keep your credential in your
-own secret manager.
+Discover pricing and onboarding from the hosted API:
+
+```text
+https://ai-risk-oracle.fly.dev/pricing
+https://ai-risk-oracle.fly.dev/onboard
+```
+
+Use self-serve onboarding, prepaid API key balance, or x402 where supported.
+Email interailabs@gmail.com is available for support, security, enterprise
+access, partnerships, or manual integration help.
 
 ## 2. Verify Before Execution
 
@@ -47,7 +55,9 @@ The response `score` is a risk score from 0 to 1. Higher values mean higher
 execution risk.
 
 - `allow`: proceed automatically.
-- `review_required`: pause and route to human or policy review.
+- `review_required`: the current agent should not execute autonomously under
+  the current policy; route to a supervisor agent, policy system, wallet rule,
+  governance queue, or human operator.
 - `block`: block execution.
 
 ## 4. Store The Receipt

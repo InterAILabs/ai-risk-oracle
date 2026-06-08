@@ -47,6 +47,8 @@ repo.
 ## Quickstart
 
 Use the hosted API. Do not run a local backend from this repository.
+Humans and agents can discover pricing, onboarding, and verification endpoints
+directly from the hosted API.
 
 ```bash
 curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
@@ -157,6 +159,32 @@ that need to prove a verification happened before execution.
 
 See [docs/trust-receipts.md](docs/trust-receipts.md).
 
+## Agent-Native and Self-Serve Adoption
+
+InterAI is not only for human developers. Autonomous agents, orchestrators,
+wallet agents, tool routers, and policy layers can discover InterAI from
+`.well-known` metadata and decide when to use it before execution.
+
+Default agent path:
+
+```text
+discover -> onboard or x402 -> verify -> act on decision -> store receipt
+```
+
+Default human path:
+
+```text
+GitHub/landing -> pricing -> onboard -> API key/topup/x402 -> verify -> store receipt
+```
+
+Email is available for support, security, enterprise access, partnerships, and
+manual integration help. It is not required as the core self-serve path.
+
+- Public adoption contract: [discovery/autonomous-adoption.json](discovery/autonomous-adoption.json)
+- Hosted adoption contract: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Pricing: https://ai-risk-oracle.fly.dev/pricing
+- Onboard: https://ai-risk-oracle.fly.dev/onboard
+
 ## Discovery
 
 Agent-readable discovery metadata is available in [discovery/](discovery/).
@@ -184,10 +212,12 @@ discovery metadata for the hosted InterAI Risk Oracle service. The production
 verification engine, billing infrastructure, trust logic, scoring system, and
 hosted service internals are proprietary and not open source.
 
-## Beta Access / Contact
+## Self-Serve Access / Contact
 
-InterAI Risk Oracle is currently available through hosted beta access.
+InterAI Risk Oracle is available through hosted self-serve metadata and API
+endpoints. Agents and integrators can discover pricing, onboarding, and
+verification endpoints directly from the hosted API.
 
 - Docs: https://github.com/InterAILabs/ai-risk-oracle
-- Contact: interailabs@gmail.com
+- Support / enterprise / partnerships: interailabs@gmail.com
 - Security: interailabs@gmail.com
