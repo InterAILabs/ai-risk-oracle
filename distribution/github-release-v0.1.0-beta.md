@@ -10,14 +10,14 @@ Pre-release / controlled technical beta.
 
 ## Notes
 
-InterAI Risk Oracle is an Autonomous Execution Gateway for pre-execution
-verification of autonomous agents.
+InterAI Risk Oracle is an Autonomous Execution Gateway for pre-execution verification of
+autonomous agents.
 
 Before an agent executes, InterAI verifies.
 
 This public beta package is for controlled technical testers, agent builders,
-wallet/payment agents, autonomous workflow platforms, and integration partners.
-It is not a broad high-volume self-serve production declaration.
+wallet/payment agents, autonomous workflow platforms, and integration partners. It is
+not a broad high-volume self-serve production declaration.
 
 ## Highlights
 
@@ -40,9 +40,9 @@ It is not a broad high-volume self-serve production declaration.
 - `score`: risk score from 0 to 1; higher means more risk
 - `signals`: object
 
-`review_required` means the current agent should not execute autonomously under
-the current policy. The reviewer may be a supervisor agent, policy system,
-wallet rule, governance queue, or human operator.
+`review_required` means the current agent should not execute autonomously under the
+current policy. The reviewer may be a supervisor agent, policy system, wallet rule,
+governance queue, or human operator.
 
 ## Public Links
 

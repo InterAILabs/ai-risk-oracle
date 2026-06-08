@@ -19,8 +19,8 @@ Use the hosted pricing endpoint as the source of truth for:
 - prepaid API key and trial availability
 - topup receive address
 
-Do not hard-code operational payment values in clients when the pricing
-endpoint can be used.
+Do not hard-code operational payment values in clients when the pricing endpoint can be
+used.
 
 ## Client Behavior
 
@@ -32,5 +32,5 @@ endpoint can be used.
 
 ## Current Status
 
-Ready for controlled x402 client testing. Do not perform real payment tests
-without an explicit test plan and operator approval.
+Ready for controlled x402 client testing. Do not perform real payment tests without an
+explicit test plan and operator approval.

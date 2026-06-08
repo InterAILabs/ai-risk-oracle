@@ -1,7 +1,6 @@
 # Adoption Metrics
 
-This document defines privacy-conscious metrics for autonomous execution
-adoption.
+This document defines privacy-conscious metrics for autonomous execution adoption.
 
 ## Funnel
 
@@ -65,4 +64,3 @@ discover -> pricing -> onboard/API key/trial or x402 -> verify -> receipt lookup
 - Treat full wallet addresses, payment transaction identifiers, and account IDs
   as operational data.
 - Share public adoption numbers only after operator review.
-

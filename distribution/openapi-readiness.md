@@ -59,4 +59,3 @@ Before submitting the API contract to a partner:
 3. Confirm `signals` is represented as an object in examples and schemas.
 4. Confirm the score description says higher means more risk.
 5. Confirm legacy compatibility is not the primary narrative.
-

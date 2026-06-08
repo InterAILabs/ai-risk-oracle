@@ -34,4 +34,3 @@ Before a submission or partner handoff:
 
 Ready for controlled partner review. Broad traffic should remain gated by the
 operational limits documented in `docs/distribution-checklist.md`.
-

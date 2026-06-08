@@ -14,14 +14,14 @@ Agent proposes action
 
 ## What It Is
 
-InterAI Risk Oracle sits between an autonomous agent and the action it wants to
-execute: a tool call, payment, wallet signature, database update, workflow
-approval, trade, or outbound message.
+InterAI Risk Oracle sits between an autonomous agent and the action it wants to execute:
+a tool call, payment, wallet signature, database update, workflow approval, trade, or
+outbound message.
 
-The agent sends the proposed action to InterAI before execution. InterAI returns
-a risk score, machine-readable signals, `recommended_action`, `policy_result`,
-and trust receipt metadata. The agent then executes, routes for review, or
-aborts based on the decision, and stores the receipt for audit.
+The agent sends the proposed action to InterAI before execution. InterAI returns a risk
+score, machine-readable signals, `recommended_action`, `policy_result`, and trust
+receipt metadata. The agent then executes, routes for review, or aborts based on the
+decision, and stores the receipt for audit.
 
 Default self-serve path:
 
@@ -31,10 +31,10 @@ pricing -> onboard/API key/trial or x402 -> verify -> decision -> receipt
 
 ## Why Autonomous Agents Need Execution Verification
 
-Autonomous systems increasingly call tools, move funds, consume third-party
-outputs, and trigger workflows without constant human review. A verification
-layer gives those systems a pre-execution checkpoint: inspect the planned action,
-evaluate risk, and decide whether to allow, require review, or block execution.
+Autonomous systems increasingly call tools, move funds, consume third-party outputs, and
+trigger workflows without constant human review. A verification layer gives those
+systems a pre-execution checkpoint: inspect the planned action, evaluate risk, and
+decide whether to allow, require review, or block execution.
 
 ## Core Use Cases
 
@@ -54,19 +54,18 @@ evaluate risk, and decide whether to allow, require review, or block execution.
 
 ## What This Repository Is / Is Not
 
-This repository is for public integration materials: SDKs, schemas, examples,
-OpenAPI, A2A/MCP discovery metadata, and hosted API docs. The production
-verification engine is hosted and proprietary.
+This repository is for public integration materials: SDKs, schemas, examples, OpenAPI,
+A2A/MCP discovery metadata, and hosted API docs. The production verification engine is
+hosted and proprietary.
 
-Use the SDKs, schemas, examples, and discovery metadata to integrate with the
-hosted API. Do not expect to run the production verification engine from this
-repo.
+Use the SDKs, schemas, examples, and discovery metadata to integrate with the hosted
+API. Do not expect to run the production verification engine from this repo.
 
 ## Quickstart
 
-Use the hosted API. Do not run a local backend from this repository.
-Humans and agents can discover pricing, onboarding, and verification endpoints
-directly from the hosted API.
+Use the hosted API. Do not run a local backend from this repository. Humans and agents
+can discover pricing, onboarding, and verification endpoints directly from the hosted
+API.
 
 ```bash
 curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
@@ -183,17 +182,17 @@ switch (decision.recommended_action) {
 
 ## Trust Receipts
 
-Trust receipts are durable records of a verification decision. They are designed
-for agent-to-agent handoff, audit trails, retry safety, and governance systems
-that need to prove a verification happened before execution.
+Trust receipts are durable records of a verification decision. They are designed for
+agent-to-agent handoff, audit trails, retry safety, and governance systems that need to
+prove a verification happened before execution.
 
 See [docs/trust-receipts.md](docs/trust-receipts.md).
 
 ## Agent-Native and Self-Serve Adoption
 
-InterAI is not only for human developers. Autonomous agents, orchestrators,
-wallet agents, tool routers, and policy layers can discover InterAI from
-`.well-known` metadata and decide when to use it before execution.
+InterAI is not only for human developers. Autonomous agents, orchestrators, wallet
+agents, tool routers, and policy layers can discover InterAI from `.well-known` metadata
+and decide when to use it before execution.
 
 Default agent path:
 
@@ -207,8 +206,8 @@ Default human path:
 GitHub/landing -> pricing -> onboard -> API key/topup/x402 -> verify -> store receipt
 ```
 
-Email is available for support, security, enterprise access, partnerships, and
-manual integration help. It is not required as the core self-serve path.
+Email is available for support, security, enterprise access, partnerships, and manual
+integration help. It is not required as the core self-serve path.
 
 - Public adoption contract: [discovery/autonomous-adoption.json](discovery/autonomous-adoption.json)
 - Hosted adoption contract: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
@@ -217,9 +216,9 @@ manual integration help. It is not required as the core self-serve path.
 
 ## Discovery
 
-Agent-readable discovery metadata is available in [discovery/](discovery/).
-These files describe public capabilities, authentication, schemas, and integration
-surfaces without exposing service internals.
+Agent-readable discovery metadata is available in [discovery/](discovery/). These files
+describe public capabilities, authentication, schemas, and integration surfaces without
+exposing service internals.
 
 ## SDKs
 
@@ -239,14 +238,14 @@ surfaces without exposing service internals.
 
 This repository contains public API documentation, SDKs, schemas, examples, and
 discovery metadata for the hosted InterAI Risk Oracle service. The production
-verification engine, billing infrastructure, trust logic, scoring system, and
-hosted service internals are proprietary and not open source.
+verification engine, billing infrastructure, trust logic, scoring system, and hosted
+service internals are proprietary and not open source.
 
 ## Self-Serve Access / Contact
 
-InterAI Risk Oracle is available through hosted self-serve metadata and API
-endpoints. Agents and integrators can discover pricing, onboarding, and
-verification endpoints directly from the hosted API.
+InterAI Risk Oracle is available through hosted self-serve metadata and API endpoints.
+Agents and integrators can discover pricing, onboarding, and verification endpoints
+directly from the hosted API.
 
 - Docs: https://github.com/InterAILabs/ai-risk-oracle
 - Support / enterprise / partnerships: interailabs@gmail.com

@@ -1,11 +1,10 @@
 # 3 Decisions In 90 Seconds
 
-InterAI Risk Oracle is an autonomous execution gateway for AI agents. Before an
-agent executes, InterAI verifies the proposed action, applies policy
-enforcement, and returns a decision with trust receipts for audit.
+InterAI Risk Oracle is an autonomous execution gateway for AI agents. Before an agent
+executes, InterAI verifies the proposed action, applies policy enforcement, and returns
+a decision with trust receipts for audit.
 
-Use the hosted API with OpenAPI, A2A, MCP, x402, and Base USDC integration
-metadata.
+Use the hosted API with OpenAPI, A2A, MCP, x402, and Base USDC integration metadata.
 
 ## 1. Safe Read-Only Lookup -> allow
 
@@ -91,8 +90,8 @@ Response summary:
 }
 ```
 
-What the agent should do next: pause execution and route to a supervisor agent,
-policy system, wallet rule, governance queue, or human operator.
+What the agent should do next: pause execution and route to a supervisor agent, policy
+system, wallet rule, governance queue, or human operator.
 
 ## 3. Irreversible Transfer -> block
 
@@ -142,8 +141,8 @@ Response summary:
 }
 ```
 
-What the agent should do next: abort the action, log the decision, and store the
-trust receipt.
+What the agent should do next: abort the action, log the decision, and store the trust
+receipt.
 
 ## What Should The Agent Do Next?
 
