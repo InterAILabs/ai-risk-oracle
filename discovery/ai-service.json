@@ -1,7 +1,17 @@
 {
   "service_name": "InterAI Risk Oracle",
   "base_url": "https://ai-risk-oracle.fly.dev",
+  "service_type": "autonomous_execution_gateway",
+  "category": "autonomous_execution_gateway",
   "description": "Autonomous Execution Gateway for pre-execution verification of autonomous agents. Before an agent executes, InterAI verifies.",
+  "primary_path": [
+    "discover",
+    "pricing",
+    "onboard_or_x402",
+    "verify",
+    "decision",
+    "store_receipt"
+  ],
   "capabilities": [
     "autonomous_execution_verification",
     "pre_tool_execution_check",
@@ -17,13 +27,24 @@
     "obtained_via": "POST https://ai-risk-oracle.fly.dev/onboard"
   },
   "pricing": {
-    "model": "self_serve_hosted",
+    "model": "hosted_api_self_serve_metadata",
     "pricing_url": "https://ai-risk-oracle.fly.dev/pricing",
     "onboard_url": "https://ai-risk-oracle.fly.dev/onboard",
+    "verify_url": "https://ai-risk-oracle.fly.dev/verify",
     "x402_supported": true,
-    "details": "Agents and integrators can discover pricing, onboarding, and verification endpoints directly from hosted metadata."
+    "prepaid_api_key_supported": true,
+    "trial_supported": true,
+    "details": "Agents and integrators can discover pricing, onboard through hosted self-serve metadata or x402, verify actions before execution, and store trust receipts without emailing for default access."
+  },
+  "endpoints": {
+    "pricing": "https://ai-risk-oracle.fly.dev/pricing",
+    "onboard": "https://ai-risk-oracle.fly.dev/onboard",
+    "verify": "https://ai-risk-oracle.fly.dev/verify",
+    "autonomous_adoption": "discovery/autonomous-adoption.json",
+    "hosted_autonomous_adoption": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json"
   },
   "autonomous_adoption": {
+    "repo_path": "discovery/autonomous-adoption.json",
     "url": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json",
     "purpose": "Machine-readable guidance for agents and builders deciding when and how to use InterAI before execution"
   },
