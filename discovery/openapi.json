@@ -15,12 +15,18 @@
       "post": {
         "summary": "Verify an autonomous action before execution",
         "description": "Receives the autonomous_execution request contract and returns a risk score, policy result, recommended action, machine-readable signals, and trust receipt metadata.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "../schemas/verify-request.schema.json" }
+              "schema": {
+                "$ref": "../schemas/verify-request.schema.json"
+              }
             }
           }
         },
@@ -29,7 +35,9 @@
             "description": "Verification decision",
             "content": {
               "application/json": {
-                "schema": { "$ref": "../schemas/verify-response.schema.json" }
+                "schema": {
+                  "$ref": "../schemas/verify-response.schema.json"
+                }
               }
             }
           }

@@ -16,7 +16,9 @@
     "trust_receipt"
   ],
   "properties": {
-    "decision_id": { "type": "string" },
+    "decision_id": {
+      "type": "string"
+    },
     "request_contract": {
       "type": "string",
       "const": "autonomous_execution"
@@ -29,53 +31,124 @@
     },
     "risk_level": {
       "type": "string",
-      "enum": ["low", "medium", "high"]
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
     },
     "signals": {
       "type": "object",
       "properties": {
-        "semantic_relevance": { "type": "number", "minimum": 0, "maximum": 1 },
-        "contradiction_risk": { "type": "number", "minimum": 0, "maximum": 1 },
-        "unsupported_specificity": { "type": "number", "minimum": 0, "maximum": 1 },
-        "numeric_consistency": { "type": "number", "minimum": 0, "maximum": 1 },
-        "overconfidence": { "type": "number", "minimum": 0, "maximum": 1 },
-        "has_external_side_effect": { "type": "boolean" },
-        "is_irreversible": { "type": "boolean" },
-        "involves_money": { "type": "boolean" },
-        "amount_usd": { "type": ["number", "null"], "minimum": 0 },
-        "requires_user_confirmation": { "type": "boolean" },
-        "has_counterparty": { "type": "boolean" },
-        "environment": { "type": "string" },
-        "action_type": { "type": ["string", "null"] },
-        "autonomous_execution_detected": { "type": "boolean" }
+        "semantic_relevance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "contradiction_risk": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "unsupported_specificity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "numeric_consistency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "overconfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "has_external_side_effect": {
+          "type": "boolean"
+        },
+        "is_irreversible": {
+          "type": "boolean"
+        },
+        "involves_money": {
+          "type": "boolean"
+        },
+        "amount_usd": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "requires_user_confirmation": {
+          "type": "boolean"
+        },
+        "has_counterparty": {
+          "type": "boolean"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "action_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "autonomous_execution_detected": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": true
     },
     "recommended_action": {
       "type": "string",
-      "enum": ["allow", "review_required", "block"]
+      "enum": [
+        "allow",
+        "review_required",
+        "block"
+      ]
     },
     "policy_result": {
       "type": "string",
-      "enum": ["allow", "review_required", "block"]
+      "enum": [
+        "allow",
+        "review_required",
+        "block"
+      ]
     },
     "policy_violations": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["code", "message", "severity"],
+        "required": [
+          "code",
+          "message",
+          "severity"
+        ],
         "properties": {
-          "code": { "type": "string" },
-          "message": { "type": "string" },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
           "severity": {
             "type": "string",
-            "enum": ["allow", "review_required", "block"]
+            "enum": [
+              "allow",
+              "review_required",
+              "block"
+            ]
           }
         },
         "additionalProperties": false
       }
     },
-    "trust_receipt_id": { "type": "string" },
+    "trust_receipt_id": {
+      "type": "string"
+    },
     "trust_receipt": {
       "type": "object",
       "additionalProperties": true

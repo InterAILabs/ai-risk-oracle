@@ -55,7 +55,7 @@ wallet rule, governance queue, or human operator.
 - Agent card: https://ai-risk-oracle.fly.dev/.well-known/agent.json
 - Autonomous adoption: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
 
-## Manual Release Checklist
+## Manual Operator Checklist
 
 - Create tag/release `v0.1.0-beta`.
 - Mark the release as a pre-release.
@@ -63,4 +63,3 @@ wallet rule, governance queue, or human operator.
 - Use these notes as the release body.
 - Confirm `docs/distribution-checklist.md` remains linked from the changelog.
 - Do not describe this beta as broad high-volume production-ready.
-
