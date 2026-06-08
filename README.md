@@ -1,15 +1,33 @@
 # InterAI Risk Oracle
 
-Hosted verification and trust infrastructure for autonomous agents.
+Autonomous Execution Gateway for pre-execution verification of autonomous agents.
 
 Before an agent executes, InterAI verifies.
 
+```text
+Agent proposes action
+  -> InterAI verifies
+  -> allow / review_required / block
+  -> execute / route / abort
+  -> store receipt
+```
+
 ## What It Is
 
-InterAI Risk Oracle is a hosted API that helps autonomous agents decide whether
-to proceed before executing high-impact actions. It returns risk scores,
-machine-readable signals, recommended actions, and trust receipts that can be
-stored for audit, replay protection, and downstream governance.
+InterAI Risk Oracle sits between an autonomous agent and the action it wants to
+execute: a tool call, payment, wallet signature, database update, workflow
+approval, trade, or outbound message.
+
+The agent sends the proposed action to InterAI before execution. InterAI returns
+a risk score, machine-readable signals, `recommended_action`, `policy_result`,
+and trust receipt metadata. The agent then executes, routes for review, or
+aborts based on the decision, and stores the receipt for audit.
+
+Default self-serve path:
+
+```text
+pricing -> onboard/API key/trial or x402 -> verify -> decision -> receipt
+```
 
 ## Why Autonomous Agents Need Execution Verification
 
@@ -91,17 +109,19 @@ const oracle = new InterAIRiskOracleClient({
   apiKey: "replace-with-your-credential"
 })
 
+const action = {
+  type: "payment",
+  name: "release_vendor_payment",
+  description: "Release payment to a vendor agent",
+  amount_usd: 125,
+  currency: "USD",
+  irreversible: false,
+  external_side_effect: true
+}
+
 const decision = await oracle.verify({
   use_case: "agent-before-payment",
-  action: {
-    type: "payment",
-    name: "release_vendor_payment",
-    description: "Release payment to a vendor agent",
-    amount_usd: 125,
-    currency: "USD",
-    irreversible: false,
-    external_side_effect: true
-  },
+  action,
   context: {
     agent_id: "agent_123",
     environment: "production",
@@ -117,8 +137,18 @@ const decision = await oracle.verify({
   }
 })
 
-if (decision.recommended_action === "allow") {
-  // Continue with the downstream action.
+switch (decision.recommended_action) {
+  case "allow":
+    await execute(action)
+    break
+
+  case "review_required":
+    await routeToSupervisorOrPolicyLayer(action, decision)
+    break
+
+  case "block":
+    await abortAction(action, decision)
+    break
 }
 ```
 
