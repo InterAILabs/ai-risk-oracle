@@ -6,24 +6,39 @@
   "properties": {
     "max_risk_level": {
       "type": "string",
-      "enum": ["low", "medium", "high"]
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
     },
-    "require_trust_receipt": { "type": "boolean" },
-    "amount_usd_limit": { "type": "number", "minimum": 0 },
+    "require_trust_receipt": {
+      "type": "boolean"
+    },
+    "amount_usd_limit": {
+      "type": "number",
+      "minimum": 0
+    },
     "blocked_action_types": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "allowed_action_types": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "require_human_review_above": {
       "type": "number",
       "minimum": 0,
       "maximum": 1
     },
-    "require_user_confirmation_for_irreversible": { "type": "boolean" }
+    "require_user_confirmation_for_irreversible": {
+      "type": "boolean"
+    }
   },
   "additionalProperties": true
 }
