@@ -9,7 +9,7 @@ technical submission attempts are recorded here.
 
 | Channel | URL | Status | Date/time | Response | Confirmation |
 |---|---|---|---|---|---|
-| APIs.guru / OpenAPI Directory | https://apis.guru/add-api/ | `blocked_needs_account` | 2026-06-08T07:03-03:00 | Form builds a GitHub issue; local `gh` auth token for InterAI Labs was invalid. | No issue created. |
+| APIs.guru / OpenAPI Directory | https://apis.guru/add-api/ | `blocked_needs_auth` | 2026-06-08T07:03-03:00 and 2026-06-08T07:12-03:00 | Form builds a GitHub issue; local `gh` auth token for InterAI Labs was invalid. Login and refresh attempts timed out waiting for operator/browser completion. | No issue created. |
 | Arch Tools x402 Service Directory | https://archtools.dev/directory | `failed` | 2026-06-08T07:05-03:00 | Public endpoint returned HTTP 500. | No successful confirmation. |
 | x402.solutions | https://www.x402.solutions/ | `blocked_needs_terms_acceptance` | 2026-06-08T07:03-03:00 | Form requires agreement to project review and potential feature. | Not submitted. |
 | FindAPI | https://www.findapi.dev/submit | `blocked_needs_captcha` | 2026-06-08T07:03-03:00 | Form includes Cloudflare Turnstile. | Not submitted. |
@@ -74,10 +74,19 @@ Blocked because:
 GitHub CLI auth for the InterAI Labs account was present but the token was invalid.
 ```
 
+Rechecked on 2026-06-08:
+
+```text
+gh auth status: active account InterAILabs on github.com, token invalid.
+gh auth login -h github.com -w -p https: timed out waiting for browser/operator completion.
+gh auth refresh -h github.com -s repo: timed out waiting for browser/operator completion.
+git ls-remote origin main: succeeded for the public repo.
+```
+
 Status:
 
 ```text
-blocked_needs_account
+blocked_needs_auth
 ```
 
 No issue was created.
@@ -90,4 +99,3 @@ No issue was created.
 - APIKeyHub: blocked by dashboard/account.
 - MCP Registry: blocked by missing registry-ready MCP server package.
 - A2A directories: blocked by account/category adaptation.
-
