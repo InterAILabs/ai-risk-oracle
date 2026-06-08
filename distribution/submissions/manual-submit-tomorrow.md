@@ -8,6 +8,19 @@ high-volume production-ready unless the channel explicitly confirms that status.
 
 ## 1. APIs.guru / OpenAPI Directory
 
+First repair GitHub CLI, or use the browser while logged in as InterAI Labs.
+
+Safe CLI repair options:
+
+```text
+gh auth status
+gh auth login -h github.com -w -p https
+gh auth refresh -h github.com -s repo
+```
+
+Do not paste a token manually unless the operator explicitly authorizes a PAT
+flow. Do not print tokens.
+
 Open:
 
 ```text
@@ -40,7 +53,8 @@ Do not:
 After submit:
 
 - save the issue URL;
-- set tracker status to `submitted`;
+- set tracker status to `submitted` only after the GitHub issue is actually
+  created;
 - review telemetry after 24/48h.
 
 ## 2. Arch Tools x402 Service Directory

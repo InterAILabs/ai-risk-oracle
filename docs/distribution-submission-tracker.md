@@ -15,6 +15,7 @@ Allowed status values:
 - `submitted`
 - `ready_for_manual_submit`
 - `failed`
+- `blocked_needs_auth`
 - `blocked_needs_account`
 - `blocked_needs_terms_acceptance`
 - `blocked_needs_captcha`
@@ -29,7 +30,7 @@ Allowed status values:
 | Channel | URL | Category | Priority | Status | Ready now? | Account needed? | Submission type | Manual/automatable | Source asset | Next action | Follow-up date | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | GitHub release/topics/search | https://github.com/InterAILabs/ai-risk-oracle | Source repository | P0 | `ready_to_submit` | Yes | GitHub maintainer | Repo metadata and release hygiene | Manual metadata update | README, CHANGELOG, release, `distribution/submission-assets.md` | Confirm repo description, homepage, and topics from the exact topic list below. | 2026-06-10 | Release `v0.1.0-beta` exists as a pre-release. Do not claim directory presence from GitHub metadata alone. |
-| APIs.guru / OpenAPI Directory | https://apis.guru/add-api/ | OpenAPI aggregation | P0 | `blocked_needs_account` | Yes | GitHub auth required | Web form redirects to GitHub issue | Manual | `distribution/submissions/openapi-directory.md` | Re-authenticate GitHub as InterAI Labs, then submit the generated issue from the Add API form. | 2026-06-09 | The form builds a public GitHub issue in `APIs-guru/openapi-directory`. Local `gh` auth for InterAI Labs was present but token invalid, so no issue was created. |
+| APIs.guru / OpenAPI Directory | https://apis.guru/add-api/ | OpenAPI aggregation | P0 | `blocked_needs_auth` | Yes | GitHub auth required | Web form redirects to GitHub issue | Manual | `distribution/submissions/openapi-directory.md` | Re-authenticate GitHub CLI or use the browser form while logged in as InterAI Labs, then submit the generated issue. | 2026-06-09 | The form builds a public GitHub issue in `APIs-guru/openapi-directory`. `gh` shows active account `InterAILabs` on `github.com`, but the token is invalid. Web login and refresh attempts timed out waiting for browser/operator completion. Git normal can still read/push `InterAILabs/ai-risk-oracle`. |
 | OpenAPI Directory MCP Server | https://www.openapidirectory.com | OpenAPI search/MCP access | P2 | `not_started` | Unclear | Unknown | Unknown | Manual research | Hosted OpenAPI URL | Research whether this site accepts provider submissions or only indexes upstream APIs.guru/OpenAPI data. | 2026-06-14 | Treat as indirect until submission route is confirmed. |
 | FindAPI | https://www.findapi.dev/submit | Developer API directory | P1 | `blocked_needs_captcha` | Yes | No login shown | Web form with Cloudflare Turnstile | Manual | `distribution/submissions/developer-api-directory.md` | Submit manually in browser after completing Turnstile. | 2026-06-09 | Form asks for API name, website, description, use cases, auth type, CORS, protocol, pricing, and free-note fields. |
 | APIKeyHub | https://apikeyhub.com/dashboard | API and MCP directory | P1 | `blocked_needs_account` | Likely | Yes | Dashboard submission | Manual | `distribution/submissions/developer-api-directory.md` | Operator must log in or use an existing account, then submit through dashboard. | 2026-06-14 | Public site shows recently approved community submissions and a dashboard submit flow. |
