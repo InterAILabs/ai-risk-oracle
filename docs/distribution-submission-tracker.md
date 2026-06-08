@@ -2,34 +2,95 @@
 
 This tracker is the working board for Autonomous Distribution Execution v1.
 
-It does not claim InterAI is already submitted, accepted, listed, or approved by
-any external channel. Operators should update status only after a real manual
-submission or verified automated workflow.
+Date of this pass: 2026-06-08.
+
+No external listing, approval, or directory publication is claimed here. Status
+values describe InterAI's internal readiness and the next operator action.
+
+Allowed status values:
+
+- `not_started`
+- `ready_to_submit`
+- `prepared`
+- `submitted`
+- `blocked_needs_account`
+- `blocked_needs_domain`
+- `blocked_needs_mcp_server`
+- `not_applicable`
 
 ## Tracker
 
 | Channel | URL | Category | Priority | Status | Ready now? | Account needed? | Submission type | Manual/automatable | Source asset | Next action | Follow-up date | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GitHub release/topics/search | https://github.com/InterAILabs/ai-risk-oracle | Source repository | P0 | Ready to maintain | Yes | GitHub maintainer | Repo metadata and release | Manual now; automatable later | README, CHANGELOG, release draft | Confirm release, topics, description, homepage, and searchable tags | TBD | Do not claim external directory listing from GitHub metadata alone. |
-| OpenAPI/API directories | https://www.openapidirectory.com | API discovery | P1 | Needs submission | Yes | Likely | Hosted OpenAPI listing | Manual first pass | `distribution/submission-assets.md`, hosted OpenAPI URL | Review directory rules and submit hosted spec if accepted | TBD | Use hosted OpenAPI as source of truth. |
-| APIKeyHub | https://apikeyhub.com | Developer API directory | P1 | Needs submission research | Likely | Likely | API profile/listing | Manual | Submission assets, pricing URL, onboard URL | Confirm category, required fields, and moderation process | TBD | Be clear that self-serve uses onboard/trial or x402. |
-| FindAPI | https://www.findapi.dev | API discovery | P1 | Needs submission research | Likely | Likely | API profile/listing | Manual | Submission assets, OpenAPI URL | Confirm whether hosted OpenAPI URL can be submitted directly | TBD | Do not invent listing status. |
-| APIs.guru / OpenAPI Directory if applicable | https://apis.guru | OpenAPI index | P2 | Needs eligibility check | Not yet | Unknown | OpenAPI catalog contribution | Manual/PR depending rules | Hosted OpenAPI URL | Check contribution requirements and ownership criteria | TBD | Submit only if service fits their acceptance rules. |
-| x402 ecosystem/directories | https://www.x402.org/ecosystem | Payment-enabled API ecosystem | P0 | Needs submission | Yes | Likely | Ecosystem listing | Manual | Pricing URL, x402/Base USDC section, submission assets | Prepare x402-specific copy and submit through official channel | TBD | Do not perform payments for listing preparation. |
-| MCP Registry | https://modelcontextprotocol.io/registry/about | MCP ecosystem | P0 | Needs implementation/submission artifact | No | Likely | Remote MCP server submission | Manual first pass | MCP readiness docs, hosted MCP endpoint if validated | Build and validate registry-specific metadata before submission | TBD | InterAI has MCP metadata/readiness, but not a full MCP server submission yet. |
-| A2A / agent card directories | TBD | Agent interoperability | P2 | Needs directory discovery | Conditional | Unknown | Agent card listing | Manual | Hosted agent card, A2A readiness notes | Identify credible active directories before submitting | TBD | Agent card exists; directory ecosystem is still uneven. |
-| AI agent/tool directories | TBD | Agent tooling discovery | P1 | Needs curated shortlist | Conditional | Likely | Tool/infrastructure listing | Manual | Submission assets, README, trust receipt docs | Select credible directories; avoid spam listings | TBD | Position as infrastructure, not a consumer chatbot. |
-| Developer API directories | TBD | Developer infrastructure | P1 | Needs curated shortlist | Yes | Likely | API listing | Manual | Submission assets, OpenAPI, SDK docs | Build first wave list and submit with beta scope | TBD | Use categories like AI infrastructure, agent safety, policy, governance. |
-| Search/indexing/SEO | GitHub, hosted metadata, future domain | Discoverability | P0 | Ongoing | Yes | Maintainer | Metadata hygiene | Mixed | README, docs, hosted `.well-known` endpoints | Maintain topics, release links, backlinks, and clear self-serve path | TBD | Search improves as directory backlinks accumulate. |
-| Future domain path | `oracle.interailabs.com` and `api.interailabs.com` | Brand trust and canonical hosting | P1 | Planned | No | Domain/DNS/Fly access | Infrastructure migration | Manual | Domain roadmap | Choose domain and plan canonical URL update | TBD | Not blocking current beta, but recommended before broader distribution. |
+| GitHub release/topics/search | https://github.com/InterAILabs/ai-risk-oracle | Source repository | P0 | `ready_to_submit` | Yes | GitHub maintainer | Repo metadata and release hygiene | Manual metadata update | README, CHANGELOG, release, `distribution/submission-assets.md` | Confirm repo description, homepage, and topics from the exact topic list below. | 2026-06-10 | Release `v0.1.0-beta` exists as a pre-release. Do not claim directory presence from GitHub metadata alone. |
+| APIs.guru / OpenAPI Directory | https://apis.guru/add-api/ | OpenAPI aggregation | P0 | `prepared` | Yes | No account seen; web form/operator action required | Web form, not direct PR | Manual | `distribution/submissions/openapi-directory.md` | Use the APIs.guru Add API form with the hosted OpenAPI URL and official category. | 2026-06-10 | APIs.guru contribution docs say to use the web form and not raise PRs directly against generated spec files. |
+| OpenAPI Directory MCP Server | https://www.openapidirectory.com | OpenAPI search/MCP access | P2 | `not_started` | Unclear | Unknown | Unknown | Manual research | Hosted OpenAPI URL | Research whether this site accepts provider submissions or only indexes upstream APIs.guru/OpenAPI data. | 2026-06-14 | Treat as indirect until submission route is confirmed. |
+| FindAPI | https://www.findapi.dev/submit | Developer API directory | P1 | `prepared` | Yes | No login shown; web form/operator action required | Web form | Manual | `distribution/submissions/developer-api-directory.md` | Submit one targeted form entry if operator approves external publication review. | 2026-06-10 | Form asks for API name, website, description, use cases, auth type, CORS, protocol, pricing, and free-note fields. |
+| APIKeyHub | https://apikeyhub.com/dashboard | API and MCP directory | P1 | `blocked_needs_account` | Likely | Yes | Dashboard submission | Manual | `distribution/submissions/developer-api-directory.md` | Operator must log in or use an existing account, then submit through dashboard. | 2026-06-14 | Public site shows recently approved community submissions and a dashboard submit flow. |
+| API Map | https://apimap.dev | API directory for AI agents | P2 | `prepared` | Conditional | Unknown | Contact or unknown | Manual | `distribution/submissions/developer-api-directory.md` | Use only as a single targeted contact/submission if operator confirms channel fit. | 2026-06-14 | Strong agent-indexing fit, but no clear self-serve submit endpoint was found. |
+| x402.eco ecosystem | https://www.x402.eco | x402 ecosystem discovery | P0 | `prepared` | Yes | Unknown | GitHub/community contribution or ecosystem process | Manual | `distribution/submissions/x402-ecosystem.md` | Use x402-specific package and ask ecosystem maintainers for the canonical contribution path. | 2026-06-10 | Site exposes an ecosystem directory and a GitHub contribute link, but do not create a PR until the expected data format is confirmed. |
+| x402.solutions ecosystem | https://www.x402.solutions/ | x402 ecosystem listing | P1 | `ready_to_submit` | Yes | No account shown; form requires review consent | Web form | Manual | `distribution/submissions/x402-ecosystem.md` | Operator can submit one targeted listing form after approving review/feature consent. | 2026-06-10 | Form says submitted projects may be reviewed and potentially featured. |
+| Arch Tools x402 Service Directory | https://archtools.dev/directory | x402 service directory | P0 | `ready_to_submit` | Yes | No account shown; form requires contact email | Web form | Manual | `distribution/submissions/x402-ecosystem.md` | Operator can submit Service Name, URL, Description, and Contact Email. | 2026-06-10 | Good fit because it is explicitly a directory of x402-compatible APIs. |
+| MCP Registry | https://modelcontextprotocol.io/registry | MCP ecosystem | P1 | `blocked_needs_mcp_server` | No | Authentication required | `server.json` publish flow | Manual first, automatable later | `distribution/submissions/mcp-registry-future.md` | Build and validate a registry-specific `server.json` before any publish attempt. | 2026-06-21 | InterAI has MCP metadata/readiness, but not a full MCP Registry submission package yet. |
+| A2A Registry | https://www.a2a-registry.org | A2A/agent card directory | P2 | `blocked_needs_account` | Conditional | Yes | Register/submit agent | Manual | Hosted agent card, `distribution/submissions/developer-api-directory.md` | Operator must decide whether this service should be presented as an A2A service and sign up if appropriate. | 2026-06-21 | Site advertises sign-up and Submit Agent. Do not claim A2A registry presence. |
+| AgentRolodex | https://agentrolodex.com | A2A agent directory | P2 | `ready_to_submit` | Conditional | Unknown | Register A2A agent | Manual | Hosted agent card | Operator can review the register flow and submit only if service category fits. | 2026-06-21 | Agent card exists, but directory fit is lower priority than API/x402 channels. |
+| a2alist.ai | https://a2alist.ai | A2A/x402 directory | P3 | `not_started` | Unknown | Unknown | Unknown | Manual research | Hosted agent card, x402 package | Research submission mechanism before taking action. | 2026-06-21 | Active directory surfaced in search, but submission path was not confirmed. |
+| MadeWithStack | https://www.madewithstack.com/submit | Agent-native/developer product directory | P2 | `ready_to_submit` | Conditional | No account shown; badge commitment required | Manual review form | Manual | `distribution/submissions/developer-api-directory.md` | Operator must approve badge commitment before submitting. | 2026-06-14 | Good agent-native fit, but badge commitment makes this a human authorization step. |
+| PublicAPIs.io | https://publicapis.io/submit | API directory | P3 | `not_applicable` | No | Payment required for pro path | Paid listing form | Manual | None | Skip for this wave. | N/A | Submission page emphasizes a paid $99 Pro listing; this pass does not create payments. |
+| TheFreeAPI | https://thefreeapi.com | Free public API directory | P3 | `not_applicable` | No | Unknown | Add API form | Manual | None | Skip unless a free/no-auth public subset is launched. | N/A | InterAI is a paid/trial API, not a free public API. |
+| Search/indexing/SEO | GitHub, hosted metadata, future backlinks | Discoverability | P0 | `prepared` | Yes | No | Metadata hygiene | Manual plus monitoring | README, release, hosted `.well-known` endpoints | Keep first wave small; monitor telemetry after each targeted submission. | 2026-06-10 | First wave should use `ai-risk-oracle.fly.dev`; do not wait for a custom domain. |
+| Future domain path | `oracle.interailabs.com`, `api.interailabs.com` | Brand trust/canonical hosting | P1 | `blocked_needs_domain` | No | DNS/Fly/domain access | Infrastructure planning | Manual | `docs/domain-and-hosting-roadmap.md` | Keep Fly URL for first wave; plan `oracle.interailabs.com` after initial discovery. | 2026-06-21 | Reserve `api.interailabs.com` for future stable platform APIs. |
+
+## Recommended GitHub Topics
+
+Use only if an InterAI Labs maintainer confirms repository metadata updates:
+
+```text
+autonomous-agents
+ai-agents
+agent-safety
+execution-gateway
+pre-execution-verification
+openapi
+x402
+base-usdc
+trust-receipts
+developer-api
+```
+
+## Post-Distribution Telemetry Review
+
+After each targeted channel action, review telemetry at 24 hours and 48 hours.
+
+Use the admin-only production summary:
+
+```text
+GET /admin/adoption/summary
+```
+
+Review these counters:
+
+- `discovery_hits`
+- `pricing_hits`
+- `onboardings`
+- `first_verifies`
+- `total_verifies`
+- `x402_payment_required`
+- `topup_created`
+- `topup_confirmed`
+- `errors`
+
+Compare the channel action timestamp with `last_24h` and `last_7d`. Do not
+publish raw telemetry. Share external adoption numbers only after operator
+review.
 
 ## Operating Rules
 
 - Do not claim publication before it is verified.
-- Do not create external submissions from automation without operator approval.
+- Do not submit external forms without operator approval.
+- Do not create external accounts from this tracker.
 - Do not paste API keys, admin tokens, payment secrets, or raw customer data into
   directory forms.
 - Link to hosted metadata instead of copying changing operational values.
 - Keep beta scope honest: controlled technical beta, not broad high-volume
   production service.
-
