@@ -1,7 +1,7 @@
 const baseUrl = "https://ai-risk-oracle.fly.dev"
 const credential = "replace-with-your-credential"
 
-const decision = await fetch(`${baseUrl}/verify`, {
+const response = await fetch(`${baseUrl}/verify`, {
   method: "POST",
   headers: {
     authorization: `Bearer ${credential}`,
@@ -34,9 +34,41 @@ const decision = await fetch(`${baseUrl}/verify`, {
   })
 })
 
-const body = await decision.json()
-console.log(body)
+const decision = await response.json()
 
-if (body.recommended_action !== "allow") {
-  throw new Error(`Payment paused: ${body.recommended_action}`)
+if (!response.ok) {
+  throw new Error(`InterAI API error: HTTP ${response.status}`)
 }
+
+switch (decision.recommended_action) {
+  case "allow":
+    console.log("Gateway decision: allow. Continue with payment execution.", {
+      decision_id: decision.decision_id,
+      trust_receipt_id: decision.trust_receipt_id
+    })
+    break
+
+  case "review_required":
+    console.log(
+      "Gateway decision: review_required. Pause this agent and route to a supervisor, policy system, wallet rule, governance queue, or human operator.",
+      {
+        decision_id: decision.decision_id,
+        trust_receipt_id: decision.trust_receipt_id,
+        policy_violations: decision.policy_violations
+      }
+    )
+    break
+
+  case "block":
+    console.log("Gateway decision: block. Abort payment execution and log the decision.", {
+      decision_id: decision.decision_id,
+      trust_receipt_id: decision.trust_receipt_id,
+      policy_violations: decision.policy_violations
+    })
+    break
+
+  default:
+    throw new Error(`Unknown gateway decision: ${decision.recommended_action}`)
+}
+
+export {}

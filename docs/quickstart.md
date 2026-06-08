@@ -5,6 +5,12 @@ using the hosted InterAI Risk Oracle API.
 
 ## 1. Get API Access
 
+Use the default self-serve path:
+
+```text
+pricing -> onboard/API key/trial or x402 -> verify -> receipt
+```
+
 Discover pricing and onboarding from the hosted API:
 
 ```text
@@ -12,9 +18,10 @@ https://ai-risk-oracle.fly.dev/pricing
 https://ai-risk-oracle.fly.dev/onboard
 ```
 
-Use self-serve onboarding, prepaid API key balance, or x402 where supported.
-Email interailabs@gmail.com is available for support, security, enterprise
-access, partnerships, or manual integration help.
+Use self-serve onboarding for an API key and trial/prepaid balance, or use x402
+where supported. Email interailabs@gmail.com is available for support,
+security, enterprise, partnerships, or manual integration help; it is not
+required for the default self-serve path.
 
 ## 2. Verify Before Execution
 
