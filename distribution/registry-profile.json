@@ -1,0 +1,78 @@
+{
+  "name": "InterAI Risk Oracle",
+  "tagline": "Before an agent executes, InterAI verifies.",
+  "description": "Autonomous Execution Gateway for pre-execution verification of autonomous agents.",
+  "category": "autonomous_execution_gateway",
+  "service_type": "autonomous_execution_gateway",
+  "submission_status": "candidate_not_submitted",
+  "homepage_url": "https://ai-risk-oracle.fly.dev",
+  "repository_url": "https://github.com/InterAILabs/ai-risk-oracle",
+  "hosted_base_url": "https://ai-risk-oracle.fly.dev",
+  "primary_path": [
+    "discover",
+    "pricing",
+    "onboard_or_x402",
+    "verify",
+    "decision",
+    "store_receipt"
+  ],
+  "endpoints": {
+    "pricing": "https://ai-risk-oracle.fly.dev/pricing",
+    "onboard": "https://ai-risk-oracle.fly.dev/onboard",
+    "verify": "https://ai-risk-oracle.fly.dev/verify",
+    "openapi": "https://ai-risk-oracle.fly.dev/.well-known/openapi.json",
+    "agent_card": "https://ai-risk-oracle.fly.dev/.well-known/agent.json",
+    "ai_service": "https://ai-risk-oracle.fly.dev/.well-known/ai-service.json",
+    "discovery_bundle": "https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json",
+    "autonomous_adoption": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json"
+  },
+  "capabilities": [
+    "pre_execution_verification",
+    "autonomous_action_risk_scoring",
+    "policy_decisioning",
+    "trust_receipts",
+    "self_serve_onboarding",
+    "base_usdc_x402"
+  ],
+  "decision_contract": {
+    "request_contract": "autonomous_execution",
+    "recommended_action": [
+      "allow",
+      "review_required",
+      "block"
+    ],
+    "policy_result": [
+      "allow",
+      "review_required",
+      "block"
+    ],
+    "risk_level": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "score": "Risk score from 0 to 1. Higher means more risk.",
+    "signals": "Object"
+  },
+  "pricing": {
+    "model": "hosted_api_self_serve_metadata",
+    "pricing_url": "https://ai-risk-oracle.fly.dev/pricing",
+    "supports_prepaid_api_key": true,
+    "supports_trial": true,
+    "supports_x402": true,
+    "chain": "Base",
+    "asset": "USDC"
+  },
+  "support": {
+    "email": "interailabs@gmail.com",
+    "not_required_for_default_self_serve_path": true,
+    "intended_for": [
+      "support",
+      "security",
+      "enterprise",
+      "partnerships",
+      "manual integration help"
+    ]
+  },
+  "review_required_semantics": "The current agent should not execute autonomously under the current policy. Route to a supervisor, policy system, wallet rule, governance queue, or human operator."
+}
