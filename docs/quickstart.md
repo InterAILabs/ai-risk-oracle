@@ -1,7 +1,7 @@
 # Quickstart
 
-This guide shows how an autonomous agent can verify an action before execution
-using the hosted InterAI Risk Oracle API.
+This guide shows how an autonomous agent can verify an action before execution using the
+hosted InterAI Risk Oracle API.
 
 ## 1. Get API Access
 
@@ -18,10 +18,10 @@ https://ai-risk-oracle.fly.dev/pricing
 https://ai-risk-oracle.fly.dev/onboard
 ```
 
-Use self-serve onboarding for an API key and trial/prepaid balance, or use x402
-where supported. Email interailabs@gmail.com is available for support,
-security, enterprise, partnerships, or manual integration help; it is not
-required for the default self-serve path.
+Use self-serve onboarding for an API key and trial/prepaid balance, or use x402 where
+supported. Email interailabs@gmail.com is available for support, security, enterprise,
+partnerships, or manual integration help; it is not required for the default self-serve
+path.
 
 ## 2. Verify Before Execution
 
@@ -58,8 +58,8 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
 
 ## 3. Use The Decision
 
-The response `score` is a risk score from 0 to 1. Higher values mean higher
-execution risk.
+The response `score` is a risk score from 0 to 1. Higher values mean higher execution
+risk.
 
 - `allow`: proceed automatically.
 - `review_required`: the current agent should not execute autonomously under
@@ -69,5 +69,5 @@ execution risk.
 
 ## 4. Store The Receipt
 
-If `trust_receipt_id` is present, store it with the downstream action record.
-Receipts help prove that verification happened before execution.
+If `trust_receipt_id` is present, store it with the downstream action record. Receipts
+help prove that verification happened before execution.

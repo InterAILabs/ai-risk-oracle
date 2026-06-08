@@ -15,10 +15,10 @@ Before an agent executes, InterAI verifies.
 ## Long Description
 
 InterAI Risk Oracle is a hosted Autonomous Execution Gateway for pre-execution
-verification of autonomous agents. Agents call InterAI before a tool call,
-payment, workflow approval, database mutation, trade, or other action. InterAI
-returns a machine-readable risk score, policy result, recommended action, and
-trust receipt metadata.
+verification of autonomous agents. Agents call InterAI before a tool call, payment,
+workflow approval, database mutation, trade, or other action. InterAI returns a
+machine-readable risk score, policy result, recommended action, and trust receipt
+metadata.
 
 ## Primary Adoption Path
 
@@ -26,8 +26,8 @@ trust receipt metadata.
 discover -> pricing -> onboard/API key/trial or x402 -> verify -> decision -> store receipt
 ```
 
-Email is available for support, security, enterprise access, partnerships, and
-manual integration help. It is not required for the default self-serve path.
+Email is available for support, security, enterprise access, partnerships, and manual
+integration help. It is not required for the default self-serve path.
 
 ## Decision Contract
 
@@ -38,9 +38,9 @@ manual integration help. It is not required for the default self-serve path.
 - `score`: risk score from 0 to 1; higher means more risk
 - `signals`: object
 
-`review_required` means the current agent should not execute autonomously under
-the current policy. Route to a supervisor, policy system, wallet rule,
-governance queue, or human operator.
+`review_required` means the current agent should not execute autonomously under the
+current policy. Route to a supervisor, policy system, wallet rule, governance queue, or
+human operator.
 
 ## Public URLs
 
@@ -56,6 +56,5 @@ governance queue, or human operator.
 
 ## Submission Notes
 
-This file is a draft for registry operators and ecosystem partners. Do not
-announce registry placement until the external operator confirms the placement.
-
+This file is a draft for registry operators and ecosystem partners. Do not announce
+registry placement until the external operator confirms the placement.

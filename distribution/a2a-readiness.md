@@ -29,6 +29,5 @@ Place InterAI before:
 
 ## Current Status
 
-Ready for controlled integration tests with agent builders. Use the hosted
-metadata as the source of truth during onboarding.
-
+Ready for controlled integration tests with agent builders. Use the hosted metadata as
+the source of truth during onboarding.

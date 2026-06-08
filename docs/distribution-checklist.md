@@ -1,7 +1,7 @@
 # Distribution Checklist
 
-This checklist is for controlled tester onboarding, ecosystem submissions, and
-partner handoffs.
+This checklist is for controlled tester onboarding, ecosystem submissions, and partner
+handoffs.
 
 ## Ready Now
 
@@ -17,8 +17,7 @@ partner handoffs.
 
 ## Controlled Beta Scope
 
-InterAI is ready for controlled beta testers and partner review when operators
-confirm:
+InterAI is ready for controlled beta testers and partner review when operators confirm:
 
 - production `/health` is healthy
 - production `/ready` is ready
