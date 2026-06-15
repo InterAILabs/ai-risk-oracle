@@ -3,59 +3,47 @@
 Use this checklist on 2026-06-09. Submit only one channel at a time, then review
 telemetry after 24 hours and 48 hours.
 
-Do not claim InterAI is listed, approved, official, certified, audited, or
-high-volume production-ready unless the channel explicitly confirms that status.
+Do not claim InterAI is listed, approved, certified, audited, officially
+endorsed by a directory, or high-volume production-ready unless the channel
+explicitly confirms that status.
 
 ## 1. APIs.guru / OpenAPI Directory
 
-First repair GitHub CLI, or use the browser while logged in as InterAI Labs.
-
-Safe CLI repair options:
+Status:
 
 ```text
-gh auth status
-gh auth login -h github.com -w -p https
-gh auth refresh -h github.com -s repo
+submitted_pending_review
 ```
 
-Do not paste a token manually unless the operator explicitly authorizes a PAT
-flow. Do not print tokens.
-
-Open:
+Issue:
 
 ```text
-https://apis.guru/add-api/
+https://github.com/APIs-guru/openapi-directory/issues/2665
 ```
 
-Fields:
+Do not submit another APIs.guru issue unless maintainers ask for a replacement.
+
+Current details:
 
 ```text
-URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
 Format: OpenAPI/Swagger
-Is the definition official?: Yes, by API owner
+Official: true
 API Name: InterAI Risk Oracle
-API Logo URL: leave blank unless an approved square logo URL is available
-Category: Artificial Intelligence
-```
-
-What happens:
-
-```text
-The form opens a GitHub issue in APIs-guru/openapi-directory.
+Category: tools
+OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
 ```
 
 Do not:
 
-- submit from a personal account if InterAI Labs account/auth is expected;
-- mark as listed until the issue is accepted and merged/indexed;
-- edit the generated issue to add claims beyond the public OpenAPI metadata.
+- claim InterAI is approved;
+- claim InterAI is listed;
+- claim APIs.guru acceptance until a maintainer or the directory confirms it.
 
-After submit:
+Next action:
 
-- save the issue URL;
-- set tracker status to `submitted` only after the GitHub issue is actually
-  created;
-- review telemetry after 24/48h.
+```text
+Monitor issue #2665 and respond if maintainers request changes.
+```
 
 ## 2. Arch Tools x402 Service Directory
 
