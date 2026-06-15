@@ -2,14 +2,14 @@
 
 Distribution operator pass: 2026-06-08, America/Buenos_Aires.
 
-No channel is marked as listed, approved, official, or accepted. Only confirmed
-technical submission attempts are recorded here.
+No channel is marked as listed, approved, accepted, or officially endorsed by a
+directory. Only confirmed technical submission attempts are recorded here.
 
 ## Summary
 
 | Channel | URL | Status | Date/time | Response | Confirmation |
 |---|---|---|---|---|---|
-| APIs.guru / OpenAPI Directory | https://apis.guru/add-api/ | `blocked_needs_auth` | 2026-06-08T07:03-03:00 and 2026-06-08T07:12-03:00 | Form builds a GitHub issue; local `gh` auth token for InterAI Labs was invalid. Login and refresh attempts timed out waiting for operator/browser completion. | No issue created. |
+| APIs.guru / OpenAPI Directory | https://github.com/APIs-guru/openapi-directory/issues/2665 | `submitted_pending_review` | 2026-06-15 | GitHub issue submitted by InterAILabs. Current state: open / pending review. | Issue #2665 created. Not approved or listed. |
 | Arch Tools x402 Service Directory | https://archtools.dev/directory | `failed` | 2026-06-08T07:05-03:00 | Public endpoint returned HTTP 500. | No successful confirmation. |
 | x402.solutions | https://www.x402.solutions/ | `blocked_needs_terms_acceptance` | 2026-06-08T07:03-03:00 | Form requires agreement to project review and potential feature. | Not submitted. |
 | FindAPI | https://www.findapi.dev/submit | `blocked_needs_captcha` | 2026-06-08T07:03-03:00 | Form includes Cloudflare Turnstile. | Not submitted. |
@@ -54,12 +54,12 @@ failed
 No listing confirmation, pending review confirmation, or directory ID was
 received.
 
-## APIs.guru Attempt
+## APIs.guru Submission
 
 Channel:
 
 ```text
-https://apis.guru/add-api/
+https://github.com/APIs-guru/openapi-directory/issues/2665
 ```
 
 Mechanism confirmed:
@@ -68,28 +68,42 @@ Mechanism confirmed:
 The Add API form redirects to a public GitHub issue in APIs-guru/openapi-directory with label "add API".
 ```
 
-Blocked because:
+Submission details:
 
 ```text
-GitHub CLI auth for the InterAI Labs account was present but the token was invalid.
+Title: Add "InterAI Risk Oracle" API
+Submitted by: InterAILabs
+State: open / pending review
+Format: openapi
+Official: true
+OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+Name: InterAI Risk Oracle
+Category: tools
+Repo: https://github.com/InterAILabs/ai-risk-oracle
+Hosted service: https://ai-risk-oracle.fly.dev
+Release: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
 ```
 
-Rechecked on 2026-06-08:
+Scope note:
 
 ```text
-gh auth status: active account InterAILabs on github.com, token invalid.
-gh auth login -h github.com -w -p https: timed out waiting for browser/operator completion.
-gh auth refresh -h github.com -s repo: timed out waiting for browser/operator completion.
-git ls-remote origin main: succeeded for the public repo.
+Controlled technical beta, not broad high-volume production.
 ```
 
 Status:
 
 ```text
-blocked_needs_auth
+submitted_pending_review
 ```
 
-No issue was created.
+This is not approved and not listed until an APIs.guru maintainer or the
+directory confirms acceptance.
+
+Next action:
+
+```text
+Monitor issue #2665 and respond if maintainers request changes.
+```
 
 ## Not Submitted
 
