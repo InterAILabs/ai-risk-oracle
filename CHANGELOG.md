@@ -4,6 +4,8 @@
 
 ### Added
 
+- Professional readiness checklist documenting what is ready now and what is
+  still pending before enterprise or high-volume claims.
 - Draft `v0.1.1-beta` readiness release notes for OpenAPI validation and public
   distribution state.
 - Public pricing review notes documenting the unchanged beta price and future
@@ -16,6 +18,8 @@
 
 - Channel readiness now records APIs.guru issue #2665 as submitted pending
   review, not merely prepared.
+- Manual submission instructions now reflect the next manual pass and include
+  both Arch Tools failed request IDs.
 
 ## v0.1.0-beta
 

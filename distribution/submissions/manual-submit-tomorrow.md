@@ -1,6 +1,6 @@
-# Manual Submit Tomorrow
+# Manual Submit Next
 
-Use this checklist on 2026-06-09. Submit only one channel at a time, then review
+Use this checklist for the next manual distribution pass. Submit only one channel at a time, then review
 telemetry after 24 hours and 48 hours.
 
 Do not claim InterAI is listed, approved, certified, audited, officially
@@ -65,8 +65,10 @@ Contact Email: interailabs@gmail.com
 If the form fails:
 
 - record the HTTP/status message or visible error;
+- include request ID `c65acb6c-c60c-4067-a7dc-e339f588c3b8` if contacting Arch
+  Tools about the first failed automated attempt;
 - include request ID `10a30a3d-8631-4ca5-8340-c2315a848821` if contacting Arch
-  Tools about the failed automated attempt;
+  Tools about the second failed automated attempt;
 - do not mark as submitted without confirmation.
 
 ## 3. x402.solutions
@@ -137,6 +139,7 @@ After each successful manual submission, review at 24 hours and 48 hours:
 - `onboardings`
 - `first_verifies`
 - `total_verifies`
+- `receipts_created`
 - `x402_payment_required`
 - `topup_created`
 - `topup_confirmed`
