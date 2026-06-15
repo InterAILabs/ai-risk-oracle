@@ -4,9 +4,18 @@
 
 ### Added
 
+- Draft `v0.1.1-beta` readiness release notes for OpenAPI validation and public
+  distribution state.
+- Public pricing review notes documenting the unchanged beta price and future
+  review points.
 - Clean public repository structure for hosted API discovery.
 - Public documentation, schemas, discovery metadata, SDK stubs, and examples.
 - Proprietary core notice clarifying that hosted service internals are excluded.
+
+### Changed
+
+- Channel readiness now records APIs.guru issue #2665 as submitted pending
+  review, not merely prepared.
 
 ## v0.1.0-beta
 
