@@ -1,9 +1,18 @@
-# v0.1.1-beta Readiness Draft
+# InterAI Risk Oracle v0.1.1-beta
 
 Before an agent executes, InterAI verifies.
 
-This draft is prepared for a future `v0.1.1-beta` pre-release. It has not been
-published as a GitHub release yet.
+Publication status:
+
+```text
+created
+```
+
+Release URL:
+
+```text
+https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.1-beta
+```
 
 ## Highlights
 
@@ -22,8 +31,7 @@ published as a GitHub release yet.
 - APIs.guru / OpenAPI Directory:
   https://github.com/APIs-guru/openapi-directory/issues/2665
 - Status: submitted pending review.
-- Not approved.
-- Not listed.
+- External directory review is still pending.
 - Next action: monitor issue #2665 and respond if maintainers request changes.
 
 ## OpenAPI Validation Notes
@@ -48,35 +56,3 @@ Base USDC
 ```
 
 Use `https://ai-risk-oracle.fly.dev/pricing` as the source of truth.
-
-## Manual Release Checklist
-
-- Confirm build, tests, contracts, benchmark, and secrets check pass.
-- Confirm hosted smoke passes after any deploy.
-- Confirm OpenAPI validation has no blocking errors.
-- Confirm APIs.guru issue #2665 is still described as pending unless accepted.
-- Confirm no secrets or API keys appear in release notes.
-- Publish as a pre-release only after operator approval.
-
-## Manual GitHub Release Instructions
-
-GitHub CLI authentication was not valid during the final readiness audit, so the
-release was not created automatically.
-
-Create manually:
-
-```text
-Tag: v0.1.1-beta
-Title: InterAI Risk Oracle v0.1.1-beta
-Target: latest public main commit after the final readiness pass
-Release type: pre-release
-Body file: distribution/github-release-v0.1.1-beta.md
-```
-
-Do not claim:
-
-- APIs.guru approval;
-- APIs.guru listing;
-- MCP Registry listing;
-- broad high-volume production readiness;
-- enterprise readiness.

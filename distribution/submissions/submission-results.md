@@ -11,6 +11,7 @@ directory. Only confirmed technical submission attempts are recorded here.
 
 | Channel | URL | Status | Date/time | Response | Confirmation |
 |---|---|---|---|---|---|
+| GitHub release v0.1.1-beta | https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.1-beta | `created` | 2026-06-15 | Pre-release created by InterAILabs. | Release exists. |
 | APIs.guru / OpenAPI Directory | https://github.com/APIs-guru/openapi-directory/issues/2665 | `submitted_pending_review` | 2026-06-15 | GitHub issue submitted by InterAILabs. Current state: open / pending review. | Issue #2665 created. Not approved or listed. |
 | Arch Tools x402 Service Directory | https://archtools.dev/directory | `failed` | 2026-06-08T07:05-03:00 | Public endpoint returned HTTP 500. | No successful confirmation. |
 | x402.solutions | https://www.x402.solutions/ | `blocked_needs_terms_acceptance` | 2026-06-08T07:03-03:00 | Form requires agreement to project review and potential feature. | Not submitted. |
@@ -133,7 +134,7 @@ https://github.com/InterAILabs/ai-risk-oracle/pull/1
 Current status:
 
 ```text
-manual_cleanup_needed
+closed_and_deleted
 ```
 
 Reason:
@@ -144,21 +145,19 @@ Reason:
   branch is 1 commit ahead;
 - the old branch would remove current distribution docs, release drafts,
   readiness docs, and submission packages if merged as-is;
-- GitHub CLI authentication is not currently safe for closing the old PR or
-  deleting the old branch automatically;
-- no branch deletion or PR closure was performed.
+- GitHub CLI authentication was restored as InterAILabs with ADMIN permission;
+- PR #1 was closed without merge;
+- remote branch `codex-public-autonomous-execution-gateway-v1` was deleted.
 
-Manual next action:
+Cleanup action performed:
 
-1. Open `https://github.com/InterAILabs/ai-risk-oracle/pull/1`.
-2. Confirm it is still the PR from branch
-   `codex-public-autonomous-execution-gateway-v1` into `main`.
-3. Close it with this factual note:
+```text
+PR #1: closed
+Branch: deleted
+```
+
+Close comment used:
 
 ```text
 Closing as superseded by the current main branch and the v0.1.1-beta readiness pass. The public repository now tracks the Autonomous Execution Gateway beta state, hosted OpenAPI 3.1 validation, and distribution readiness docs.
 ```
-
-4. Delete remote branch `codex-public-autonomous-execution-gateway-v1` after the
-   PR is closed, unless a maintainer identifies unique work that should be
-   cherry-picked first.

@@ -20,6 +20,8 @@
   review, not merely prepared.
 - Manual submission instructions now reflect the next manual pass and include
   both Arch Tools failed request IDs.
+- GitHub release and cleanup state now records `v0.1.1-beta` as created, old
+  PR #1 as closed, and the superseded public branch as deleted.
 
 ## v0.1.0-beta
 
