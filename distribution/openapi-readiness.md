@@ -5,6 +5,8 @@ InterAI Risk Oracle exposes the hosted OpenAPI contract at:
 - `https://ai-risk-oracle.fly.dev/.well-known/openapi.json`
 - `https://ai-risk-oracle.fly.dev/openapi.json`
 
+The hosted contract is OpenAPI 3.1.0.
+
 ## Primary Contract
 
 The primary request contract is `autonomous_execution`.
@@ -55,7 +57,24 @@ Example response:
 Before submitting the API contract to a partner:
 
 1. Fetch both OpenAPI URLs.
-2. Confirm the service title and description say Autonomous Execution Gateway.
-3. Confirm `signals` is represented as an object in examples and schemas.
-4. Confirm the score description says higher means more risk.
-5. Confirm legacy compatibility is not the primary narrative.
+2. Confirm `openapi` is `3.1.0`.
+3. Confirm the service title and description say Autonomous Execution Gateway.
+4. Confirm `signals` is represented as an object in examples and schemas.
+5. Confirm the score description says higher means more risk.
+6. Confirm legacy compatibility is not the primary narrative.
+
+## APIs.guru Status
+
+APIs.guru submission:
+
+```text
+https://github.com/APIs-guru/openapi-directory/issues/2665
+```
+
+Status:
+
+```text
+submitted_pending_review
+```
+
+This is not approved and not listed until APIs.guru confirms acceptance.

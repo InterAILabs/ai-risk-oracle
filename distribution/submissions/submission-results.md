@@ -113,3 +113,32 @@ Monitor issue #2665 and respond if maintainers request changes.
 - APIKeyHub: blocked by dashboard/account.
 - MCP Registry: blocked by missing registry-ready MCP server package.
 - A2A directories: blocked by account/category adaptation.
+
+## Public Repository Hygiene
+
+Old public branch:
+
+```text
+codex-public-autonomous-execution-gateway-v1
+```
+
+Current status:
+
+```text
+manual_cleanup_needed
+```
+
+Reason:
+
+- the old branch appears superseded by later `main` work, but it is not
+  patch-equivalent to `main`;
+- GitHub CLI authentication is not currently safe for closing the old PR or
+  deleting the old branch automatically;
+- no branch deletion or PR closure was performed.
+
+Manual next action:
+
+1. Open the old PR in `InterAILabs/ai-risk-oracle`.
+2. Confirm it has no unique changes compared with current `main`.
+3. Close it with a factual superseded note.
+4. Delete the remote branch only after confirming no needed work is lost.

@@ -8,7 +8,7 @@ This document states what is ready to submit now and what still needs work.
 |---|---|---|
 | GitHub release/topics/search | Ready to submit | Public repo, changelog, README, and release exist. Operator still needs to confirm topics and repo metadata. |
 | x402 ecosystem/directories | Prepared | Hosted pricing metadata exposes x402/Base USDC support. Channel-specific packages exist in `distribution/submissions/`. |
-| APIs.guru / OpenAPI Directory | Prepared | Hosted OpenAPI URL exists and APIs.guru accepts API requests through its Add API form. |
+| APIs.guru / OpenAPI Directory | Submitted pending review | Issue #2665 is open at APIs.guru. InterAI is not approved or listed yet. |
 | FindAPI | Prepared | Submission form exists and the developer API package includes field-ready copy. |
 | APIKeyHub | Blocked: needs account | Public site exposes API/MCP directory and dashboard submission flow; operator account action is needed. |
 | Developer API directories | Prepared | API description, docs, OpenAPI, pricing, onboard, and SDK links are available. |
@@ -22,10 +22,14 @@ This document states what is ready to submit now and what still needs work.
 
 - GitHub release topics and repository metadata, after operator confirms the
   exact topic list.
-- APIs.guru Add API form, after operator approves the external request.
 - FindAPI, after operator approves one targeted manual form.
 - Arch Tools x402 Service Directory, after operator approves one targeted manual
   form.
+
+## Submitted Pending Review
+
+- APIs.guru / OpenAPI Directory: issue #2665 is open and pending maintainer
+  review. Do not claim approval or listing until APIs.guru confirms it.
 
 ## Ready To Prepare Now
 
