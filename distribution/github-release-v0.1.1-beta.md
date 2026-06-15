@@ -57,3 +57,26 @@ Use `https://ai-risk-oracle.fly.dev/pricing` as the source of truth.
 - Confirm APIs.guru issue #2665 is still described as pending unless accepted.
 - Confirm no secrets or API keys appear in release notes.
 - Publish as a pre-release only after operator approval.
+
+## Manual GitHub Release Instructions
+
+GitHub CLI authentication was not valid during the final readiness audit, so the
+release was not created automatically.
+
+Create manually:
+
+```text
+Tag: v0.1.1-beta
+Title: InterAI Risk Oracle v0.1.1-beta
+Target: latest public main commit after the final readiness pass
+Release type: pre-release
+Body file: distribution/github-release-v0.1.1-beta.md
+```
+
+Do not claim:
+
+- APIs.guru approval;
+- APIs.guru listing;
+- MCP Registry listing;
+- broad high-volume production readiness;
+- enterprise readiness.

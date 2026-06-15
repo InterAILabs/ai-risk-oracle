@@ -2,6 +2,8 @@
 
 Distribution operator pass: 2026-06-08, America/Buenos_Aires.
 
+Final readiness audit update: 2026-06-15, America/Buenos_Aires.
+
 No channel is marked as listed, approved, accepted, or officially endorsed by a
 directory. Only confirmed technical submission attempts are recorded here.
 
@@ -122,6 +124,12 @@ Old public branch:
 codex-public-autonomous-execution-gateway-v1
 ```
 
+Old public PR:
+
+```text
+https://github.com/InterAILabs/ai-risk-oracle/pull/1
+```
+
 Current status:
 
 ```text
@@ -132,13 +140,25 @@ Reason:
 
 - the old branch appears superseded by later `main` work, but it is not
   patch-equivalent to `main`;
+- comparison on 2026-06-15 showed `origin/main` is 18 commits ahead and the old
+  branch is 1 commit ahead;
+- the old branch would remove current distribution docs, release drafts,
+  readiness docs, and submission packages if merged as-is;
 - GitHub CLI authentication is not currently safe for closing the old PR or
   deleting the old branch automatically;
 - no branch deletion or PR closure was performed.
 
 Manual next action:
 
-1. Open the old PR in `InterAILabs/ai-risk-oracle`.
-2. Confirm it has no unique changes compared with current `main`.
-3. Close it with a factual superseded note.
-4. Delete the remote branch only after confirming no needed work is lost.
+1. Open `https://github.com/InterAILabs/ai-risk-oracle/pull/1`.
+2. Confirm it is still the PR from branch
+   `codex-public-autonomous-execution-gateway-v1` into `main`.
+3. Close it with this factual note:
+
+```text
+Closing as superseded by the current main branch and the v0.1.1-beta readiness pass. The public repository now tracks the Autonomous Execution Gateway beta state, hosted OpenAPI 3.1 validation, and distribution readiness docs.
+```
+
+4. Delete remote branch `codex-public-autonomous-execution-gateway-v1` after the
+   PR is closed, unless a maintainer identifies unique work that should be
+   cherry-picked first.

@@ -78,3 +78,19 @@ submitted_pending_review
 ```
 
 This is not approved and not listed until APIs.guru confirms acceptance.
+
+## Final Validation Result
+
+Latest hosted validation:
+
+```text
+swagger-cli: valid
+Redocly: 0 errors, 7 warnings
+```
+
+Accepted warnings:
+
+- `info.license` is not declared because the hosted core is proprietary and the
+  package is not open source.
+- Some reusable components are retained for public contract clarity even when
+  Redocly marks them unused.
