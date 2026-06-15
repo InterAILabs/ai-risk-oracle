@@ -6,7 +6,7 @@ This document states what is ready to submit now and what still needs work.
 
 | Channel | Readiness | Reason |
 |---|---|---|
-| GitHub release/topics/search | Ready to submit | Public repo, changelog, README, and release exist. Operator still needs to confirm topics and repo metadata. |
+| GitHub release/topics/search | Release created | Public repo, changelog, README, `v0.1.0-beta`, and `v0.1.1-beta` pre-releases exist. Operator still needs to confirm topics and repo metadata. |
 | x402 ecosystem/directories | Prepared | Hosted pricing metadata exposes x402/Base USDC support. Channel-specific packages exist in `distribution/submissions/`. |
 | APIs.guru / OpenAPI Directory | Submitted pending review | Issue #2665 is open at APIs.guru. InterAI is not approved or listed yet. |
 | FindAPI | Prepared | Submission form exists and the developer API package includes field-ready copy. |
@@ -20,8 +20,8 @@ This document states what is ready to submit now and what still needs work.
 
 ## Ready To Send Now
 
-- GitHub release topics and repository metadata, after operator confirms the
-  exact topic list.
+- GitHub repository topics and metadata, after operator confirms the exact topic
+  list.
 - FindAPI, after operator approves one targeted manual form.
 - Arch Tools x402 Service Directory, after operator approves one targeted manual
   form.
