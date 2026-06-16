@@ -204,23 +204,50 @@ different from real zero values. Numeric zero means the admin endpoint loaded an
 reported no events for that metric. `unavailable` means no operator telemetry was
 loaded.
 
-Early telemetry may include operator smoke tests, dashboard checks, Codex audits,
-and external traffic. Treat counts as mixed until external traffic is isolated.
-Do not describe early counts as real adoption or real users unless internal
-traffic has been separated.
+The monitor identifies its own production requests with:
 
-Interpretation rules:
+```text
+User-Agent: InterAI-Risk-Oracle-Monitor/0.1
+X-IARO-Monitor: local-dashboard
+```
 
-- `discovery_hits > 0`: discovery/indexing activity; may include internal checks.
-- `pricing_hits > 0`: pricing interest; may include internal checks.
-- `onboardings > 0`: trial onboarding observed; may include smoke accounts.
-- `first_verifies > 0`: verify usage observed; may include smoke tests.
+These headers are classification hints only. They are not used for auth or
+security decisions.
+
+If `/admin/adoption/summary` provides `traffic_segments`, the dashboard uses
+`traffic_segments.<window>.external_only` for the main telemetry table, signal
+interpretation, and telemetry deltas. Raw counters remain visible in the
+Raw / mixed all traffic table. `adoption.windows` is still raw `all_traffic` for
+compatibility.
+
+Traffic segments:
+
+- `all_traffic`: raw counters, including internal and historical traffic.
+- `external_only`: public/external traffic after excluding local monitor, admin,
+  smoke/audit, and unknown historical records.
+- `internal_monitoring`: local dashboard and admin-route traffic.
+- `smoke_or_audit`: self-serve smoke/audit activity.
+- `unknown_or_historical`: older or incomplete records that cannot be safely
+  classified.
+
+Metrics from before traffic source classification are mixed/raw. Do not describe
+pre-change counts as real adoption or real users unless the external-only segment
+supports that claim.
+
+Interpretation rules for `external_only` when available:
+
+- `discovery_hits > 0`: discovery/indexing activity.
+- `pricing_hits > 0`: commercial curiosity.
+- `onboardings > 0`: trial adoption.
+- `first_verifies > 0`: first real usage.
 - `total_verifies > first_verifies`: repeated verify usage observed.
-- `x402_payment_required > 0`: payment path touched, not necessarily buyer
-  intent.
-- `topup_created > 0`: payment intent candidate.
+- `x402_payment_required > 0`: payment path touched, not necessarily buyer intent.
+- `topup_created > 0`: payment intent.
 - `topup_confirmed > 0`: confirmed revenue.
 - `errors > 0`: investigate and classify.
+
+If only raw/mixed telemetry is available, treat the same signals as cautious
+operator hints, not external adoption proof.
 
 The dashboard stores aggregate snapshots locally and shows deltas since the
 previous snapshot, for example `pricing_hits: +3`. If no prior snapshot exists,
@@ -228,9 +255,9 @@ it reports `baseline created`.
 
 ## Error Triage
 
-The dashboard does not invent error classification. If
-`/admin/adoption/summary` does not provide enough breakdown to classify errors,
-the UI shows:
+The dashboard uses backend-provided aggregate error classification when
+available. If `/admin/adoption/summary` does not provide enough breakdown to
+classify errors, the UI shows:
 
 ```text
 Errors require log review
@@ -239,8 +266,8 @@ Errors require log review
 Classification categories are:
 
 - `expected_auth_or_payment_errors`
-- `invalid_requests_from_tests`
-- `dashboard_monitoring_errors`
+- `invalid_requests`
+- `monitor_or_admin`
 - `real_server_errors`
 - `unknown`
 

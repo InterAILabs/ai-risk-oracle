@@ -25,6 +25,25 @@ The summary is intended for internal readiness review and distribution planning.
 It reports `last_24h`, `last_7d`, and `all_time` windows using safe counters and
 distributions.
 
+For backwards compatibility, `adoption.windows` remains raw `all_traffic`.
+Operators should prefer `adoption.traffic_segments.<window>.external_only` for
+distribution and adoption interpretation when that field is present.
+
+Traffic segments:
+
+- `all_traffic`: raw counters, including historical and internal traffic.
+- `external_only`: public/external traffic after excluding monitor, admin,
+  smoke/audit, and unknown historical events.
+- `internal_monitoring`: local monitor and admin traffic.
+- `smoke_or_audit`: self-serve smoke/audit account activity.
+- `unknown_or_historical`: older or incomplete records that cannot be safely
+  classified.
+
+Events before source classification was introduced are not deleted or rewritten.
+They may remain mixed in raw windows or appear under fallback classification.
+Treat pre-change adoption numbers as raw/mixed unless the external-only segment
+is available and reviewed.
+
 Tracked adoption events include:
 
 - landing and discovery views
@@ -47,9 +66,21 @@ The summary may include distributions for:
 - payment mode
 - status code
 - billed microusdcs
+- source breakdown
+- error breakdown by status, route, source, and category
 
 This endpoint requires admin authentication. Do not publish raw output without
 operator review.
+
+Error categories:
+
+- `expected_auth_or_payment_errors`: expected 401/402/403 auth or payment-path
+  responses. A 402 payment-required response is not confirmed revenue and is not
+  a server incident by itself.
+- `invalid_requests`: malformed or invalid 4xx requests.
+- `monitor_or_admin`: local monitor or admin-route failures.
+- `real_server_errors`: 5xx server errors requiring investigation.
+- `unknown`: events that cannot be classified from aggregate fields.
 
 ## Discovery Metrics
 
