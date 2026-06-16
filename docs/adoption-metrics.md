@@ -33,8 +33,10 @@ Traffic segments:
 
 - `all_traffic`: raw counters, including historical and internal traffic.
 - `external_only`: public/external traffic after excluding monitor, admin,
-  smoke/audit, and unknown historical events.
+  demo trial, smoke/audit, and unknown historical events.
 - `internal_monitoring`: local monitor and admin traffic.
+- `demo_trial`: controlled demo trial traffic. It is real product interest, but
+  not paid adoption.
 - `smoke_or_audit`: self-serve smoke/audit account activity.
 - `unknown_or_historical`: older or incomplete records that cannot be safely
   classified.
@@ -56,6 +58,8 @@ Tracked adoption events include:
 - x402 payment-required responses
 - topup creation and confirmation
 - trial exhaustion
+- demo page views, trial creation, demo verify completion, and demo receipt views
+- trial rate limits and abuse blocks
 - API errors
 
 The summary may include distributions for:
