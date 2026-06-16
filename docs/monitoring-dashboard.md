@@ -224,8 +224,10 @@ Traffic segments:
 
 - `all_traffic`: raw counters, including internal and historical traffic.
 - `external_only`: public/external traffic after excluding local monitor, admin,
-  smoke/audit, and unknown historical records.
+  demo trial, smoke/audit, and unknown historical records.
 - `internal_monitoring`: local dashboard and admin-route traffic.
+- `demo_trial`: controlled demo traffic from scoped trial keys. Treat it as demo
+  funnel interest, not paid adoption.
 - `smoke_or_audit`: self-serve smoke/audit activity.
 - `unknown_or_historical`: older or incomplete records that cannot be safely
   classified.
@@ -241,6 +243,8 @@ Interpretation rules for `external_only` when available:
 - `onboardings > 0`: trial adoption.
 - `first_verifies > 0`: first real usage.
 - `total_verifies > first_verifies`: repeated verify usage observed.
+- `demo_trial_created > 0`: controlled demo trial creation.
+- `demo_verify_completed > 0`: safe demo verification completed.
 - `x402_payment_required > 0`: payment path touched, not necessarily buyer intent.
 - `topup_created > 0`: payment intent.
 - `topup_confirmed > 0`: confirmed revenue.

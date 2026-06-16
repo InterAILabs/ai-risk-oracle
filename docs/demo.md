@@ -6,6 +6,34 @@ a decision with trust receipts for audit.
 
 Use the hosted API with OpenAPI, A2A, MCP, x402, and Base USDC integration metadata.
 
+## Controlled Demo Layer
+
+Open:
+
+```text
+https://ai-risk-oracle.fly.dev/demo
+```
+
+The live demo is controlled. It creates a scoped `demo_trial` key, runs a safe
+read-only sandbox verification through the existing `/verify` endpoint, and opens
+the public trust receipt.
+
+It does not:
+
+- open anonymous unlimited `/verify`
+- move funds
+- confirm topups
+- call external tools
+- fetch arbitrary URLs
+- bypass x402/payment requirements for non-trial traffic
+
+Demo-trial keys are short-lived, low-quota, rate limited, stored hashed, shown
+raw only once, and separated from paid adoption telemetry under
+`traffic_segments.<window>.demo_trial`.
+
+Current beta abuse controls are in-memory per process. A shared persistent rate
+limit store is still needed for enterprise-grade abuse prevention.
+
 ## 1. Safe Read-Only Lookup -> allow
 
 Situation: an agent wants to read order status from an internal system.
