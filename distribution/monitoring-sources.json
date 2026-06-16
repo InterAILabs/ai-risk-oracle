@@ -1,0 +1,172 @@
+[
+  {
+    "id": "apis-guru-openapi-directory",
+    "name": "APIs.guru / OpenAPI Directory",
+    "type": "github_issue",
+    "priority": 1,
+    "status": "submitted_pending_review",
+    "url": "https://github.com/APIs-guru/openapi-directory/issues/2665",
+    "api_url": "https://api.github.com/repos/APIs-guru/openapi-directory/issues/2665",
+    "submission_url": "https://apis.guru/add-api/",
+    "requires_manual_action": false,
+    "blocked_reason": null,
+    "expected_signal": "Public GitHub issue remains open until directory review completes.",
+    "interpretation_rules": {
+      "open": "submitted_pending_review",
+      "closed": "needs_manual_review",
+      "approval_policy": "Never mark approved or listed unless an explicit maintainer or directory confirmation exists."
+    },
+    "notes": [
+      "Issue-based submission is confirmed.",
+      "Current expected state is submitted_pending_review.",
+      "Do not infer approved/listed from issue closure alone."
+    ]
+  },
+  {
+    "id": "interai-github-release-v0-1-1-beta",
+    "name": "InterAI GitHub release",
+    "type": "github_release",
+    "priority": 2,
+    "status": "created",
+    "url": "https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.1-beta",
+    "api_url": "https://api.github.com/repos/InterAILabs/ai-risk-oracle/releases/tags/v0.1.1-beta",
+    "submission_url": null,
+    "requires_manual_action": false,
+    "blocked_reason": null,
+    "expected_signal": "Release tag exists and remains available as public beta evidence.",
+    "interpretation_rules": {
+      "exists": "release_exists",
+      "missing": "release_missing",
+      "prerelease": "release_prerelease_exists"
+    },
+    "notes": [
+      "Used as public release evidence for distribution reviewers.",
+      "This monitor only checks public release metadata."
+    ]
+  },
+  {
+    "id": "arch-tools-x402-directory",
+    "name": "Arch Tools x402 Directory",
+    "type": "manual_or_form",
+    "priority": 3,
+    "status": "failed_retry_manual",
+    "url": "https://archtools.dev/directory",
+    "api_url": null,
+    "submission_url": "https://archtools.dev/directory",
+    "requires_manual_action": true,
+    "blocked_reason": "Prior public form attempt returned HTTP 500.",
+    "expected_signal": "Manual retry or operator contact confirms acceptance, rejection, or a stable submission path.",
+    "request_ids": [
+      "c65acb6c-c60c-4067-a7dc-e339f588c3b8",
+      "10a30a3d-8631-4ca5-8340-c2315a848821"
+    ],
+    "interpretation_rules": {
+      "failed_retry_manual": "Manual retry required; do not submit automatically.",
+      "http_500": "External form failed, no listing confirmation."
+    },
+    "notes": [
+      "No listing confirmation was received.",
+      "Dashboard must not retry or submit this form automatically."
+    ]
+  },
+  {
+    "id": "x402-solutions",
+    "name": "x402.solutions",
+    "type": "manual_or_form",
+    "priority": 4,
+    "status": "ready_manual_requires_review_consent",
+    "url": "https://www.x402.solutions/",
+    "api_url": null,
+    "submission_url": "https://www.x402.solutions/",
+    "requires_manual_action": true,
+    "blocked_reason": "Submission requires operator review and consent to project review or possible feature.",
+    "expected_signal": "Operator explicitly approves terms and submits manually.",
+    "interpretation_rules": {
+      "ready_manual_requires_review_consent": "Ready for manual review; no automated submission allowed."
+    },
+    "notes": [
+      "Do not submit without explicit operator consent.",
+      "Treat as manual distribution work."
+    ]
+  },
+  {
+    "id": "findapi",
+    "name": "FindAPI",
+    "type": "manual_or_form",
+    "priority": 5,
+    "status": "blocked_captcha_turnstile",
+    "url": "https://www.findapi.dev/",
+    "api_url": null,
+    "submission_url": "https://www.findapi.dev/submit",
+    "requires_manual_action": true,
+    "blocked_reason": "Submission form includes Cloudflare Turnstile.",
+    "expected_signal": "Human operator completes captcha-gated form if distribution remains desired.",
+    "interpretation_rules": {
+      "blocked_captcha_turnstile": "Human-only path; no automated submission."
+    },
+    "notes": [
+      "No submission was sent.",
+      "Dashboard must not bypass captcha or create accounts."
+    ]
+  },
+  {
+    "id": "x402-eco",
+    "name": "x402.eco",
+    "type": "unclear_path",
+    "priority": 6,
+    "status": "blocked_unclear_submission_path",
+    "url": "https://www.x402.eco",
+    "api_url": null,
+    "submission_url": null,
+    "requires_manual_action": true,
+    "blocked_reason": "No unambiguous service submission format confirmed.",
+    "expected_signal": "A documented contribution path, maintainer contact, or repository issue template becomes available.",
+    "interpretation_rules": {
+      "blocked_unclear_submission_path": "Do not submit until a clear path exists."
+    },
+    "notes": [
+      "Active ecosystem page observed.",
+      "No automated action is configured."
+    ]
+  },
+  {
+    "id": "mcp-registry",
+    "name": "MCP Registry",
+    "type": "future_registry",
+    "priority": 7,
+    "status": "blocked_until_real_mcp_server_registry_package",
+    "url": null,
+    "api_url": null,
+    "submission_url": null,
+    "requires_manual_action": true,
+    "blocked_reason": "Distribution should wait for a real MCP server registry package.",
+    "expected_signal": "Registry-ready MCP server package and confirmed registry submission requirements.",
+    "interpretation_rules": {
+      "blocked_until_real_mcp_server_registry_package": "Future channel; avoid premature listing."
+    },
+    "notes": [
+      "Keep as future registry work.",
+      "Not a current submission target."
+    ]
+  },
+  {
+    "id": "a2a-directories",
+    "name": "A2A directories",
+    "type": "future_registry",
+    "priority": 8,
+    "status": "lower_priority_beta_controlled_review",
+    "url": null,
+    "api_url": null,
+    "submission_url": null,
+    "requires_manual_action": true,
+    "blocked_reason": "Lower priority while beta distribution stays controlled.",
+    "expected_signal": "A2A directory criteria become clear and beta scope expands.",
+    "interpretation_rules": {
+      "lower_priority_beta_controlled_review": "Monitor later; keep controlled-review posture."
+    },
+    "notes": [
+      "Future channel for agent protocol visibility.",
+      "No submission should be sent from this dashboard."
+    ]
+  }
+]
