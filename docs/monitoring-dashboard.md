@@ -27,6 +27,7 @@ Optional environment variables:
 ```bash
 IARO_BASE_URL=https://ai-risk-oracle.fly.dev
 IARO_ADMIN_TOKEN=YOUR_ADMIN_TOKEN
+IARO_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 IARO_GITHUB_REPO=InterAILabs/ai-risk-oracle
 PORT=8787
 ```
@@ -39,6 +40,11 @@ GET /admin/adoption/summary
 
 The dashboard sends it as `X-Admin-Token`. It is not written to disk, printed, or
 returned by the local API.
+
+`IARO_GITHUB_TOKEN` is optional. When present, the monitor uses it only for
+read-only public GitHub API requests. It is not printed, stored, or returned by
+the local API. Without it, the monitor still works with public GitHub requests,
+cache, ETags, and rate-limit backoff.
 
 ## Local API
 
@@ -96,6 +102,23 @@ Supported active types:
 - `manual_or_form`, `unclear_path`, `future_registry`: no submission is
   attempted; the dashboard only shows configured status and next action.
 
+Optional source fields supported by the hardened monitor:
+
+- `ttl_seconds`: per-source polling TTL.
+- `cache_strategy`: cache policy description, usually
+  `memory_and_disk_stale_while_revalidate` for GitHub.
+- `api_auth`: whether public API auth is optional.
+- `rate_limit_sensitive`: whether rate-limit handling applies.
+- `approval_rules`: what is required before claiming approved/listed.
+- `no_claim_rules`: what must not be inferred.
+- `manual_next_action`: safe operator next step.
+- `success_criteria`: evidence needed to mark success.
+
+For APIs.guru, an open issue means `submitted_pending_review`. A closed issue is
+not automatically approved or listed. Listing should only be claimed when a
+maintainer confirms it, the OpenAPI Directory repository includes the API, or
+another explicit directory signal exists.
+
 ## What It Checks
 
 Public health checks:
@@ -122,6 +145,53 @@ OpenAPI shows parse status, OpenAPI version, info version, and the direct link.
 Pricing shows current verify price, microusdc amount, currency, network, x402
 availability, trial availability, and top-up availability.
 
+## Polling, Cache, And TTL
+
+The dashboard uses short TTLs for InterAI production health and longer TTLs for
+distribution checks:
+
+- Public InterAI health and metadata: approximately 45 seconds.
+- Admin telemetry: approximately 60 seconds.
+- Local diagnostics: approximately 60 seconds.
+- GitHub issue and release checks: 15 minutes by default.
+- Manual and future registry channels: static config only unless an `api_url` is
+  explicitly added.
+
+GitHub checks use:
+
+- `User-Agent: InterAI-Risk-Oracle-Monitor/0.1`
+- optional `IARO_GITHUB_TOKEN`
+- in-memory cache
+- local disk cache
+- ETag / `If-None-Match` when available
+- rate-limit headers:
+  - `x-ratelimit-limit`
+  - `x-ratelimit-remaining`
+  - `x-ratelimit-reset`
+
+If GitHub returns a 403 rate limit response, the monitor preserves the last known
+good state when available, marks the source as cached/stale, and waits for the
+reset/backoff window before retrying. Rate limit does not change the real
+distribution status.
+
+The local cache is:
+
+```text
+.cache/iaro-monitor-cache.json
+```
+
+The root `.gitignore` excludes `.cache/`. The cache must never contain tokens.
+It stores only public GitHub state, public health summaries, timestamps, rate
+limit metadata, and aggregate telemetry snapshots.
+
+To reset local monitor state:
+
+```powershell
+Remove-Item -LiteralPath .cache\iaro-monitor-cache.json
+```
+
+Then restart the dashboard.
+
 Admin adoption telemetry shows aggregate counters for `last_24h`, `last_7d`,
 and `all_time` when `IARO_ADMIN_TOKEN` is set. Without a token it shows:
 
@@ -133,6 +203,53 @@ When telemetry is unavailable, dashboard cells show `unavailable`. This is
 different from real zero values. Numeric zero means the admin endpoint loaded and
 reported no events for that metric. `unavailable` means no operator telemetry was
 loaded.
+
+Early telemetry may include operator smoke tests, dashboard checks, Codex audits,
+and external traffic. Treat counts as mixed until external traffic is isolated.
+Do not describe early counts as real adoption or real users unless internal
+traffic has been separated.
+
+Interpretation rules:
+
+- `discovery_hits > 0`: discovery/indexing activity; may include internal checks.
+- `pricing_hits > 0`: pricing interest; may include internal checks.
+- `onboardings > 0`: trial onboarding observed; may include smoke accounts.
+- `first_verifies > 0`: verify usage observed; may include smoke tests.
+- `total_verifies > first_verifies`: repeated verify usage observed.
+- `x402_payment_required > 0`: payment path touched, not necessarily buyer
+  intent.
+- `topup_created > 0`: payment intent candidate.
+- `topup_confirmed > 0`: confirmed revenue.
+- `errors > 0`: investigate and classify.
+
+The dashboard stores aggregate snapshots locally and shows deltas since the
+previous snapshot, for example `pricing_hits: +3`. If no prior snapshot exists,
+it reports `baseline created`.
+
+## Error Triage
+
+The dashboard does not invent error classification. If
+`/admin/adoption/summary` does not provide enough breakdown to classify errors,
+the UI shows:
+
+```text
+Errors require log review
+```
+
+Classification categories are:
+
+- `expected_auth_or_payment_errors`
+- `invalid_requests_from_tests`
+- `dashboard_monitoring_errors`
+- `real_server_errors`
+- `unknown`
+
+Rules:
+
+- 402 `payment_required` is not automatically a severe error.
+- 401/403 auth/admin failures may be expected.
+- 4xx from invalid test requests may be expected.
+- confirmed 5xx errors require attention.
 
 ## Troubleshooting
 
@@ -197,14 +314,16 @@ node -v
 
 ### GitHub API Rate Limits
 
-GitHub checks are public unauthenticated GET requests and include:
+GitHub checks are public GET requests and include:
 
 ```text
 User-Agent: InterAI-Risk-Oracle-Monitor/0.1
 ```
 
-The monitor does not use a GitHub token. If GitHub rate limits local requests,
-the affected channel will show HTTP status and `http_error` details.
+If `IARO_GITHUB_TOKEN` is set, the monitor uses it only for GitHub API reads. If
+GitHub rate limits local requests, the affected channel shows `RATE LIMITED` and
+continues to show cached or configured state rather than turning the source into
+a false failure.
 
 ### Missing Admin Token
 
@@ -219,19 +338,19 @@ npm run monitor:dashboard
 Without the token, public health, pricing, OpenAPI, and distribution checks still
 run.
 
-## Signal Interpretation
+## Overall Status
 
-The dashboard maps aggregate telemetry to operator-facing signals:
+The UI reports:
 
-- `discovery_hits > 0`: Discovery/indexing activity
-- `pricing_hits > 0`: Commercial curiosity
-- `onboardings > 0`: Trial adoption
-- `first_verifies > 0`: First real usage
-- `total_verifies > first_verifies`: Repeated usage
-- `x402_payment_required > 0`: Payment path touched
-- `topup_created > 0`: Payment intent
-- `topup_confirmed > 0`: Confirmed revenue
-- `errors > 0`: Investigate logs
+- `green`: production health, readiness, OpenAPI, pricing, and cached
+  distribution state are OK.
+- `yellow`: production is OK but telemetry errors are unclassified, GitHub is
+  rate-limited, or admin telemetry is unavailable.
+- `red`: `/health`, `/ready`, OpenAPI, pricing, or confirmed server health checks
+  fail.
+
+With production OK, telemetry loaded, and aggregate errors still unclassified,
+the expected operator posture is `yellow`.
 
 ## What It Does Not Do
 

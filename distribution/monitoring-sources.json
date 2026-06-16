@@ -8,9 +8,25 @@
     "url": "https://github.com/APIs-guru/openapi-directory/issues/2665",
     "api_url": "https://api.github.com/repos/APIs-guru/openapi-directory/issues/2665",
     "submission_url": "https://apis.guru/add-api/",
+    "ttl_seconds": 900,
+    "cache_strategy": "memory_and_disk_stale_while_revalidate",
+    "api_auth": "optional_github_token_from_env",
+    "rate_limit_sensitive": true,
     "requires_manual_action": false,
     "blocked_reason": null,
     "expected_signal": "Public GitHub issue remains open until directory review completes.",
+    "approval_rules": [
+      "Maintainer explicitly confirms acceptance.",
+      "The API appears in the OpenAPI Directory repository.",
+      "A directory page or machine-readable index includes InterAI Risk Oracle."
+    ],
+    "no_claim_rules": [
+      "Open issue means submitted_pending_review, not approved.",
+      "Closed issue is not approved/listed unless explicit evidence confirms listing.",
+      "GitHub API rate limit does not change the real distribution status."
+    ],
+    "manual_next_action": "Monitor issue #2665 and respond if maintainers request changes.",
+    "success_criteria": "Explicit maintainer acceptance or directory inclusion evidence.",
     "interpretation_rules": {
       "open": "submitted_pending_review",
       "closed": "needs_manual_review",
@@ -31,9 +47,23 @@
     "url": "https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.1-beta",
     "api_url": "https://api.github.com/repos/InterAILabs/ai-risk-oracle/releases/tags/v0.1.1-beta",
     "submission_url": null,
+    "ttl_seconds": 900,
+    "cache_strategy": "memory_and_disk_stale_while_revalidate",
+    "api_auth": "optional_github_token_from_env",
+    "rate_limit_sensitive": true,
     "requires_manual_action": false,
     "blocked_reason": null,
     "expected_signal": "Release tag exists and remains available as public beta evidence.",
+    "approval_rules": [
+      "Release API returns the v0.1.1-beta tag.",
+      "Cached confirmed release remains valid during GitHub rate limit windows."
+    ],
+    "no_claim_rules": [
+      "GitHub API failure does not mean the release is missing.",
+      "Do not mark missing unless GitHub returns a confirmed 404 without cached good state."
+    ],
+    "manual_next_action": "Use release as public beta evidence for reviewers.",
+    "success_criteria": "Release tag v0.1.1-beta exists.",
     "interpretation_rules": {
       "exists": "release_exists",
       "missing": "release_missing",
@@ -53,9 +83,15 @@
     "url": "https://archtools.dev/directory",
     "api_url": null,
     "submission_url": "https://archtools.dev/directory",
+    "ttl_seconds": null,
+    "cache_strategy": "static_config",
+    "api_auth": "none",
+    "rate_limit_sensitive": false,
     "requires_manual_action": true,
     "blocked_reason": "Prior public form attempt returned HTTP 500.",
     "expected_signal": "Manual retry or operator contact confirms acceptance, rejection, or a stable submission path.",
+    "manual_next_action": "Retry manually only after operator review.",
+    "success_criteria": "Manual confirmation of accepted listing or stable submission receipt.",
     "request_ids": [
       "c65acb6c-c60c-4067-a7dc-e339f588c3b8",
       "10a30a3d-8631-4ca5-8340-c2315a848821"
@@ -78,9 +114,15 @@
     "url": "https://www.x402.solutions/",
     "api_url": null,
     "submission_url": "https://www.x402.solutions/",
+    "ttl_seconds": null,
+    "cache_strategy": "static_config",
+    "api_auth": "none",
+    "rate_limit_sensitive": false,
     "requires_manual_action": true,
     "blocked_reason": "Submission requires operator review and consent to project review or possible feature.",
     "expected_signal": "Operator explicitly approves terms and submits manually.",
+    "manual_next_action": "Review terms and consent requirements before any manual submission.",
+    "success_criteria": "Manual confirmation from x402.solutions review/listing flow.",
     "interpretation_rules": {
       "ready_manual_requires_review_consent": "Ready for manual review; no automated submission allowed."
     },
@@ -98,9 +140,15 @@
     "url": "https://www.findapi.dev/",
     "api_url": null,
     "submission_url": "https://www.findapi.dev/submit",
+    "ttl_seconds": null,
+    "cache_strategy": "static_config",
+    "api_auth": "none",
+    "rate_limit_sensitive": false,
     "requires_manual_action": true,
     "blocked_reason": "Submission form includes Cloudflare Turnstile.",
     "expected_signal": "Human operator completes captcha-gated form if distribution remains desired.",
+    "manual_next_action": "Human-only submission if channel becomes worthwhile.",
+    "success_criteria": "Manual confirmation from FindAPI.",
     "interpretation_rules": {
       "blocked_captcha_turnstile": "Human-only path; no automated submission."
     },
@@ -118,9 +166,15 @@
     "url": "https://www.x402.eco",
     "api_url": null,
     "submission_url": null,
+    "ttl_seconds": null,
+    "cache_strategy": "static_config",
+    "api_auth": "none",
+    "rate_limit_sensitive": false,
     "requires_manual_action": true,
     "blocked_reason": "No unambiguous service submission format confirmed.",
     "expected_signal": "A documented contribution path, maintainer contact, or repository issue template becomes available.",
+    "manual_next_action": "Find a clear contribution path before acting.",
+    "success_criteria": "Clear public submission or maintainer path exists.",
     "interpretation_rules": {
       "blocked_unclear_submission_path": "Do not submit until a clear path exists."
     },
@@ -138,9 +192,15 @@
     "url": null,
     "api_url": null,
     "submission_url": null,
+    "ttl_seconds": null,
+    "cache_strategy": "static_config",
+    "api_auth": "none",
+    "rate_limit_sensitive": false,
     "requires_manual_action": true,
     "blocked_reason": "Distribution should wait for a real MCP server registry package.",
     "expected_signal": "Registry-ready MCP server package and confirmed registry submission requirements.",
+    "manual_next_action": "Wait for a real MCP server registry package.",
+    "success_criteria": "Registry-ready MCP server package exists.",
     "interpretation_rules": {
       "blocked_until_real_mcp_server_registry_package": "Future channel; avoid premature listing."
     },
@@ -158,9 +218,15 @@
     "url": null,
     "api_url": null,
     "submission_url": null,
+    "ttl_seconds": null,
+    "cache_strategy": "static_config",
+    "api_auth": "none",
+    "rate_limit_sensitive": false,
     "requires_manual_action": true,
     "blocked_reason": "Lower priority while beta distribution stays controlled.",
     "expected_signal": "A2A directory criteria become clear and beta scope expands.",
+    "manual_next_action": "Revisit after beta distribution scope expands.",
+    "success_criteria": "A2A directory criteria are clear and channel priority increases.",
     "interpretation_rules": {
       "lower_priority_beta_controlled_review": "Monitor later; keep controlled-review posture."
     },
