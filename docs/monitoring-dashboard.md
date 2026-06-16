@@ -47,10 +47,12 @@ The dashboard exposes local-only helper endpoints:
 ```text
 GET /api/status
 GET /api/distribution-sources
+GET /api/diagnostics
 ```
 
 `/api/status` returns the full dashboard payload. `/api/distribution-sources`
-returns the parsed channel configuration.
+returns the parsed channel configuration. `/api/diagnostics` returns safe local
+runtime and outbound connectivity diagnostics.
 
 ## Distribution Sources
 
@@ -126,6 +128,96 @@ and `all_time` when `IARO_ADMIN_TOKEN` is set. Without a token it shows:
 ```text
 Admin telemetry unavailable: set IARO_ADMIN_TOKEN
 ```
+
+When telemetry is unavailable, dashboard cells show `unavailable`. This is
+different from real zero values. Numeric zero means the admin endpoint loaded and
+reported no events for that metric. `unavailable` means no operator telemetry was
+loaded.
+
+## Troubleshooting
+
+### All Endpoints Show Request Failures
+
+Open the local diagnostics endpoint:
+
+```text
+http://127.0.0.1:8787/api/diagnostics
+```
+
+Check:
+
+- `fetchAvailable`: whether the current Node runtime exposes `globalThis.fetch`
+- `dns`: whether `ai-risk-oracle.fly.dev` and `api.github.com` resolve
+- `outboundTests`: whether local GET requests to production health and GitHub API
+  succeed
+- `lastError`: the latest safe error details
+- `conclusion`: the monitor's probable diagnosis
+
+Possible conclusions:
+
+- `ok`: outbound checks and required diagnostics are healthy.
+- `local_outbound_failed`: both InterAI and GitHub checks failed, usually from
+  local firewall, sandbox, proxy, DNS, or network policy.
+- `github_api_failed`: production health worked but GitHub API failed.
+- `production_down`: GitHub worked but InterAI production health failed.
+- `admin_token_missing`: public checks worked, but admin telemetry is unavailable
+  because `IARO_ADMIN_TOKEN` is not set.
+- `unknown`: diagnostics were inconclusive.
+
+The request wrapper exposes safe fields such as `errorType`, `errorCode`,
+`causeCode`, `errorMessage`, `durationMs`, `status`, `ok`, `jsonParse`, and
+`checkedAt`. Examples include `ENOTFOUND`, `ECONNRESET`, `ETIMEDOUT`,
+`SELF_SIGNED_CERT_IN_CHAIN`, `fetch_not_available`, `request_timeout`,
+`json_parse_failed`, and `http_error`.
+
+### Proxy Or Firewall
+
+The diagnostics endpoint reports only whether these variables are present, not
+their values:
+
+```text
+HTTP_PROXY
+HTTPS_PROXY
+NO_PROXY
+```
+
+If outbound fails locally but the same URLs work in a browser, check corporate
+proxy requirements, VPN policy, Windows firewall, endpoint security software, or
+the shell/sandbox where Node is running.
+
+### Node Version And Fetch
+
+The monitor prefers `globalThis.fetch`. If `fetch` is unavailable, it falls back
+to native `http` and `https` modules. Use a recent Node version for the cleanest
+behavior:
+
+```bash
+node -v
+```
+
+### GitHub API Rate Limits
+
+GitHub checks are public unauthenticated GET requests and include:
+
+```text
+User-Agent: InterAI-Risk-Oracle-Monitor/0.1
+```
+
+The monitor does not use a GitHub token. If GitHub rate limits local requests,
+the affected channel will show HTTP status and `http_error` details.
+
+### Missing Admin Token
+
+To load admin telemetry, set `IARO_ADMIN_TOKEN` in the shell that starts the
+dashboard. Do not write it into files or print it:
+
+```powershell
+$env:IARO_ADMIN_TOKEN = "<token value>"
+npm run monitor:dashboard
+```
+
+Without the token, public health, pricing, OpenAPI, and distribution checks still
+run.
 
 ## Signal Interpretation
 
