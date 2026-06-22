@@ -34,6 +34,43 @@ raw only once, and separated from paid adoption telemetry under
 Current beta abuse controls are in-memory per process. A shared persistent rate
 limit store is still needed for enterprise-grade abuse prevention.
 
+## Expected Outputs
+
+Demo-trial onboarding returns the raw key once and includes safety metadata:
+
+```json
+{
+  "ok": true,
+  "message": "account_created",
+  "api_key": "interai_demo_...shown_once",
+  "safety": {
+    "scope": "demo_trial",
+    "demo_trial": true,
+    "api_key_shown_once": true,
+    "max_verifications": 5,
+    "no_wallet_movement": true,
+    "no_topup_confirmation": true
+  }
+}
+```
+
+The safe verification path should include:
+
+```json
+{
+  "request_contract": "autonomous_execution",
+  "risk_level": "low",
+  "recommended_action": "allow",
+  "policy_result": "allow",
+  "trust_receipt_id": "tr_..."
+}
+```
+
+The receipt lookup should return `ok: true`, a public `receipt` object, and
+`verification` metadata. Public receipt fields include `receipt_id`,
+`request_contract`, `risk_level`, `recommended_action`, `policy_result`,
+`trust_receipt_id`, and safe `signals`.
+
 ## 1. Safe Read-Only Lookup -> allow
 
 Situation: an agent wants to read order status from an internal system.
@@ -178,3 +215,10 @@ receipt.
 - review_required: pause execution and route to a supervisor agent, policy
   system, wallet rule, governance queue, or human operator.
 - block: abort the action, log the decision, and store the trust receipt.
+
+## Next Step After Demo
+
+- Review pricing: https://ai-risk-oracle.fly.dev/pricing
+- Integrate `/verify`: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+- Store returned trust receipt IDs for audit lookup.
+- Use public docs and examples: https://github.com/InterAILabs/ai-risk-oracle
