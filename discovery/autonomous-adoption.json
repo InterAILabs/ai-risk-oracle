@@ -20,7 +20,8 @@
     "store_receipt"
   ],
   "default_human_path": [
-    "github_or_landing",
+    "github_or_landing_or_demo",
+    "demo",
     "pricing",
     "onboard",
     "api_key_or_topup_or_x402",
@@ -65,9 +66,11 @@
     }
   },
   "self_serve": {
+    "demo_endpoint": "https://ai-risk-oracle.fly.dev/demo",
     "onboard_endpoint": "https://ai-risk-oracle.fly.dev/onboard",
     "pricing_endpoint": "https://ai-risk-oracle.fly.dev/pricing",
     "verify_endpoint": "https://ai-risk-oracle.fly.dev/verify",
+    "openapi_endpoint": "https://ai-risk-oracle.fly.dev/.well-known/openapi.json",
     "supports_x402": true,
     "supports_prepaid_api_key": true,
     "trial_supported": true
