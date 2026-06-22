@@ -29,6 +29,12 @@ Default self-serve path:
 pricing -> onboard/API key/trial or x402 -> verify -> decision -> receipt
 ```
 
+Try the controlled demo first:
+
+```text
+https://ai-risk-oracle.fly.dev/demo
+```
+
 ## Why Autonomous Agents Need Execution Verification
 
 Autonomous systems increasingly call tools, move funds, consume third-party outputs, and
@@ -63,9 +69,9 @@ API. Do not expect to run the production verification engine from this repo.
 
 ## Quickstart
 
-Use the hosted API. Do not run a local backend from this repository. Humans and agents
-can discover pricing, onboarding, and verification endpoints directly from the hosted
-API.
+Use the hosted API. Do not run a local backend from this repository. Start with
+the controlled demo at https://ai-risk-oracle.fly.dev/demo, then use pricing,
+onboarding, OpenAPI, and verification endpoints directly from the hosted API.
 
 ```bash
 curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
@@ -211,6 +217,7 @@ integration help. It is not required as the core self-serve path.
 
 - Public adoption contract: [discovery/autonomous-adoption.json](discovery/autonomous-adoption.json)
 - Hosted adoption contract: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Demo: https://ai-risk-oracle.fly.dev/demo
 - Pricing: https://ai-risk-oracle.fly.dev/pricing
 - Onboard: https://ai-risk-oracle.fly.dev/onboard
 
@@ -228,6 +235,7 @@ exposing service internals.
 ## Examples
 
 - [3 decisions in 90 seconds](docs/demo.md)
+- [Distribution pack](docs/distribution-pack.md)
 - [Tester readiness pack](docs/tester-readiness.md)
 - [Agent before tool execution](examples/agent-before-tool-execution/README.md)
 - [Agent before payment](examples/agent-before-payment/README.md)
