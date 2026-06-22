@@ -74,6 +74,47 @@
           }
         }
       }
+    },
+    "/demo": {
+      "get": {
+        "summary": "Run controlled demo walkthrough",
+        "description": "Human-facing demo for creating a limited demo_trial key, running a safe read-only verification, and viewing a public trust receipt.",
+        "responses": {
+          "200": {
+            "description": "Controlled demo page"
+          }
+        }
+      }
+    },
+    "/robots.txt": {
+      "get": {
+        "summary": "Get crawler policy",
+        "responses": {
+          "200": {
+            "description": "Crawler policy with sitemap location"
+          }
+        }
+      }
+    },
+    "/sitemap.xml": {
+      "get": {
+        "summary": "Get XML sitemap",
+        "responses": {
+          "200": {
+            "description": "Public discovery sitemap"
+          }
+        }
+      }
+    },
+    "/llms.txt": {
+      "get": {
+        "summary": "Get LLM discovery summary",
+        "responses": {
+          "200": {
+            "description": "LLM-readable service summary"
+          }
+        }
+      }
     }
   },
   "components": {

@@ -29,6 +29,7 @@
   "pricing": {
     "model": "hosted_api_self_serve_metadata",
     "pricing_url": "https://ai-risk-oracle.fly.dev/pricing",
+    "demo_url": "https://ai-risk-oracle.fly.dev/demo",
     "onboard_url": "https://ai-risk-oracle.fly.dev/onboard",
     "verify_url": "https://ai-risk-oracle.fly.dev/verify",
     "x402_supported": true,
@@ -38,6 +39,7 @@
   },
   "endpoints": {
     "pricing": "https://ai-risk-oracle.fly.dev/pricing",
+    "demo": "https://ai-risk-oracle.fly.dev/demo",
     "onboard": "https://ai-risk-oracle.fly.dev/onboard",
     "verify": "https://ai-risk-oracle.fly.dev/verify",
     "autonomous_adoption": "discovery/autonomous-adoption.json",
