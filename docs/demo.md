@@ -222,3 +222,17 @@ receipt.
 - Integrate `/verify`: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
 - Store returned trust receipt IDs for audit lookup.
 - Use public docs and examples: https://github.com/InterAILabs/ai-risk-oracle
+
+## Attribution Guidance
+
+For channel-specific demo links, use privacy-safe UTM parameters:
+
+- `https://ai-risk-oracle.fly.dev/demo?utm_source=github&utm_medium=readme&utm_campaign=demo`
+- `https://ai-risk-oracle.fly.dev/demo?utm_source=openapi&utm_medium=manifest&utm_campaign=agent_discovery`
+- `https://ai-risk-oracle.fly.dev/demo?utm_source=llms&utm_medium=agent&utm_campaign=discovery`
+- `https://ai-risk-oracle.fly.dev/demo?utm_source=apisguru&utm_medium=directory&utm_campaign=openapi`
+
+Attribution telemetry stores source and user-agent classes, referrer host/path
+groups without query strings, and an anonymous daily bucket. It does not store
+raw IPs, Authorization headers, API keys, request bodies, copied text, or
+persistent cookies.
