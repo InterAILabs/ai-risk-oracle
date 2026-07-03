@@ -220,6 +220,9 @@ receipt.
 
 - Review pricing: https://ai-risk-oracle.fly.dev/pricing
 - Integrate `/verify`: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+- Use InterAI before tool execution: ../examples/agent-middleware/typescript
+- Python middleware example: ../examples/agent-middleware/python
+- Integration patterns: ./integration-patterns.md
 - Store returned trust receipt IDs for audit lookup.
 - Use public docs and examples: https://github.com/InterAILabs/ai-risk-oracle
 
