@@ -35,6 +35,26 @@ Try the controlled demo first:
 https://ai-risk-oracle.fly.dev/demo
 ```
 
+## Use InterAI Before Tool Execution
+
+Wire InterAI into your agent before the agent executes a tool or action:
+
+- Demo: https://ai-risk-oracle.fly.dev/demo
+- TypeScript middleware example: [examples/agent-middleware/typescript](examples/agent-middleware/typescript)
+- Python middleware example: [examples/agent-middleware/python](examples/agent-middleware/python)
+- Integration patterns: [docs/integration-patterns.md](docs/integration-patterns.md)
+
+```text
+decision = interai.verify(action)
+if decision.allow:
+  execute(action)
+elif decision.review_required:
+  route_to_review(action)
+else:
+  block(action)
+store(decision.trust_receipt_id)
+```
+
 ## Why Autonomous Agents Need Execution Verification
 
 Autonomous systems increasingly call tools, move funds, consume third-party outputs, and
@@ -239,8 +259,11 @@ exposing service internals.
 - [Tester readiness pack](docs/tester-readiness.md)
 - [Agent before tool execution](examples/agent-before-tool-execution/README.md)
 - [Agent before payment](examples/agent-before-payment/README.md)
+- [Agent middleware TypeScript](examples/agent-middleware/typescript/README.md)
+- [Agent middleware Python](examples/agent-middleware/python/README.md)
 - [Autonomous wallet gate](examples/autonomous-wallet-gate/README.md)
 - [Pre-trade verification](examples/pre-trade-verification/README.md)
+- [Integration patterns](docs/integration-patterns.md)
 
 ## Public Repository Scope
 

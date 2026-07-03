@@ -1,0 +1,13 @@
+{
+  "name": "interai-agent-middleware-example",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir dist *.ts",
+    "start": "npm run build && node dist/exampleAgent.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
