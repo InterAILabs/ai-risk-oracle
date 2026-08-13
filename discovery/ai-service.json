@@ -1,9 +1,10 @@
 {
   "service_name": "InterAI Risk Oracle",
+  "version": "0.1.2-beta",
   "base_url": "https://ai-risk-oracle.fly.dev",
   "service_type": "autonomous_execution_gateway",
   "category": "autonomous_execution_gateway",
-  "description": "Autonomous Execution Gateway for pre-execution verification of autonomous agents. Before an agent executes, InterAI verifies.",
+  "description": "Centralized policy gate and signed audit receipts for consequential autonomous-agent actions.",
   "primary_path": [
     "discover",
     "pricing",
@@ -42,6 +43,10 @@
     "demo": "https://ai-risk-oracle.fly.dev/demo",
     "onboard": "https://ai-risk-oracle.fly.dev/onboard",
     "verify": "https://ai-risk-oracle.fly.dev/verify",
+    "mcp": "https://ai-risk-oracle.fly.dev/mcp",
+    "a2a": "https://ai-risk-oracle.fly.dev/a2a",
+    "a2a_v1": "https://ai-risk-oracle.fly.dev/a2a/v1",
+    "a2a_v1_agent_card": "https://ai-risk-oracle.fly.dev/.well-known/agent-card.json",
     "autonomous_adoption": "discovery/autonomous-adoption.json",
     "hosted_autonomous_adoption": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json"
   },

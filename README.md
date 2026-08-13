@@ -1,6 +1,6 @@
 # InterAI Risk Oracle
 
-Autonomous Execution Gateway for pre-execution verification of autonomous agents.
+Centralized policy gate and signed audit receipts for consequential agent actions.
 
 Before an agent executes, InterAI verifies.
 
@@ -29,7 +29,7 @@ Default self-serve path:
 pricing -> onboard/API key/trial or x402 -> verify -> decision -> receipt
 ```
 
-Try the controlled demo first:
+Run the live read-only demo first:
 
 ```text
 https://ai-risk-oracle.fly.dev/demo
@@ -90,8 +90,9 @@ API. Do not expect to run the production verification engine from this repo.
 ## Quickstart
 
 Use the hosted API. Do not run a local backend from this repository. Start with
-the controlled demo at https://ai-risk-oracle.fly.dev/demo, then use pricing,
-onboarding, OpenAPI, and verification endpoints directly from the hosted API.
+the guided demo at https://ai-risk-oracle.fly.dev/demo. One click creates a
+short-lived credential in memory, evaluates a fixed safe action, and opens its
+public receipt. Then use OpenAPI and the SDK source to integrate the hosted API.
 
 ```bash
 curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
@@ -249,8 +250,12 @@ exposing service internals.
 
 ## SDKs
 
-- [TypeScript SDK](sdk/typescript/README.md)
-- [Python SDK](python/README.md)
+- [TypeScript SDK](sdk/typescript/README.md) — buildable npm package source
+- [Python SDK](python/README.md) — buildable Python package source
+
+Both packages are prepared for publication and generate idempotency keys by
+default. Confirm the corresponding registry release before advertising an
+install command as generally available.
 
 ## Examples
 
@@ -264,6 +269,7 @@ exposing service internals.
 - [Autonomous wallet gate](examples/autonomous-wallet-gate/README.md)
 - [Pre-trade verification](examples/pre-trade-verification/README.md)
 - [Integration patterns](docs/integration-patterns.md)
+- [Adoption recovery and measurement](docs/adoption-recovery.md)
 
 ## Public Repository Scope
 

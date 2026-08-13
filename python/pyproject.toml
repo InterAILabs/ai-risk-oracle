@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "interai-risk-oracle"
+version = "0.1.2b0"
+description = "Python client for the hosted InterAI Risk Oracle policy gate"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "InterAILabs" }]
+keywords = ["ai-agents", "policy-enforcement", "risk", "trust-receipts"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only"
+]
+
+[tool.setuptools]
+packages = ["interai_risk_oracle"]

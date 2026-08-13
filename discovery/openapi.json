@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "InterAI Risk Oracle Public API",
-    "version": "0.0.0-public-beta",
-    "description": "Public hosted API contracts for InterAI Risk Oracle, an autonomous execution gateway for pre-execution verification of autonomous agents."
+    "version": "0.1.2-beta",
+    "description": "Public hosted API contracts for InterAI Risk Oracle, a centralized policy gate for consequential autonomous-agent actions."
   },
   "servers": [
     {

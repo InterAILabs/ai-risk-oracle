@@ -1,0 +1,11 @@
+InterAI Public Interface License Notice
+
+Copyright (c) InterAILabs.
+
+This package contains client code for integrating with the hosted InterAI Risk
+Oracle API. It may be used, copied, modified, and distributed for that purpose,
+provided that this notice is retained. The hosted service internals,
+verification logic, scoring logic, trademarks, and trust intelligence remain
+proprietary unless a separate written license says otherwise.
+
+This package is provided "as is", without warranties or conditions of any kind.

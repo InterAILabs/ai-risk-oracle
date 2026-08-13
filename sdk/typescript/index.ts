@@ -75,28 +75,47 @@ export type VerifyResponse = {
 export type InterAIClientOptions = {
   baseUrl: string
   apiKey?: string
+  clientName?: string
+}
+
+function defaultIdempotencyKey() {
+  const random = globalThis.crypto?.randomUUID?.()
+  return random || `interai-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
 export class InterAIRiskOracleClient {
   readonly baseUrl: string
   readonly apiKey?: string
+  readonly clientName: string
 
   constructor(options: InterAIClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "")
     this.apiKey = options.apiKey
+    this.clientName = options.clientName || "typescript-sdk/0.1.2-beta"
   }
 
-  async verify(request: VerifyRequest): Promise<VerifyResponse> {
+  async verify(
+    request: VerifyRequest,
+    idempotencyKey = defaultIdempotencyKey()
+  ): Promise<VerifyResponse> {
     const response = await fetch(`${this.baseUrl}/verify`, {
       method: "POST",
       headers: {
         ...(this.apiKey ? { authorization: `Bearer ${this.apiKey}` } : {}),
-        "content-type": "application/json"
+        "content-type": "application/json",
+        "x-idempotency-key": idempotencyKey,
+        "x-interai-client": this.clientName
       },
       body: JSON.stringify(request)
     })
 
-    const body = await response.json()
+    const text = await response.text()
+    let body: unknown
+    try {
+      body = text ? JSON.parse(text) : null
+    } catch {
+      body = { error: "invalid_json_response", raw: text.slice(0, 500) }
+    }
     if (!response.ok) {
       throw new Error(`InterAI verify failed: ${response.status} ${JSON.stringify(body)}`)
     }

@@ -1,6 +1,10 @@
 {
   "name": "interai-risk-oracle",
-  "description": "Hosted verification layer for autonomous execution checks.",
+  "version": "0.1.2-beta",
+  "description": "Production-backed MCP JSON-RPC interface for pre-execution policy checks.",
+  "endpoint": "https://ai-risk-oracle.fly.dev/mcp",
+  "transport": "streamable-http-json-rpc",
+  "status": "hosted",
   "tools": [
     {
       "name": "verify_autonomous_action",
@@ -9,4 +13,3 @@
     }
   ]
 }
-

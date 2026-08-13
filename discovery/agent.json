@@ -1,13 +1,21 @@
 {
   "name": "InterAI Risk Oracle",
-  "description": "Autonomous Execution Gateway for pre-execution verification of autonomous agents. Before an agent executes, InterAI verifies.",
-  "url": "https://ai-risk-oracle.fly.dev",
+  "version": "0.1.2-beta",
+  "description": "Centralized policy gate for consequential autonomous-agent actions. Before an agent executes, InterAI verifies.",
+  "url": "https://ai-risk-oracle.fly.dev/a2a",
   "capabilities": [
     "verify_autonomous_action",
     "issue_trust_receipt",
     "recommend_allow_review_required_or_block"
   ],
   "default_action": "POST /verify",
+  "interfaces": {
+    "http": "https://ai-risk-oracle.fly.dev/verify",
+    "mcp": "https://ai-risk-oracle.fly.dev/mcp",
+    "a2a_legacy": "https://ai-risk-oracle.fly.dev/a2a",
+    "a2a_v1": "https://ai-risk-oracle.fly.dev/a2a/v1",
+    "a2a_v1_agent_card": "https://ai-risk-oracle.fly.dev/.well-known/agent-card.json"
+  },
   "autonomous_adoption": {
     "url": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json",
     "purpose": "Machine-readable guidance for agents and builders deciding when and how to use InterAI before execution"
