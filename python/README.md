@@ -1,13 +1,17 @@
 # Python SDK
 
-Minimal hosted API client for InterAI Risk Oracle.
+Dependency-free hosted API client for InterAI Risk Oracle. The package metadata
+is publish-ready; confirm the package has been released before installing it
+from a registry.
 
 ```python
+import os
+
 from interai_risk_oracle import InterAIRiskOracleClient
 
 client = InterAIRiskOracleClient(
     base_url="https://ai-risk-oracle.fly.dev",
-    api_key="replace-with-your-credential",
+    api_key=os.environ["INTERAI_API_KEY"],
 )
 
 decision = client.verify({
@@ -27,5 +31,8 @@ decision = client.verify({
         "require_trust_receipt": True,
         "require_human_review_above": 0.75,
     },
-})
+}, idempotency_key="stable-business-operation-id")
 ```
+
+If the idempotency key is omitted, the client creates a UUID for the call. Use
+a stable business-operation key when retrying the same action.

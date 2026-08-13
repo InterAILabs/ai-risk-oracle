@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.2-beta (release candidate)
+
+- Lead with the agent tool-call policy-gate use case.
+- Document the one-click guided demo and privacy-safe activation stages.
+- Make the TypeScript and Python SDK directories buildable package sources.
+- Generate idempotency keys by default in both public clients.
+- Record A2A v1 and MCP as production-backed interfaces where documented.
+
 ## Unreleased
 
 ### Added
