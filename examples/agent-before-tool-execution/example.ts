@@ -5,7 +5,8 @@ const response = await fetch(`${baseUrl}/verify`, {
   method: "POST",
   headers: {
     authorization: `Bearer ${credential}`,
-    "content-type": "application/json"
+    "content-type": "application/json",
+    "x-idempotency-key": "agent-before-tool-example-1"
   },
   body: JSON.stringify({
     use_case: "agent-before-tool-execution",

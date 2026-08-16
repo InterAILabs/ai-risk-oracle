@@ -10,7 +10,11 @@ https://ai-risk-oracle.fly.dev
 
 ```http
 Authorization: Bearer <interai_credential>
+X-Idempotency-Key: stable-business-operation-id
 ```
+
+Bearer-billed verification requires the idempotency key. Reuse the same value
+when retrying the same business operation after a timeout.
 
 Humans and agents can discover pricing and onboarding directly:
 

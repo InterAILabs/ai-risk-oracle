@@ -66,10 +66,16 @@
           "maximum": 1
         },
         "has_external_side_effect": {
-          "type": "boolean"
+          "type": [
+            "boolean",
+            "null"
+          ]
         },
         "is_irreversible": {
-          "type": "boolean"
+          "type": [
+            "boolean",
+            "null"
+          ]
         },
         "involves_money": {
           "type": "boolean"
@@ -95,6 +101,12 @@
             "string",
             "null"
           ]
+        },
+        "unknown_critical_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "autonomous_execution_detected": {
           "type": "boolean"

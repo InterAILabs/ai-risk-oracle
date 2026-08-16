@@ -39,10 +39,12 @@
           "type": "string"
         },
         "irreversible": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Declare explicitly. If omitted, the response signal is null and policy requires review."
         },
         "external_side_effect": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Declare explicitly. If omitted, the response signal is null and policy requires review."
         }
       },
       "additionalProperties": true
