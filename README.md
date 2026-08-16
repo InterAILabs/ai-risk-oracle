@@ -98,6 +98,7 @@ public receipt. Then use OpenAPI and the SDK source to integrate the hosted API.
 curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
   -H "Authorization: Bearer <interai_credential>" \
   -H "Content-Type: application/json" \
+  -H "X-Idempotency-Key: quickstart-operation-1" \
   -d '{
     "use_case": "agent-before-tool-execution",
     "action": {
@@ -256,6 +257,12 @@ exposing service internals.
 Both packages are prepared for publication and generate idempotency keys by
 default. Confirm the corresponding registry release before advertising an
 install command as generally available.
+
+Bearer-billed HTTP verification requires an idempotency key; the SDKs generate
+one automatically. For retrying the same business operation, supply the same
+stable key. Autonomous actions that omit `external_side_effect` or
+`irreversible` expose those signals as `null` and receive at least
+`review_required` rather than being interpreted as safe.
 
 ## Examples
 

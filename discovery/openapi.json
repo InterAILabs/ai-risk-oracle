@@ -20,6 +20,17 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "X-Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Required for Bearer-billed verification so transport retries resolve to the same operation.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {

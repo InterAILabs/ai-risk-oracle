@@ -46,14 +46,15 @@ export type VerifySignals = {
   unsupported_specificity?: number
   numeric_consistency?: number
   overconfidence?: number
-  has_external_side_effect?: boolean
-  is_irreversible?: boolean
+  has_external_side_effect?: boolean | null
+  is_irreversible?: boolean | null
   involves_money?: boolean
   amount_usd?: number | null
   requires_user_confirmation?: boolean
   has_counterparty?: boolean
   environment?: string
   action_type?: string | null
+  unknown_critical_fields?: string[]
   autonomous_execution_detected?: boolean
   [key: string]: unknown
 }
@@ -78,7 +79,7 @@ export type InterAIClientOptions = {
   clientName?: string
 }
 
-function defaultIdempotencyKey() {
+function defaultIdempotencyKey(): string {
   const random = globalThis.crypto?.randomUUID?.()
   return random || `interai-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }

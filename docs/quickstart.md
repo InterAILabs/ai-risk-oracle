@@ -29,6 +29,7 @@ path.
 curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
   -H "Authorization: Bearer <interai_credential>" \
   -H "Content-Type: application/json" \
+  -H "X-Idempotency-Key: quickstart-operation-1" \
   -d '{
     "use_case": "agent-before-tool-execution",
     "action": {
