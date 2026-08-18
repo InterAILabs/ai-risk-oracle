@@ -23,6 +23,7 @@ It does not:
 - open anonymous unlimited `/verify`
 - move funds
 - confirm topups
+- create top-up intents or receive development top-up credit
 - call external tools
 - fetch arbitrary URLs
 - bypass x402/payment requirements for non-trial traffic
