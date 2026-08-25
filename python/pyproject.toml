@@ -19,5 +19,11 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only"
 ]
 
+[project.urls]
+Homepage = "https://ai-risk-oracle.fly.dev/"
+Documentation = "https://github.com/InterAILabs/ai-risk-oracle#readme"
+Repository = "https://github.com/InterAILabs/ai-risk-oracle"
+Issues = "https://github.com/InterAILabs/ai-risk-oracle/issues"
+
 [tool.setuptools]
 packages = ["interai_risk_oracle"]
