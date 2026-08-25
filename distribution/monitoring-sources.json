@@ -39,13 +39,13 @@
     ]
   },
   {
-    "id": "interai-github-release-v0-1-2-beta",
+    "id": "interai-github-release-v0-1-3-beta",
     "name": "InterAI GitHub release",
     "type": "github_release",
     "priority": 2,
     "status": "created",
-    "url": "https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.2-beta",
-    "api_url": "https://api.github.com/repos/InterAILabs/ai-risk-oracle/releases/tags/v0.1.2-beta",
+    "url": "https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta",
+    "api_url": "https://api.github.com/repos/InterAILabs/ai-risk-oracle/releases/tags/v0.1.3-beta",
     "submission_url": null,
     "ttl_seconds": 900,
     "cache_strategy": "memory_and_disk_stale_while_revalidate",
@@ -55,7 +55,7 @@
     "blocked_reason": null,
     "expected_signal": "Release tag exists and remains available as public beta evidence.",
     "approval_rules": [
-      "Release API returns the v0.1.2-beta tag.",
+      "Release API returns the v0.1.3-beta tag.",
       "Cached confirmed release remains valid during GitHub rate limit windows."
     ],
     "no_claim_rules": [
@@ -63,7 +63,7 @@
       "Do not mark missing unless GitHub returns a confirmed 404 without cached good state."
     ],
     "manual_next_action": "Use release as public beta evidence for reviewers.",
-    "success_criteria": "Release tag v0.1.2-beta exists.",
+    "success_criteria": "Release tag v0.1.3-beta exists.",
     "interpretation_rules": {
       "exists": "release_exists",
       "missing": "release_missing",
@@ -198,7 +198,7 @@
     "rate_limit_sensitive": false,
     "requires_manual_action": false,
     "blocked_reason": null,
-    "expected_signal": "The Registry API returns io.github.InterAILabs/ai-risk-oracle version 0.1.2-beta.",
+    "expected_signal": "The Registry API returns io.github.InterAILabs/ai-risk-oracle version 0.1.3-beta as active and latest.",
     "manual_next_action": "Monitor the exact Registry API record and republish only for a later validated release.",
     "success_criteria": "Exact server/version record exists in the official Registry API.",
     "interpretation_rules": {
@@ -207,7 +207,7 @@
     "notes": [
       "server.json passed mcp-publisher v1.8.1 validate on 2026-08-24.",
       "Official TypeScript client v2.0.0 completed handshake, tools/list, and a public tool call.",
-      "Published and API-verified on 2026-08-25 as io.github.InterAILabs/ai-risk-oracle@0.1.2-beta."
+      "Published and API-verified on 2026-08-25 as io.github.InterAILabs/ai-risk-oracle@0.1.3-beta (active and latest)."
     ]
   },
   {
