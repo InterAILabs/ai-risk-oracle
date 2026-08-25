@@ -7,7 +7,7 @@ Both registries use their official trusted-publishing path. Do not create or sto
 The first publication must be made interactively because npm only allows a trusted publisher to be attached after the package exists.
 
 1. From `sdk/typescript`, run `npm login --auth-type=web` and complete the browser confirmation.
-2. Run `npm publish --access public --provenance` for the first release.
+2. Run `npm publish --access public --provenance` for the first release of `interai-risk-oracle`.
 3. In the npm package settings, add a GitHub Actions trusted publisher with:
    - organization or user: `InterAILabs`
    - repository: `ai-risk-oracle`

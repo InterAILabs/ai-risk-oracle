@@ -5,11 +5,11 @@ publish-ready; confirm the package has been released before using the registry
 command below.
 
 ```bash
-npm install @interai/risk-oracle
+npm install interai-risk-oracle
 ```
 
 ```ts
-import { InterAIRiskOracleClient } from "@interai/risk-oracle"
+import { InterAIRiskOracleClient } from "interai-risk-oracle"
 
 const client = new InterAIRiskOracleClient({
   baseUrl: "https://ai-risk-oracle.fly.dev",
