@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.3-beta
+
+- Publish fast pricing at `0.010000 USDC` and semantic pricing at
+  `0.030000 USDC`.
+- Publish batch pricing at `0.010000 USDC + 0.005000 USDC/item`.
+- Align the isolated demo trial to `0.050000 USDC` for five fast calls.
+- Document the explicit production facilitator requirement for Base Mainnet.
+- Align SDK, discovery, MCP Registry, and package metadata to `0.1.3-beta`.
+
 ## v0.1.2-beta
 
 - Lead with the agent tool-call policy-gate use case.

@@ -32,7 +32,7 @@ class InterAIRiskOracleClient:
         *,
         base_url: str,
         api_key: str | None = None,
-        client_name: str = "python-sdk/0.1.2-beta",
+        client_name: str = "python-sdk/0.1.3-beta",
         ssl_context: ssl.SSLContext | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")

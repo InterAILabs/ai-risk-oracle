@@ -1,6 +1,6 @@
 {
   "name": "interai-risk-oracle",
-  "version": "0.1.2-beta",
+  "version": "0.1.3-beta",
   "description": "Production-backed MCP JSON-RPC interface for pre-execution policy checks.",
   "endpoint": "https://ai-risk-oracle.fly.dev/mcp",
   "transport": "streamable-http-json-rpc",

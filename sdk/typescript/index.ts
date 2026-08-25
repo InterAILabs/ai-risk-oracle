@@ -104,7 +104,7 @@ export class InterAIRiskOracleClient {
   constructor(options: InterAIClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "")
     this.apiKey = options.apiKey
-    this.clientName = options.clientName || "typescript-sdk/0.1.2-beta"
+    this.clientName = options.clientName || "typescript-sdk/0.1.3-beta"
   }
 
   private async jsonRequest(path: string, init?: RequestInit): Promise<unknown> {

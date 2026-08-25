@@ -1,6 +1,6 @@
 {
   "name": "InterAI Risk Oracle",
-  "version": "0.1.2-beta",
+  "version": "0.1.3-beta",
   "description": "Agent-to-agent verification service for pre-execution risk decisions.",
   "url": "https://ai-risk-oracle.fly.dev/a2a",
   "a2a_v1": {
