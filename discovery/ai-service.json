@@ -1,6 +1,6 @@
 {
   "service_name": "InterAI Risk Oracle",
-  "version": "0.1.2-beta",
+  "version": "0.1.3-beta",
   "base_url": "https://ai-risk-oracle.fly.dev",
   "service_type": "autonomous_execution_gateway",
   "category": "autonomous_execution_gateway",

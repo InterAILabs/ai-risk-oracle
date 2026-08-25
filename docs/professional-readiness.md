@@ -13,7 +13,7 @@ external directory approval.
 - Primary contract: `autonomous_execution`.
 - Support email: `interailabs@gmail.com`
 - Security email: `interailabs@gmail.com`
-- Current beta pricing: `0.0006 USDC/request`.
+- Current beta pricing: fast `0.010000 USDC`, semantic `0.030000 USDC`, and batch `0.010000 + 0.005000/item`.
 - Payment metadata: x402/Base USDC and prepaid API key/trial metadata are
   exposed through `/pricing`.
 
@@ -31,7 +31,7 @@ external directory approval.
 ## Not Yet Claimed
 
 - No APIs.guru approval or listing.
-- No MCP Registry listing.
+- MCP Registry listing is published for the current public beta release.
 - No A2A directory listing.
 - No broad high-volume production SLA.
 - No enterprise procurement readiness.
