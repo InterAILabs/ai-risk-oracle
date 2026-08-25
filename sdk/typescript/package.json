@@ -2,6 +2,15 @@
   "name": "@interai/risk-oracle",
   "version": "0.1.2-beta",
   "description": "TypeScript client and policy-gate helpers for the hosted InterAI Risk Oracle API.",
+  "homepage": "https://ai-risk-oracle.fly.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InterAILabs/ai-risk-oracle.git",
+    "directory": "sdk/typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/InterAILabs/ai-risk-oracle/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
