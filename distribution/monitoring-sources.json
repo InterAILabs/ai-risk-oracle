@@ -188,25 +188,26 @@
     "name": "MCP Registry",
     "type": "future_registry",
     "priority": 7,
-    "status": "validated_authentication_pending",
+    "status": "published_verified",
     "url": "https://registry.modelcontextprotocol.io",
-    "api_url": "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.interailabs%2Fai-risk-oracle",
+    "api_url": "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.InterAILabs%2Fai-risk-oracle",
     "submission_url": "https://registry.modelcontextprotocol.io",
     "ttl_seconds": null,
     "cache_strategy": "static_config",
     "api_auth": "none",
     "rate_limit_sensitive": false,
-    "requires_manual_action": true,
-    "blocked_reason": "GitHub namespace authentication and first publish are pending.",
-    "expected_signal": "The Registry API returns io.github.interailabs/ai-risk-oracle version 0.1.2-beta.",
-    "manual_next_action": "Authenticate with mcp-publisher, publish server.json, and verify the Registry API record.",
+    "requires_manual_action": false,
+    "blocked_reason": null,
+    "expected_signal": "The Registry API returns io.github.InterAILabs/ai-risk-oracle version 0.1.2-beta.",
+    "manual_next_action": "Monitor the exact Registry API record and republish only for a later validated release.",
     "success_criteria": "Exact server/version record exists in the official Registry API.",
     "interpretation_rules": {
-      "validated_authentication_pending": "Artifact is valid; do not claim listing until authenticated publish and API confirmation."
+      "published_verified": "Exact server/version is present in the official Registry API."
     },
     "notes": [
       "server.json passed mcp-publisher v1.8.1 validate on 2026-08-24.",
-      "Official TypeScript client v2.0.0 completed handshake, tools/list, and a public tool call."
+      "Official TypeScript client v2.0.0 completed handshake, tools/list, and a public tool call.",
+      "Published and API-verified on 2026-08-25 as io.github.InterAILabs/ai-risk-oracle@0.1.2-beta."
     ]
   },
   {

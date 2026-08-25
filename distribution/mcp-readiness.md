@@ -32,8 +32,8 @@ Before a submission or partner handoff:
 
 ## Current Status
 
-Registry artifact validated and ready for namespace authentication/publish.
-`server.json` points to the public Streamable HTTP remote and was validated with
-`mcp-publisher v1.8.1` on 2026-08-24. Protocol conformance is covered by the
-official TypeScript client at version 2.0.0. A listing must not be claimed until
-the Registry API returns the published server.
+Published and verified in the official MCP Registry as
+`io.github.InterAILabs/ai-risk-oracle@0.1.2-beta` on 2026-08-25. `server.json`
+points to the public Streamable HTTP remote and passes `mcp-publisher v1.8.1`
+validation. Protocol conformance is covered by the official TypeScript client
+at version 2.0.0, and the Registry API returns the exact published server.
