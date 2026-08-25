@@ -1,4 +1,4 @@
-# MCP Registry Future Package
+# MCP Registry Submission Package
 
 ## Channel
 
@@ -10,11 +10,11 @@ https://modelcontextprotocol.io/registry
 
 ## Status
 
-`blocked_needs_mcp_server`
+`validated_authentication_pending`
 
 ## Submission Method
 
-Future `server.json` publish flow with authentication.
+Remote `server.json` publish flow with GitHub namespace authentication.
 
 The registry documentation describes remote server publication through a
 `server.json` file with a `remotes` property, plus namespace authentication.
@@ -34,7 +34,7 @@ Remote MCP access to InterAI Risk Oracle pre-execution verification.
 ## Long Description
 
 ```text
-InterAI Risk Oracle exposes pre-execution verification for autonomous agents. A future MCP Registry submission should describe the hosted MCP endpoint, available verification tool, discovery resources, authentication requirements, and the autonomous execution decision contract.
+InterAI Risk Oracle exposes pre-execution verification for autonomous agents through a hosted Streamable HTTP MCP endpoint, with policy decisions, discovery resources, and trust receipts.
 ```
 
 ## Tags
@@ -81,25 +81,22 @@ https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
 
 ## Beta Scope
 
-MCP metadata/readiness exists, but this is not yet a full MCP Registry
-submission.
+The submission artifact exists and passed `mcp-publisher v1.8.1 validate` on
+2026-08-24. Publication and Registry API confirmation remain pending.
 
 ## What Not To Claim
 
 - Do not claim InterAI is in the MCP Registry.
-- Do not claim MCP Registry readiness until `server.json` is created and
-  validated.
 - Do not publish to the registry without namespace authentication.
-- Do not imply unauthenticated MCP access if the endpoint requires credentials.
+- Do not claim a listing until the Registry API returns the exact server/version.
+- Public discovery and pricing tools are unauthenticated; billable verification
+  requires a credential or supported payment path.
 - Do not change core MCP behavior from public docs.
 
 ## Exact Next Action
 
-1. Confirm the hosted MCP endpoint transport expected by the current registry.
-2. Create a registry-specific `server.json` in a separate implementation pass.
-3. Validate it against the current MCP Registry schema.
-4. Choose namespace:
-   - GitHub namespace if publishing under `io.github.InterAILabs/...`.
-   - Custom domain namespace only after `oracle.interailabs.com` or another
-     owned domain is live.
-5. Authenticate and publish only after explicit operator approval.
+1. Authenticate with GitHub for the `InterAILabs` organization namespace.
+2. Publish `server.json` with `mcp-publisher`.
+3. Query the Registry API for
+   `io.github.interailabs/ai-risk-oracle@0.1.2-beta`.
+4. Update channel status only after the exact record is returned.

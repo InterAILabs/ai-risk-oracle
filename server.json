@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.interailabs/ai-risk-oracle",
+  "title": "InterAI Risk Oracle",
+  "description": "Policy gate and signed trust receipts for autonomous agent actions.",
+  "repository": {
+    "url": "https://github.com/InterAILabs/ai-risk-oracle",
+    "source": "github",
+    "id": "1255624406"
+  },
+  "version": "0.1.2-beta",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://ai-risk-oracle.fly.dev/mcp"
+    }
+  ]
+}

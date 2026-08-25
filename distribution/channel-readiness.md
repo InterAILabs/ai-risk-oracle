@@ -13,7 +13,7 @@ This document states what is ready to submit now and what still needs work.
 | APIKeyHub | Blocked: needs account | Public site exposes API/MCP directory and dashboard submission flow; operator account action is needed. |
 | Developer API directories | Prepared | API description, docs, OpenAPI, pricing, onboard, and SDK links are available. |
 | AI agent/tool directories | Needs adaptation | InterAI fits the category, but each directory needs tailored copy and may favor apps over infrastructure. |
-| MCP Registry | Blocked: needs MCP server package | InterAI has MCP metadata/readiness and a hosted MCP endpoint, but not a full MCP Registry `server.json` submission package yet. |
+| MCP Registry | Validated; authentication/publish pending | `server.json` passed `mcp-publisher v1.8.1 validate`; the hosted Streamable HTTP endpoint passes the official TypeScript client handshake and tool-call test. |
 | A2A/agent-card directories | Needs account or adaptation | Hosted agent card exists; active directories generally require register/submit flows or category review. |
 | Search/indexing/SEO | Ready to start now | GitHub docs and hosted metadata are public; stronger SEO needs release, topics, backlinks, and later domain. |
 | Future domain-owned path | Needs implementation | Requires DNS/TLS/canonical URL plan and hosted metadata updates in a later controlled pass. |
@@ -41,18 +41,22 @@ This document states what is ready to submit now and what still needs work.
 
 ### MCP Registry
 
-InterAI has MCP metadata/readiness, but not a full MCP Registry submission
-package yet.
+InterAI has a registry-specific `server.json` for its public hosted remote:
 
-It also has a hosted MCP endpoint. Treat MCP Registry as a submission-adaptation
-task until registry-specific metadata is prepared and validated.
+```text
+io.github.interailabs/ai-risk-oracle
+https://ai-risk-oracle.fly.dev/mcp
+```
+
+The artifact passed the official registry validator on 2026-08-24. The endpoint
+also passes initialize, tools/list, and a public tool call with
+`@modelcontextprotocol/client@2.0.0` in legacy/2025 compatibility mode.
 
 Needed before submission:
 
-- registry-specific metadata file;
-- namespace ownership/authentication;
-- hosted endpoint validation against current registry expectations;
-- operator submission.
+- GitHub namespace authentication for the `InterAILabs` organization;
+- `mcp-publisher publish`;
+- registry API confirmation before claiming a listing.
 
 ### A2A/Agent-Card Directories
 

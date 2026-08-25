@@ -79,6 +79,18 @@ export type InterAIClientOptions = {
   clientName?: string
 }
 
+export type TrustReceiptLookup = {
+  ok: true
+  receipt: Record<string, unknown> & { receipt_id: string }
+  verification: {
+    signed: boolean
+    signature: string | null
+    signature_alg: "hmac-sha256" | null
+    signed_payload: string | null
+  }
+  [key: string]: unknown
+}
+
 function defaultIdempotencyKey(): string {
   const random = globalThis.crypto?.randomUUID?.()
   return random || `interai-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
@@ -95,21 +107,15 @@ export class InterAIRiskOracleClient {
     this.clientName = options.clientName || "typescript-sdk/0.1.2-beta"
   }
 
-  async verify(
-    request: VerifyRequest,
-    idempotencyKey = defaultIdempotencyKey()
-  ): Promise<VerifyResponse> {
-    const response = await fetch(`${this.baseUrl}/verify`, {
-      method: "POST",
+  private async jsonRequest(path: string, init?: RequestInit): Promise<unknown> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      ...init,
       headers: {
         ...(this.apiKey ? { authorization: `Bearer ${this.apiKey}` } : {}),
-        "content-type": "application/json",
-        "x-idempotency-key": idempotencyKey,
-        "x-interai-client": this.clientName
-      },
-      body: JSON.stringify(request)
+        "x-interai-client": this.clientName,
+        ...(init?.headers || {})
+      }
     })
-
     const text = await response.text()
     let body: unknown
     try {
@@ -118,8 +124,47 @@ export class InterAIRiskOracleClient {
       body = { error: "invalid_json_response", raw: text.slice(0, 500) }
     }
     if (!response.ok) {
-      throw new Error(`InterAI verify failed: ${response.status} ${JSON.stringify(body)}`)
+      throw new Error(`InterAI request failed: ${response.status} ${JSON.stringify(body)}`)
     }
-    return body as VerifyResponse
+    return body
+  }
+
+  async verify(
+    request: VerifyRequest,
+    idempotencyKey = defaultIdempotencyKey()
+  ): Promise<VerifyResponse> {
+    return this.jsonRequest("/verify", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-idempotency-key": idempotencyKey
+      },
+      body: JSON.stringify(request)
+    }) as Promise<VerifyResponse>
+  }
+
+  async getTrustReceipt(receiptId: string): Promise<TrustReceiptLookup> {
+    return this.jsonRequest(
+      `/trust/receipts/${encodeURIComponent(receiptId)}`
+    ) as Promise<TrustReceiptLookup>
+  }
+
+  async verifyTrustReceiptSignature(
+    lookup: TrustReceiptLookup
+  ): Promise<{ valid: boolean; signature_alg: "hmac-sha256" }> {
+    const { receipt, verification } = lookup
+    if (!verification.signature || !verification.signed_payload) {
+      throw new Error("Trust receipt is not signed")
+    }
+    return this.jsonRequest("/trust/verify-signature", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        receipt_id: receipt.receipt_id,
+        signed_payload: verification.signed_payload,
+        signature: verification.signature,
+        signature_alg: verification.signature_alg
+      })
+    }) as Promise<{ valid: boolean; signature_alg: "hmac-sha256" }>
   }
 }

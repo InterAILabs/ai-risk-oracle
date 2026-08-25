@@ -39,6 +39,14 @@ const decision = await client.verify({
 `verify` generates an idempotency key when one is not provided. Supply a stable
 business-operation key when retries must resolve to the same billed result.
 
+For a portable signature check, fetch a lookup and forward its opaque signed
+payload without parsing it:
+
+```ts
+const receipt = await client.getTrustReceipt(decision.trust_receipt_id!)
+const signatureCheck = await client.verifyTrustReceiptSignature(receipt)
+```
+
 Build and inspect the package locally:
 
 ```bash
