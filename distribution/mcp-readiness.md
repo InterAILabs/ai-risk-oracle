@@ -33,7 +33,8 @@ Before a submission or partner handoff:
 ## Current Status
 
 Published and verified in the official MCP Registry as
-`io.github.InterAILabs/ai-risk-oracle@0.1.2-beta` on 2026-08-25. `server.json`
+`io.github.InterAILabs/ai-risk-oracle@0.1.3-beta` on 2026-08-25. `server.json`
 points to the public Streamable HTTP remote and passes `mcp-publisher v1.8.1`
 validation. Protocol conformance is covered by the official TypeScript client
-at version 2.0.0, and the Registry API returns the exact published server.
+at version 2.0.0. The production smoke also covers initialize and
+`oracle.get_pricing`, and the Registry API marks the exact version active and latest.

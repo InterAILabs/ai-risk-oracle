@@ -47,7 +47,7 @@ mcp, autonomous agents, execution gateway, pre-execution verification, policy en
 
 - Homepage: https://ai-risk-oracle.fly.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
-- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.2-beta
+- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
 - Hosted service URL: https://ai-risk-oracle.fly.dev
 - Pricing URL: https://ai-risk-oracle.fly.dev/pricing
 - OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
@@ -76,7 +76,7 @@ https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
 ## Release URL
 
 ```text
-https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.2-beta
+https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
 ```
 
 ## Beta Scope

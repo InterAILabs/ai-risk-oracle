@@ -6,14 +6,14 @@ This document states what is ready to submit now and what still needs work.
 
 | Channel | Readiness | Reason |
 |---|---|---|
-| GitHub release/topics/search | Release created | Public repo metadata is configured and `v0.1.2-beta` is published. |
+| GitHub release/topics/search | Release created | Public repo metadata is configured and `v0.1.3-beta` is published. |
 | x402 ecosystem/directories | Prepared | Hosted pricing metadata exposes x402/Base USDC support. Channel-specific packages exist in `distribution/submissions/`. |
 | APIs.guru / OpenAPI Directory | Submitted pending review | Issue #2665 is open at APIs.guru. InterAI is not approved or listed yet. |
 | FindAPI | Prepared | Submission form exists and the developer API package includes field-ready copy. |
 | APIKeyHub | Blocked: needs account | Public site exposes API/MCP directory and dashboard submission flow; operator account action is needed. |
 | Developer API directories | Prepared | API description, docs, OpenAPI, pricing, onboard, and SDK links are available. |
 | AI agent/tool directories | Needs adaptation | InterAI fits the category, but each directory needs tailored copy and may favor apps over infrastructure. |
-| MCP Registry | Published and API-verified | `io.github.InterAILabs/ai-risk-oracle@0.1.2-beta` is visible in the official Registry API; the hosted Streamable HTTP endpoint passes the official TypeScript client handshake and tool-call test. |
+| MCP Registry | Published and API-verified | `io.github.InterAILabs/ai-risk-oracle@0.1.3-beta` is active and latest in the official Registry API; the hosted Streamable HTTP endpoint passes initialize and `oracle.get_pricing` checks. |
 | A2A/agent-card directories | Needs account or adaptation | Hosted agent card exists; active directories generally require register/submit flows or category review. |
 | Search/indexing/SEO | Ready to start now | GitHub docs and hosted metadata are public; stronger SEO needs release, topics, backlinks, and later domain. |
 | Future domain-owned path | Needs implementation | Requires DNS/TLS/canonical URL plan and hosted metadata updates in a later controlled pass. |
@@ -52,7 +52,7 @@ also passes initialize, tools/list, and a public tool call with
 
 Published on 2026-08-25 after GitHub namespace authentication. The official
 Registry API returned the exact `io.github.InterAILabs/ai-risk-oracle` server at
-version `0.1.2-beta`, so the listing may now be claimed.
+version `0.1.3-beta`, so the listing may now be claimed.
 
 ### A2A/Agent-Card Directories
 
