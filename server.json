@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.interailabs/ai-risk-oracle",
+  "name": "io.github.InterAILabs/ai-risk-oracle",
   "title": "InterAI Risk Oracle",
   "description": "Policy gate and signed trust receipts for autonomous agent actions.",
   "repository": {

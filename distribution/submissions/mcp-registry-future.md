@@ -10,7 +10,7 @@ https://modelcontextprotocol.io/registry
 
 ## Status
 
-`validated_authentication_pending`
+`published_verified`
 
 ## Submission Method
 
@@ -47,7 +47,7 @@ mcp, autonomous agents, execution gateway, pre-execution verification, policy en
 
 - Homepage: https://ai-risk-oracle.fly.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
-- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
+- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.2-beta
 - Hosted service URL: https://ai-risk-oracle.fly.dev
 - Pricing URL: https://ai-risk-oracle.fly.dev/pricing
 - OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
@@ -76,27 +76,24 @@ https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
 ## Release URL
 
 ```text
-https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
+https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.2-beta
 ```
 
 ## Beta Scope
 
-The submission artifact exists and passed `mcp-publisher v1.8.1 validate` on
-2026-08-24. Publication and Registry API confirmation remain pending.
+The submission artifact passed `mcp-publisher v1.8.1 validate`, was published on
+2026-08-25, and the official Registry API returned the exact server/version.
 
 ## What Not To Claim
 
-- Do not claim InterAI is in the MCP Registry.
-- Do not publish to the registry without namespace authentication.
-- Do not claim a listing until the Registry API returns the exact server/version.
+- Claim only the exact published server/version returned by the Registry API.
+- Authenticate the `InterAILabs` namespace again before publishing later versions.
 - Public discovery and pricing tools are unauthenticated; billable verification
   requires a credential or supported payment path.
 - Do not change core MCP behavior from public docs.
 
 ## Exact Next Action
 
-1. Authenticate with GitHub for the `InterAILabs` organization namespace.
-2. Publish `server.json` with `mcp-publisher`.
-3. Query the Registry API for
-   `io.github.interailabs/ai-risk-oracle@0.1.2-beta`.
-4. Update channel status only after the exact record is returned.
+1. Monitor the exact Registry API record.
+2. Keep `server.json` and the public release version aligned.
+3. Revalidate and publish only when a later release is ready.
