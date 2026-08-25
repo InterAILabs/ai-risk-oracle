@@ -39,13 +39,13 @@
     ]
   },
   {
-    "id": "interai-github-release-v0-1-1-beta",
+    "id": "interai-github-release-v0-1-2-beta",
     "name": "InterAI GitHub release",
     "type": "github_release",
     "priority": 2,
     "status": "created",
-    "url": "https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.1-beta",
-    "api_url": "https://api.github.com/repos/InterAILabs/ai-risk-oracle/releases/tags/v0.1.1-beta",
+    "url": "https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.2-beta",
+    "api_url": "https://api.github.com/repos/InterAILabs/ai-risk-oracle/releases/tags/v0.1.2-beta",
     "submission_url": null,
     "ttl_seconds": 900,
     "cache_strategy": "memory_and_disk_stale_while_revalidate",
@@ -55,7 +55,7 @@
     "blocked_reason": null,
     "expected_signal": "Release tag exists and remains available as public beta evidence.",
     "approval_rules": [
-      "Release API returns the v0.1.1-beta tag.",
+      "Release API returns the v0.1.2-beta tag.",
       "Cached confirmed release remains valid during GitHub rate limit windows."
     ],
     "no_claim_rules": [
@@ -63,7 +63,7 @@
       "Do not mark missing unless GitHub returns a confirmed 404 without cached good state."
     ],
     "manual_next_action": "Use release as public beta evidence for reviewers.",
-    "success_criteria": "Release tag v0.1.1-beta exists.",
+    "success_criteria": "Release tag v0.1.2-beta exists.",
     "interpretation_rules": {
       "exists": "release_exists",
       "missing": "release_missing",
@@ -188,25 +188,25 @@
     "name": "MCP Registry",
     "type": "future_registry",
     "priority": 7,
-    "status": "blocked_until_real_mcp_server_registry_package",
-    "url": null,
-    "api_url": null,
-    "submission_url": null,
+    "status": "validated_authentication_pending",
+    "url": "https://registry.modelcontextprotocol.io",
+    "api_url": "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.interailabs%2Fai-risk-oracle",
+    "submission_url": "https://registry.modelcontextprotocol.io",
     "ttl_seconds": null,
     "cache_strategy": "static_config",
     "api_auth": "none",
     "rate_limit_sensitive": false,
     "requires_manual_action": true,
-    "blocked_reason": "Distribution should wait for a real MCP server registry package.",
-    "expected_signal": "Registry-ready MCP server package and confirmed registry submission requirements.",
-    "manual_next_action": "Wait for a real MCP server registry package.",
-    "success_criteria": "Registry-ready MCP server package exists.",
+    "blocked_reason": "GitHub namespace authentication and first publish are pending.",
+    "expected_signal": "The Registry API returns io.github.interailabs/ai-risk-oracle version 0.1.2-beta.",
+    "manual_next_action": "Authenticate with mcp-publisher, publish server.json, and verify the Registry API record.",
+    "success_criteria": "Exact server/version record exists in the official Registry API.",
     "interpretation_rules": {
-      "blocked_until_real_mcp_server_registry_package": "Future channel; avoid premature listing."
+      "validated_authentication_pending": "Artifact is valid; do not claim listing until authenticated publish and API confirmation."
     },
     "notes": [
-      "Keep as future registry work.",
-      "Not a current submission target."
+      "server.json passed mcp-publisher v1.8.1 validate on 2026-08-24.",
+      "Official TypeScript client v2.0.0 completed handshake, tools/list, and a public tool call."
     ]
   },
   {

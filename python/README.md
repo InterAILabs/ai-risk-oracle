@@ -1,8 +1,7 @@
 # Python SDK
 
-Dependency-free hosted API client for InterAI Risk Oracle. The package metadata
-is publish-ready; confirm the package has been released before installing it
-from a registry.
+Hosted API client for InterAI Risk Oracle. It uses Certifi's portable CA bundle
+by default and also accepts a custom `ssl_context` in the constructor.
 
 ```python
 import os

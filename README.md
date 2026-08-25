@@ -43,6 +43,7 @@ Wire InterAI into your agent before the agent executes a tool or action:
 - TypeScript middleware example: [examples/agent-middleware/typescript](examples/agent-middleware/typescript)
 - Python middleware example: [examples/agent-middleware/python](examples/agent-middleware/python)
 - Integration patterns: [docs/integration-patterns.md](docs/integration-patterns.md)
+- 30-day design-partner pilot: [docs/pilot-program.md](docs/pilot-program.md)
 
 ```text
 decision = interai.verify(action)

@@ -1,12 +1,15 @@
 # Changelog
 
-## v0.1.2-beta (release candidate)
+## v0.1.2-beta
 
 - Lead with the agent tool-call policy-gate use case.
 - Document the one-click guided demo and privacy-safe activation stages.
 - Make the TypeScript and Python SDK directories buildable package sources.
 - Generate idempotency keys by default in both public clients.
 - Record A2A v1 and MCP as production-backed interfaces where documented.
+- Add portable trust-receipt signature envelopes and SDK helpers.
+- Use Certifi in the Python package for portable TLS verification.
+- Add an official MCP Registry `server.json` for the hosted Streamable HTTP endpoint.
 
 ## Unreleased
 

@@ -11,7 +11,7 @@ channel below needs an operator submission, review, or follow-up.
 | Channel | Purpose | Fit for InterAI | Required assets | Current status | Blocking gaps | Next action | Manual/automatable | Priority |
 |---|---|---|---|---|---|---|---|---|
 | GitHub release, topics, and search | Make the public repo discoverable to developers, agents, and registry crawlers. | Strong fit. The public repo is the canonical integration surface. | README, changelog, release notes, topics, description, homepage, docs links. | Release notes draft exists. README and changelog are beta-ready. | Need operator to create or confirm the GitHub release and topics. | Create or update `v0.1.0-beta` release as pre-release, add repo topics, verify repository description/homepage. | Manual now; later automatable through release workflow. | P0 |
-| MCP Registry | Make InterAI discoverable to MCP clients and ecosystem indexes. | Good fit if the hosted MCP endpoint is packaged as a registry-ready remote server entry. | MCP endpoint, tool list, `server.json` or registry metadata, namespace ownership, docs, security notes. | InterAI has MCP metadata/readiness and a hosted MCP endpoint, but not a full MCP Registry submission artifact yet. | Need registry-specific `server.json`, validation against current MCP Registry requirements, and submission/auth flow. | Prepare a remote MCP server submission artifact and test it before claiming registry readiness. | Mostly manual first time; metadata generation can be automated later. | P0 |
+| MCP Registry | Make InterAI discoverable to MCP clients and ecosystem indexes. | Strong fit for the hosted remote. | MCP endpoint, tool list, `server.json`, namespace ownership, docs, security notes. | Remote artifact and endpoint are validated with official tooling. | GitHub namespace authentication and publish confirmation remain. | Authenticate, publish, and verify the exact registry record before claiming listing. | Manual first time; validation is automated. | P0 |
 | x402 ecosystem and directories | Reach agents/services looking for paid HTTP resources and x402-compatible APIs. | Strong fit because `/verify` supports paid verification and Base USDC/x402 metadata. | Pricing URL, x402 payment requirements, Base USDC details, service description, example paid request, support contact. | x402 support is documented and exposed through hosted pricing metadata. | Need listing-specific copy and any required proof/demo from the x402 ecosystem directory. | Prepare x402 listing asset using `distribution/submission-assets.md`; submit to x402 ecosystem channels manually. | Manual submission; checks can be automated. | P0 |
 | OpenAPI and API directories | Expose the hosted API to developers, API search engines, and agent tooling. | Strong fit. InterAI has hosted OpenAPI and public schemas. | OpenAPI URL, service category, auth model, pricing URL, docs, example request/response. | OpenAPI is hosted and public. Public repo has schema docs. | Need directory-specific submission formats; some directories require manual moderation. | Submit to OpenAPI/API directories that accept hosted specs and developer APIs. | Manual first pass; monitoring can be automated. | P1 |
 | AI agent and tool directories | Position InterAI as pre-execution infrastructure for autonomous agents. | Strong narrative fit; varies by directory quality. | One-line description, agent use cases, screenshots optional, links, trust receipt explanation. | Submission assets are ready after this plan. | Need channel list, anti-spam selection, and tailored descriptions. | Select 5-10 credible directories; submit manually with beta scope. | Manual. | P1 |
@@ -44,17 +44,14 @@ an endorsement or listing.
 
 ## MCP Registry Assessment
 
-InterAI has MCP metadata/readiness, but not a full MCP server submission yet.
-
-It also has a hosted MCP endpoint. Treat MCP Registry as a submission-adaptation
-task until registry-specific metadata is prepared and validated.
+InterAI has a validated remote `server.json` and a hosted MCP endpoint that
+passes the official client transport test.
 
 Do not claim MCP Registry listing until:
 
-- a registry-specific server metadata file exists;
 - namespace ownership is verified;
-- the hosted MCP endpoint is validated against current registry expectations;
-- an operator completes the registry submission flow.
+- an authorized operator completes the registry publish flow;
+- the Registry API returns the exact server/version record.
 
 ## x402 Readiness Assessment
 

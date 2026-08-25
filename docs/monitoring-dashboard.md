@@ -182,7 +182,9 @@ The local cache is:
 
 The root `.gitignore` excludes `.cache/`. The cache must never contain tokens.
 It stores only public GitHub state, public health summaries, timestamps, rate
-limit metadata, and aggregate telemetry snapshots.
+limit metadata, aggregate telemetry snapshots, and a bounded synthetic history.
+Synthetic samples are taken at most once every 15 minutes, retained for 30 days,
+and summarized as availability plus p50/p95 latency by endpoint.
 
 To reset local monitor state:
 
@@ -218,6 +220,9 @@ If `/admin/adoption/summary` provides `traffic_segments`, the dashboard uses
 `traffic_segments.<window>.external_only` for the main telemetry table, signal
 interpretation, and telemetry deltas. Raw counters remain visible in the
 Raw / mixed all traffic table. `adoption.windows` is still raw `all_traffic` for
+compatibility. A separate Guided activation table combines external acquisition
+events with only the completion stages from the isolated `demo_trial` segment;
+it never relabels demo usage as external paid adoption.
 compatibility.
 
 Traffic segments:
