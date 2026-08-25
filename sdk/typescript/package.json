@@ -1,5 +1,5 @@
 {
-  "name": "@interai/risk-oracle",
+  "name": "interai-risk-oracle",
   "version": "0.1.2-beta",
   "description": "TypeScript client and policy-gate helpers for the hosted InterAI Risk Oracle API.",
   "homepage": "https://ai-risk-oracle.fly.dev/",
