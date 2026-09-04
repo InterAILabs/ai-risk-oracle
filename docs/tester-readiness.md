@@ -2,24 +2,21 @@
 
 Before an agent executes, InterAI verifies.
 
-InterAI Risk Oracle is a hosted Autonomous Execution Gateway for pre-execution
-verification of autonomous agents. It checks a proposed action before execution and
-returns a machine-readable decision: `allow`, `review_required`, or `block`. Humans and
-agents can discover pricing, onboarding, and verification endpoints directly from hosted
-metadata.
+InterAI Risk Oracle is a hosted **pre-execution decision layer** for consequential autonomous-agent actions. It sits after identity/permission checks and before execution, and returns a machine-readable authority decision: `allow`, `review_required`, or `block`.
+
+The core question is not only whether an agent is technically permitted to act. It is whether **this exact proposed action should execute now, in this context, under this policy**.
 
 ## What You Can Test Today
 
 - Hosted liveness and readiness: `/health` and `/ready`.
-- Discovery and OpenAPI: `/.well-known/openapi.json`,
-  `/.well-known/ai-service.json`, `/.well-known/agent.json`, and
-  `/.well-known/discovery-bundle.json`.
+- Discovery and OpenAPI: `/.well-known/openapi.json`, `/.well-known/ai-service.json`, `/.well-known/agent.json`, and `/.well-known/discovery-bundle.json`.
 - Autonomous action verification through `POST /verify`.
-- Policy enforcement for action type, risk level, amount, review threshold, and
-  irreversible actions.
-- Trust receipt creation and lookup.
+- Policy enforcement for action type, risk level, amount, review threshold, and irreversible actions.
+- `allow`, `review_required`, and `block` handling before execution.
+- Signed trust receipt creation, lookup, and signature verification.
 - TypeScript SDK integration.
 - Python client integration.
+- MCP and A2A hosted interfaces where documented.
 
 ## Three Core Test Cases
 
@@ -85,8 +82,7 @@ Use this case when an agent wants to release funds in production:
 }
 ```
 
-Agent behavior: pause execution and route to a supervisor agent, policy system, wallet
-rule, governance queue, or human operator.
+Agent behavior: pause execution and route to a supervisor agent, policy system, wallet rule, governance queue, or human operator.
 
 ### 3. Irreversible Transfer
 
@@ -120,32 +116,34 @@ Use this case when an agent proposes a blocked irreversible transfer:
 }
 ```
 
-Agent behavior: abort the action, log the decision, and store the trust receipt if one
-was issued.
+Agent behavior: abort the action, log the decision, and store the trust receipt if one was issued.
 
 ## Decision Handling
 
 - `allow`: execute and store the receipt.
-- `review_required`: the current agent should not execute autonomously under
-  the current policy; route to a supervisor agent, policy system, wallet rule,
-  governance queue, or human operator.
+- `review_required`: the current agent should not execute autonomously under the current policy; route to a supervisor agent, policy system, wallet rule, governance queue, or human operator.
 - `block`: abort and log.
 
-## What InterAI Does Not Promise Yet
+## What InterAI Is Not
 
-- It does not guarantee universal truth.
-- It does not replace human audit for critical actions.
-- It does not expose the production verification engine.
-- It is not a local open source library.
+InterAI is not intended to replace authentication, identity, deterministic permissions, domain regulation, or mandatory human controls. Those layers answer different questions.
+
+It also does not guarantee universal factual truth. A trust receipt records the decision InterAI made and the material associated with that decision; it does not certify that every underlying assertion is true.
+
+## Current Architectural Boundary
+
+The public `autonomous_execution` contract is the primary product surface. The service also retains an earlier prompt/response verification contract for compatibility.
+
+The autonomous contract should be evaluated as a pre-execution boundary, not as a generic hallucination checker or broad AI-safety product.
 
 ## Feedback To Send
 
 - Is the `autonomous_execution` contract clear?
-- How easy is integration through OpenAPI, A2A, MCP, TypeScript, or Python?
-- Are trust receipts useful for your audit or governance flow?
-- Which policy fields are missing?
+- Does the identity/permission/decision-layer separation match your architecture?
+- Which proposed actions would you actually gate before execution?
+- Are trust receipts useful for audit, incident reconstruction, or downstream governance?
+- Which contextual fields or policy dimensions are missing?
 - Where does onboarding feel slow or confusing?
-- Which action types matter most for your agents?
 
 ## Self-Serve Access And Support
 
@@ -155,5 +153,4 @@ Use hosted self-serve discovery first:
 - Onboard: https://ai-risk-oracle.fly.dev/onboard
 - Adoption contract: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
 
-For support, security, enterprise access, partnerships, or manual integration help,
-contact interailabs@gmail.com.
+For support, security, enterprise access, partnerships, or manual integration help, contact interailabs@gmail.com.
