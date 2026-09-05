@@ -55,23 +55,32 @@ remains available for compatibility.
 
 ## Policy Authority Boundary
 
-Hosted autonomous execution now uses a versioned InterAI-controlled host policy
-floor. The caller-supplied `policy` object is composed on top of that floor and
-may only tighten supported constraints; it cannot remove or weaken the host
-requirements.
+Authenticated autonomous execution composes policy in strict authority order:
 
-The current hosted profile is `interai-host-autonomous-baseline` version `1`.
-Trust receipt v2 binds policy authority metadata, including the authoritative
-profile digest plus digests for the caller policy and the resulting effective
-policy. This lets the receipt show which host policy boundary was in force for the
-decision.
+```text
+HOST -> ACCOUNT -> CALLER -> EFFECTIVE
+```
 
-The current host baseline is deliberately small and requires:
+The InterAI-controlled host policy is the irreducible floor. When a bearer credential resolves to an account that has a versioned policy profile, that account profile is composed next. The caller-supplied request policy is then allowed to tighten the result but cannot weaken host or account requirements.
+
+Accountless/x402 execution has no account profile to resolve and therefore uses `HOST -> CALLER -> EFFECTIVE`.
+
+The current host profile is `interai-host-autonomous-baseline` version `1` and requires:
 
 - user confirmation for irreversible actions
 - a trust receipt for the decision
 
-This is a host-level baseline, not yet a customer-administered tenant policy
-system. InterAI does not currently claim independently configurable per-tenant or
-per-account authoritative policy profiles, policy mutation authorization, or
-customer-managed policy version lifecycle.
+Trust Receipt v2 binds policy authority metadata and digests so a signed decision can identify the policy boundary under which it was made. For authenticated requests this includes:
+
+- host profile provenance and digest
+- account profile provenance, version, and digest when present
+- caller-policy digest
+- composition order
+- authoritative-policy digest
+- effective-policy digest
+
+Because account policy version/digest is also part of authenticated decision identity, a request cannot silently reuse an old idempotent decision after the applicable account policy has changed.
+
+## Administration Scope
+
+The account policy enforcement boundary is live, but account policy administration is currently an **InterAI-administered control plane**. InterAI does not yet claim customer self-service policy editing, delegated tenant policy administrators, or a customer-managed policy version lifecycle.
