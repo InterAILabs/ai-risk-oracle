@@ -1,7 +1,7 @@
 {
   "name": "InterAI Risk Oracle",
   "version": "0.1.3-beta",
-  "description": "Centralized policy gate for consequential autonomous-agent actions. Before an agent executes, InterAI verifies.",
+  "description": "Independent pre-execution decision layer for consequential autonomous-agent actions. Before an agent executes, InterAI verifies.",
   "url": "https://ai-risk-oracle.fly.dev/a2a",
   "capabilities": [
     "verify_autonomous_action",
@@ -29,6 +29,7 @@
       "workflow.approve",
       "wallet.sign"
     ],
+    "authority_boundary": "The gated actor proposes; InterAI decides under policy; the surrounding execution layer must honor allow, review_required, or block.",
     "agent_decision_mapping": {
       "allow": "execute",
       "review_required": "route_to_supervisor_policy_or_escalation_layer",
