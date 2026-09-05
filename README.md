@@ -4,7 +4,7 @@
 
 > Before an agent executes, InterAI verifies.
 
-InterAI sits between an autonomous agent and a consequential action. The agent proposes what it wants to do; InterAI evaluates the action in context, applies local policy, and returns a machine-readable authority decision:
+InterAI sits between an autonomous agent and a consequential action. The agent proposes what it wants to do; InterAI evaluates the action in context, applies request-scoped policy constraints, and returns a machine-readable authority decision:
 
 ```text
 proposed action
@@ -48,7 +48,7 @@ Use InterAI when an agent is about to do something with real consequences: execu
 For autonomous execution requests, InterAI returns:
 
 - `recommended_action`: `allow`, `review_required`, or `block`
-- `policy_result`: the authority result under the supplied policy
+- `policy_result`: the authority result under the supplied policy constraints
 - `score`: execution-risk score from `0` to `1`
 - `risk_level`: `low`, `medium`, or `high`
 - `signals`: machine-readable action and risk signals
@@ -56,6 +56,12 @@ For autonomous execution requests, InterAI returns:
 - `trust_receipt_id`: durable decision evidence
 
 `review_required` means the current agent should not execute autonomously under the current policy. Review can be handled by a supervisor agent, policy system, governance queue, wallet rule, or human operator.
+
+### Policy authority boundary
+
+The `policy` object in the current request contract is supplied by the caller. It can constrain that request, but by itself it does **not** prove that a compromised caller was unable to remove or weaken those constraints.
+
+A true tenant/host enforcement boundary requires policy to be anchored outside the action request and controlled by an authority the gated actor cannot modify. InterAI should not be described as providing that stronger guarantee from caller-supplied policy alone.
 
 ## Example
 
@@ -147,9 +153,11 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
 
 ## Trust Receipts
 
-Every consequential decision can produce a durable trust receipt. Receipts are designed to make pre-execution decisions inspectable and portable across retries, handoffs, governance systems, and later audits.
+Every consequential decision can produce a durable trust receipt. Receipts are designed to make pre-execution decisions inspectable and transportable across retries, handoffs, governance systems, and later audits.
 
-A receipt proves what InterAI evaluated and decided at that point in time. It does **not** prove that an underlying claim is universally true and does not replace domain-specific controls or human review where those are required.
+Current receipt signatures use HMAC-SHA256 and are **service-verifiable** by InterAI. That provides authenticated service-side integrity; it is not the same guarantee as an independently verifiable public-key signature that a third party can validate offline without InterAI.
+
+A receipt proves what the signed receipt payload authenticates at that point in time. It does **not** prove that an underlying claim is universally true and does not replace domain-specific controls or human review where those are required.
 
 See [docs/trust-receipts.md](docs/trust-receipts.md).
 
@@ -183,13 +191,15 @@ Ready now:
 
 - autonomous action verification
 - explicit `allow / review_required / block` decisions
-- policy enforcement for action type, amount, risk, irreversible actions, and review thresholds
-- signed trust receipts and public receipt lookup
+- request-scoped policy evaluation for action type, amount, risk, irreversible actions, and review thresholds
+- signed, service-verifiable trust receipts and public receipt lookup
 - idempotent paid verification
 - hosted OpenAPI, MCP, A2A, and machine-readable discovery
 
 Not claimed yet:
 
+- tenant/host policy authority that a compromised caller cannot weaken merely through the request body
+- independently verifiable public-key receipt signatures
 - broad high-volume production readiness
 - enterprise procurement readiness
 - universal factual truth guarantees
