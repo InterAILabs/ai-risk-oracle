@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you reference InterAI Risk Oracle in technical work, please cite the project and its author."
+title: "InterAI Risk Oracle"
+type: software
+authors:
+  - family-names: "Bolognese"
+    given-names: "Alejandro"
+    affiliation: "InterAI Labs"
+version: "0.1.3-beta"
+date-released: "2026-08-25"
+url: "https://ai-risk-oracle.fly.dev/"
+repository-code: "https://github.com/InterAILabs/ai-risk-oracle"
+abstract: >-
+  Independent pre-execution decision layer for consequential agent actions.
+  InterAI evaluates a proposed action under authoritative policy before the
+  surrounding execution layer routes, escalates, or aborts it, and can issue
+  durable trust receipts as decision evidence.
+keywords:
+  - ai-agents
+  - pre-execution-verification
+  - policy-enforcement
+  - trust-receipts
+  - mcp
+license: "LicenseRef-InterAI-Public-Interface"
