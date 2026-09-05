@@ -6,6 +6,8 @@
 
 Built by **Alejandro Bolognese / InterAI Labs** — ongoing work on agent infrastructure, execution control, trust boundaries, and production systems.
 
+**Live proof:** [Action Boundary Lab](https://ai-risk-oracle.fly.dev/lab) · [Controlled safe demo](https://ai-risk-oracle.fly.dev/demo) · [Architecture & authority boundary](docs/architecture.md) · [OpenAPI](https://ai-risk-oracle.fly.dev/.well-known/openapi.json)
+
 InterAI sits between an autonomous agent and a consequential action. The agent proposes what it wants to do; InterAI evaluates the action in context, applies authoritative host/account constraints plus any request-scoped caller constraints, and returns a machine-readable authority decision:
 
 ```text
@@ -184,6 +186,7 @@ InterAI is available as a hosted service and can be discovered or called through
 
 Useful starting points:
 
+- [Architecture & authority boundary](docs/architecture.md)
 - [Framework integration examples](examples/framework-integrations)
 - [OpenAI Agents SDK example](examples/framework-integrations/openai-agents)
 - [Mastra example](examples/framework-integrations/mastra)
