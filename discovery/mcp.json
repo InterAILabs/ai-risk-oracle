@@ -1,14 +1,26 @@
 {
   "name": "interai-risk-oracle",
   "version": "0.1.3-beta",
-  "description": "Production-backed MCP JSON-RPC interface for pre-execution policy checks.",
+  "description": "Hosted MCP interface for pre-execution decisions on consequential agent actions. Use InterAI before a tool call, payment, external message, production mutation, approval, signature, or other action that should not execute solely because an agent is technically able to perform it.",
   "endpoint": "https://ai-risk-oracle.fly.dev/mcp",
   "transport": "streamable-http-json-rpc",
   "status": "hosted",
+  "primary_tool": "oracle.verify_autonomous_action",
+  "tool_selection": {
+    "oracle.verify_autonomous_action": "Primary tool for new integrations. Call immediately before a consequential autonomous action to obtain allow, review_required, or block plus policy evidence and a trust receipt.",
+    "oracle.verify_batch": "Use when the execution layer needs to evaluate multiple proposed items in one authenticated billed request; do not use it as a replacement for per-action gating when actions execute independently.",
+    "oracle.verify_response": "Legacy compatibility alias for prompt/response verification. Prefer oracle.verify_autonomous_action for new execution-control integrations.",
+    "oracle.get_pricing": "Use before onboarding, funding, or cost estimation. It does not evaluate an action.",
+    "oracle.discovery_bundle": "Best single discovery call when an agent needs interfaces, schemas, runtime mode, and sample payloads together.",
+    "oracle.service_descriptor": "Use for service capabilities, billing, trust, endpoints, and protocol metadata. Prefer discovery_bundle when samples and schemas are also needed.",
+    "oracle.agent_card": "Use specifically for A2A discovery. Do not use it as the general InterAI service descriptor.",
+    "oracle.get_trust_receipt": "Use after verification when a receipt ID must be resolved to its canonical public representation.",
+    "oracle.verify_trust_receipt_signature": "Use when checking service-verifiable HMAC receipt integrity. This is not an independently verifiable public-key signature."
+  },
   "tools": [
     {
       "name": "verify_autonomous_action",
-      "description": "Verify a proposed autonomous action before execution.",
+      "description": "Primary pre-execution gate for a proposed autonomous action.",
       "input_schema": "../schemas/verify-request.schema.json"
     }
   ]

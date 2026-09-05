@@ -4,7 +4,7 @@
   "base_url": "https://ai-risk-oracle.fly.dev",
   "service_type": "autonomous_execution_gateway",
   "category": "autonomous_execution_gateway",
-  "description": "Centralized policy gate and signed audit receipts for consequential autonomous-agent actions.",
+  "description": "Independent pre-execution decision layer for consequential autonomous-agent actions, returning allow, review_required, or block with durable trust receipts.",
   "primary_path": [
     "discover",
     "pricing",
@@ -30,16 +30,18 @@
   "pricing": {
     "model": "hosted_api_self_serve_metadata",
     "pricing_url": "https://ai-risk-oracle.fly.dev/pricing",
+    "lab_url": "https://ai-risk-oracle.fly.dev/lab",
     "demo_url": "https://ai-risk-oracle.fly.dev/demo",
     "onboard_url": "https://ai-risk-oracle.fly.dev/onboard",
     "verify_url": "https://ai-risk-oracle.fly.dev/verify",
     "x402_supported": true,
     "prepaid_api_key_supported": true,
     "trial_supported": true,
-    "details": "Agents and integrators can discover pricing, onboard through hosted self-serve metadata or x402, verify actions before execution, and store trust receipts without emailing for default access."
+    "details": "Agents and integrators can discover pricing, inspect the Action Boundary Lab, onboard through hosted self-serve metadata or x402, verify actions before execution, and store trust receipts without emailing for default access."
   },
   "endpoints": {
     "pricing": "https://ai-risk-oracle.fly.dev/pricing",
+    "lab": "https://ai-risk-oracle.fly.dev/lab",
     "demo": "https://ai-risk-oracle.fly.dev/demo",
     "onboard": "https://ai-risk-oracle.fly.dev/onboard",
     "verify": "https://ai-risk-oracle.fly.dev/verify",
@@ -56,6 +58,10 @@
     "purpose": "Machine-readable guidance for agents and builders deciding when and how to use InterAI before execution"
   },
   "docs_url": "https://github.com/InterAILabs/ai-risk-oracle",
+  "author": {
+    "name": "Alejandro Bolognese",
+    "organization": "InterAI Labs"
+  },
   "contact": {
     "email": "interailabs@gmail.com",
     "intended_for": [
