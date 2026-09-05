@@ -55,10 +55,23 @@ remains available for compatibility.
 
 ## Policy Authority Boundary
 
-The `policy` object supplied in the current autonomous request is caller-provided
-request context. It can constrain the decision for that request, but its presence
-does not prove that the caller was unable to remove or weaken the policy.
+Hosted autonomous execution now uses a versioned InterAI-controlled host policy
+floor. The caller-supplied `policy` object is composed on top of that floor and
+may only tighten supported constraints; it cannot remove or weaken the host
+requirements.
 
-A stronger tenant/host enforcement guarantee requires policy to be anchored
-outside the controlled action request and managed by an authority the gated actor
-cannot modify.
+The current hosted profile is `interai-host-autonomous-baseline` version `1`.
+Trust receipt v2 binds policy authority metadata, including the authoritative
+profile digest plus digests for the caller policy and the resulting effective
+policy. This lets the receipt show which host policy boundary was in force for the
+decision.
+
+The current host baseline is deliberately small and requires:
+
+- user confirmation for irreversible actions
+- a trust receipt for the decision
+
+This is a host-level baseline, not yet a customer-administered tenant policy
+system. InterAI does not currently claim independently configurable per-tenant or
+per-account authoritative policy profiles, policy mutation authorization, or
+customer-managed policy version lifecycle.
