@@ -4,7 +4,9 @@
 
 > Before an agent executes, InterAI verifies.
 
-InterAI sits between an autonomous agent and a consequential action. The agent proposes what it wants to do; InterAI evaluates the action in context, applies request-scoped policy constraints, and returns a machine-readable authority decision:
+Built by **Alejandro Bolognese / InterAI Labs** — ongoing work on agent infrastructure, execution control, trust boundaries, and production systems.
+
+InterAI sits between an autonomous agent and a consequential action. The agent proposes what it wants to do; InterAI evaluates the action in context, applies authoritative host/account constraints plus any request-scoped caller constraints, and returns a machine-readable authority decision:
 
 ```text
 proposed action
@@ -48,7 +50,7 @@ Use InterAI when an agent is about to do something with real consequences: execu
 For autonomous execution requests, InterAI returns:
 
 - `recommended_action`: `allow`, `review_required`, or `block`
-- `policy_result`: the authority result under the supplied policy constraints
+- `policy_result`: the authority result under the effective policy
 - `score`: execution-risk score from `0` to `1`
 - `risk_level`: `low`, `medium`, or `high`
 - `signals`: machine-readable action and risk signals
@@ -59,9 +61,20 @@ For autonomous execution requests, InterAI returns:
 
 ### Policy authority boundary
 
-The `policy` object in the current request contract is supplied by the caller. It can constrain that request, but by itself it does **not** prove that a compromised caller was unable to remove or weaken those constraints.
+Hosted authenticated autonomous execution now composes policy in strict authority order:
 
-A true tenant/host enforcement boundary requires policy to be anchored outside the action request and controlled by an authority the gated actor cannot modify. InterAI should not be described as providing that stronger guarantee from caller-supplied policy alone.
+```text
+HOST -> ACCOUNT -> CALLER -> EFFECTIVE
+```
+
+- **Host policy** is an InterAI-controlled irreducible floor.
+- **Account policy** is a versioned profile stored outside the action request and attached only after the bearer credential resolves to its account.
+- **Caller policy** can add request-scoped restrictions but cannot weaken host or account requirements.
+- **Effective policy** is the stricter composition used for the decision.
+
+Account policy administration is currently an **InterAI-administered control plane**. This is not yet customer self-service policy management, delegated tenant administration, or an enterprise policy-management product.
+
+Accountless/x402 execution has no account profile to resolve and therefore remains `HOST -> CALLER -> EFFECTIVE`.
 
 ## Example
 
@@ -113,6 +126,8 @@ REVIEW_REQUIRED   -> route / pause / escalate
 BLOCK             -> abort
 ```
 
+InterAI does not execute the action. The surrounding execution layer is responsible for routing on the decision so the gated actor cannot simply bypass the boundary.
+
 ## Try The Hosted Beta
 
 Live demo:
@@ -129,31 +144,18 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
   -H "Content-Type: application/json" \
   -H "X-Idempotency-Key: vendor-payment-001" \
   -d '{
-    "use_case": "agent-before-payment",
-    "action": {
-      "type": "payment",
-      "name": "release_vendor_payment",
-      "amount_usd": 125,
-      "currency": "USD",
-      "irreversible": false,
-      "external_side_effect": true
-    },
-    "context": {
-      "environment": "production",
-      "counterparty_id": "vendor_agent_456",
-      "user_confirmation": false
-    },
-    "policy": {
-      "max_risk_level": "medium",
-      "require_trust_receipt": true,
-      "amount_usd_limit": 500
-    }
+    "use_case":"agent-before-payment",
+    "action":{"type":"payment","name":"release_vendor_payment","amount_usd":125,"currency":"USD","irreversible":false,"external_side_effect":true},
+    "context":{"environment":"production","counterparty_id":"vendor_agent_456","user_confirmation":false},
+    "policy":{"max_risk_level":"medium","require_trust_receipt":true,"amount_usd_limit":500}
   }'
 ```
 
 ## Trust Receipts
 
 Every consequential decision can produce a durable trust receipt. Receipts are designed to make pre-execution decisions inspectable and transportable across retries, handoffs, governance systems, and later audits.
+
+Authenticated autonomous receipts bind policy provenance for the host, resolved account profile when present, caller policy, and the resulting effective policy. Account profile version/digest is therefore part of the decision evidence rather than an untracked side configuration.
 
 Current receipt signatures use HMAC-SHA256 and are **service-verifiable** by InterAI. That provides authenticated service-side integrity; it is not the same guarantee as an independently verifiable public-key signature that a third party can validate offline without InterAI.
 
@@ -166,8 +168,8 @@ See [docs/trust-receipts.md](docs/trust-receipts.md).
 InterAI is available as a hosted service and can be discovered or called through several public interfaces:
 
 - HTTPS API and OpenAPI 3.1
-- TypeScript SDK
-- Python SDK
+- TypeScript SDK source
+- Python SDK source
 - MCP remote
 - A2A endpoint
 - `.well-known` discovery metadata
@@ -176,12 +178,18 @@ InterAI is available as a hosted service and can be discovered or called through
 
 Useful starting points:
 
+- [Framework integration examples](examples/framework-integrations)
+- [OpenAI Agents SDK example](examples/framework-integrations/openai-agents)
+- [Mastra example](examples/framework-integrations/mastra)
+- [Google ADK example](examples/framework-integrations/google-adk)
 - [Integration patterns](docs/integration-patterns.md)
 - [Tester readiness](docs/tester-readiness.md)
 - [TypeScript middleware example](examples/agent-middleware/typescript)
 - [Python middleware example](examples/agent-middleware/python)
 - [Agent before payment](examples/agent-before-payment)
 - [Agent before tool execution](examples/agent-before-tool-execution)
+
+The framework examples call the hosted API directly; they do not imply that npm or PyPI publication has been independently verified.
 
 ## Current Product Scope
 
@@ -191,14 +199,17 @@ Ready now:
 
 - autonomous action verification
 - explicit `allow / review_required / block` decisions
-- request-scoped policy evaluation for action type, amount, risk, irreversible actions, and review thresholds
-- signed, service-verifiable trust receipts and public receipt lookup
-- idempotent paid verification
+- enforced InterAI host policy floor
+- versioned account-specific authoritative policy for authenticated accounts
+- request-scoped caller policy that can only tighten higher-authority constraints
+- signed, service-verifiable trust receipts with host/account/caller/effective policy provenance
+- public receipt lookup
+- idempotent paid verification, with account policy version/digest included in authenticated decision identity
 - hosted OpenAPI, MCP, A2A, and machine-readable discovery
 
 Not claimed yet:
 
-- tenant/host policy authority that a compromised caller cannot weaken merely through the request body
+- customer self-service or delegated tenant policy administration
 - independently verifiable public-key receipt signatures
 - broad high-volume production readiness
 - enterprise procurement readiness
@@ -213,15 +224,15 @@ InterAI still supports the earlier prompt/response verification contract for com
 
 ## Repository Boundary
 
-This public repository contains integration materials: SDKs, schemas, examples, OpenAPI/discovery metadata, and documentation for the hosted service.
+This public repository contains integration materials: SDK sources, schemas, examples, OpenAPI/discovery metadata, and documentation for the hosted service.
 
 The production verification engine, billing infrastructure, trust logic, scoring internals, and hosted service implementation remain proprietary.
 
 ## Engineering
 
-InterAI Risk Oracle is built by **Alejandro Bolognese / InterAI Labs** as part of ongoing work on agent infrastructure, execution systems, and autonomous workflows.
-
 The project deliberately keeps claims narrow: the goal is not to brand every agent interaction as a security problem, but to create a clear authority boundary before consequential execution.
+
+**Alejandro Bolognese / InterAI Labs** builds InterAI as part of broader work on agent infrastructure, execution systems, trust boundaries, and production automation. Selected technical collaborations and infrastructure conversations are welcome at the contact below.
 
 ## Links
 
