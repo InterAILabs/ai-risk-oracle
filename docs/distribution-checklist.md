@@ -1,19 +1,31 @@
 # Distribution Checklist
 
-This checklist is for controlled tester onboarding, ecosystem submissions, and partner
-handoffs.
+This checklist is for controlled tester onboarding, ecosystem submissions, and partner handoffs.
 
 ## Ready Now
 
-- Hosted landing page presents InterAI as an Autonomous Execution Gateway.
-- Hosted discovery exposes OpenAPI, agent card, AI service, discovery bundle,
-  and autonomous adoption metadata.
-- Public repository documents the autonomous execution contract.
-- Self-serve path is discoverable: pricing -> onboard/API key/trial or x402 ->
-  verify -> receipt.
-- Contact email is for support, security, enterprise access, partnerships, and
-  manual integration help, not required for default access.
+- Hosted landing presents InterAI as an **independent pre-execution decision layer for consequential agent actions**.
+- The Action Boundary Lab makes the execution boundary interactive without performing the proposed side effect.
+- The controlled safe demo provides a limited read-only sandbox path with a real trust receipt.
+- Hosted discovery exposes OpenAPI, agent card, AI service, discovery bundle, and autonomous adoption metadata.
+- Public repository documents the autonomous execution contract and the current `HOST -> ACCOUNT -> CALLER -> EFFECTIVE` authority model.
+- Framework examples cover OpenAI Agents SDK, Mastra, and Google ADK at the pre-tool execution boundary.
+- Self-serve path is discoverable: pricing -> onboard/API key/trial or x402 -> verify -> receipt.
+- Contact email is for support, security, partnerships, and manual integration help, not required for default access.
 - Trust receipts are part of the primary adoption path.
+
+## Human Surface Check
+
+Before sending a new audience to InterAI, confirm that human-facing navigation stays within the intentional InterAI product experience:
+
+- `/` — product landing
+- `/lab` — Action Boundary Lab
+- `/demo` — controlled safe demo
+- `/pricing` — browser presentation, while API clients retain the JSON representation
+- `/pilot` — design-partner application
+- `/trust/receipts/{id}` — human receipt presentation for browsers, JSON for API clients
+
+Protocol surfaces such as health, OpenAPI, MCP, A2A, schemas, and discovery remain deliberately machine-first rather than being disguised as marketing pages.
 
 ## Controlled Beta Scope
 
@@ -22,7 +34,7 @@ InterAI is ready for controlled beta testers and partner review when operators c
 - production `/health` is healthy
 - production `/ready` is ready
 - hosted discovery endpoints resolve
-- `/pricing` advertises onchain production mode
+- `/pricing` JSON advertises the current production payment mode and pricing
 - smoke verification uses a temporary or approved safe credential only
 - temporary smoke credentials are revoked after testing
 
@@ -37,6 +49,7 @@ Before broad self-serve traffic, operators should address or explicitly approve:
 - no custom domain configured in the current Fly audit
 - trial onboarding abuse controls are basic
 - high-volume concurrency is unproven
+- account policy administration is InterAI-administered rather than customer self-service
 
 ## High-Volume Readiness
 
@@ -51,8 +64,7 @@ High-volume traffic should wait for:
 
 ## External Submission Safety
 
-- Use `distribution/registry-profile.json` as the source profile.
-- Use `distribution/registry-submission.md` as the human draft.
-- Do not announce external registry placement until the external operator
-  confirms it.
+- Treat historical submission drafts as records of what was submitted at that time, not as the current positioning source of truth.
+- Use current README, hosted landing, current policy docs, and live discovery metadata when preparing new submissions.
+- Do not announce external registry placement until the external operator confirms it.
 - Keep hosted metadata as the source of truth for pricing and payment details.
