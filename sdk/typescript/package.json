@@ -1,7 +1,7 @@
 {
   "name": "interai-risk-oracle",
   "version": "0.1.3-beta",
-  "description": "TypeScript client and policy-gate helpers for the hosted InterAI Risk Oracle API.",
+  "description": "TypeScript client for InterAI's independent pre-execution decision layer for consequential agent actions.",
   "homepage": "https://ai-risk-oracle.fly.dev/",
   "repository": {
     "type": "git",
@@ -42,6 +42,7 @@
     "interai",
     "risk-oracle",
     "autonomous-agents",
+    "pre-execution-verification",
     "trust-receipts",
     "policy-enforcement"
   ],

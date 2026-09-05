@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "interai-risk-oracle"
 version = "0.1.3b0"
-description = "Python client for the hosted InterAI Risk Oracle policy gate"
+description = "Python client for InterAI's independent pre-execution decision layer for consequential agent actions"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = ["certifi>=2026.6.17"]
 license = "LicenseRef-InterAI-Public-Interface"
 license-files = ["LICENSE"]
-authors = [{ name = "InterAILabs" }]
-keywords = ["ai-agents", "policy-enforcement", "risk", "trust-receipts"]
+authors = [{ name = "Alejandro Bolognese / InterAI Labs" }]
+keywords = ["ai-agents", "pre-execution-verification", "policy-enforcement", "trust-receipts"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python :: 3",
