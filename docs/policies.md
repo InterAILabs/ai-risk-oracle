@@ -2,12 +2,24 @@
 
 Policies define how InterAI Risk Oracle applies execution constraints to an autonomous action.
 
-The hosted service now enforces a versioned **InterAI host policy floor** before a
-caller-supplied policy is applied. The caller policy is treated as an additional
-set of constraints: it may make the effective policy stricter, but it cannot
-weaken or remove host requirements.
+Hosted authenticated execution now composes policy in strict authority order:
 
-The current hosted baseline is intentionally small:
+```text
+HOST -> ACCOUNT -> CALLER -> EFFECTIVE
+```
+
+- The **host policy** is an InterAI-controlled irreducible floor.
+- An optional **account policy** is a versioned profile stored outside the action request and resolved only after a bearer credential is authenticated to its account.
+- The **caller policy** is request-scoped and may only tighten the higher-authority constraints.
+- The **effective policy** is the stricter composition used by policy enforcement.
+
+Accountless/x402 execution has no authenticated account profile and therefore remains:
+
+```text
+HOST -> CALLER -> EFFECTIVE
+```
+
+The current hosted host baseline is intentionally small:
 
 ```json
 {
@@ -16,7 +28,7 @@ The current hosted baseline is intentionally small:
 }
 ```
 
-Caller-provided policy can add controls such as:
+Versioned account profiles can use the same supported controls as caller policy:
 
 ```json
 {
@@ -37,28 +49,33 @@ Common policy controls:
 - amount limit
 - allowed or blocked action types
 - risk score review threshold
-- blocked action categories
 - irreversible action user confirmation
 
-Composition follows the stricter result for each supported control. For example,
-blocked action types are combined, compatible allowlists are intersected,
-monetary/review thresholds use the stricter value, and a required confirmation or
-receipt cannot be disabled by the caller.
+Composition follows the stricter result for each supported control. Blocked action types are combined, compatible allowlists are intersected, monetary/review thresholds use the stricter value, and a required confirmation or receipt cannot be disabled by a lower-authority layer.
 
-Policy enforcement can escalate a decision to `review_required` or `block`; it
-does not downgrade a risky backend decision into a safer action.
+If enforced allowlists have no common action type, the empty intersection remains an enforceable **deny-all** state rather than falling back to an unrestricted list.
 
-`review_required` means the current agent should not execute autonomously under
-the effective policy. The reviewer may be another agent, a policy system, a
-wallet rule, a governance queue, or a human operator.
+Policy enforcement can escalate a decision to `review_required` or `block`; it does not downgrade a risky backend decision into a safer action.
+
+`review_required` means the current agent should not execute autonomously under the effective policy. The reviewer may be another agent, a policy system, a wallet rule, a governance queue, or a human operator.
 
 ## Current authority boundary
 
-The hosted baseline is an InterAI-controlled host policy profile, currently
-`interai-host-autonomous-baseline` version `1`. Autonomous trust receipts bind the
-host policy provenance and digests for the caller policy and effective policy.
+The host profile is currently `interai-host-autonomous-baseline` version `1`.
 
-This does **not** yet mean that customers can create or administer independent
-per-tenant or per-account authoritative policy profiles. Tenant/account policy
-management and authorization are a separate capability from the current hosted
-baseline.
+For authenticated accounts, InterAI can attach a versioned account profile after the API key resolves to its account. The profile is outside the action request, so the caller cannot remove it by omitting or weakening the request `policy` object. A caller may still add stricter request-specific constraints.
+
+Account policy version/digest participates in authenticated decision identity. Reusing an idempotency key after the applicable account policy changes conflicts rather than silently replaying a decision produced under the older policy.
+
+Autonomous trust receipts bind policy authority provenance for host, account when present, caller, and effective policy.
+
+## Administration scope
+
+Account policy administration is currently an **InterAI-administered control plane**. This does not yet claim:
+
+- customer self-service policy editing
+- delegated tenant administrators
+- customer-controlled policy lifecycle or approval workflows
+- enterprise policy-management UX
+
+The enforcement boundary and the administration product are separate claims; the former is live, while the latter remains intentionally limited.
