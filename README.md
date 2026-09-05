@@ -130,7 +130,13 @@ InterAI does not execute the action. The surrounding execution layer is responsi
 
 ## Try The Hosted Beta
 
-Live demo:
+Action Boundary Lab — change the proposed action and inspect the real pre-execution decision boundary:
+
+```text
+https://ai-risk-oracle.fly.dev/lab
+```
+
+Controlled safe demo — one limited read-only sandbox verification with a real trust receipt:
 
 ```text
 https://ai-risk-oracle.fly.dev/demo
@@ -237,7 +243,8 @@ The project deliberately keeps claims narrow: the goal is not to brand every age
 ## Links
 
 - Hosted beta: https://ai-risk-oracle.fly.dev
-- Demo: https://ai-risk-oracle.fly.dev/demo
+- Action Boundary Lab: https://ai-risk-oracle.fly.dev/lab
+- Controlled safe demo: https://ai-risk-oracle.fly.dev/demo
 - Pricing: https://ai-risk-oracle.fly.dev/pricing
 - Onboard: https://ai-risk-oracle.fly.dev/onboard
 - OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
