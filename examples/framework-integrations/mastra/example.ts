@@ -78,7 +78,7 @@ export const paymentAgent = new Agent({
   name: "InterAI payment boundary demo",
   instructions:
     "Use releaseVendorPayment when needed. The execution harness checks every proposed tool call with InterAI before the tool can run.",
-  model: "openai/gpt-5-mini",
+  model: "openai/gpt-5.6-sol",
   tools: { releasePayment },
   hooks: {
     beforeToolCall: async ({ toolName, input }) => {
