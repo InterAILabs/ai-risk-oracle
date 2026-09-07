@@ -54,43 +54,40 @@ Example response:
 
 ## Operator Check
 
-Before submitting the API contract to a partner:
+Before submitting the API contract to a partner or directory:
 
 1. Fetch both OpenAPI URLs.
 2. Confirm `openapi` is `3.1.0`.
-3. Confirm the service title and description say Autonomous Execution Gateway.
+3. Confirm the service description uses **Independent pre-execution decision layer for consequential agent actions** and does not claim that InterAI executes the external action.
 4. Confirm `signals` is represented as an object in examples and schemas.
 5. Confirm the score description says higher means more risk.
 6. Confirm legacy compatibility is not the primary narrative.
+7. Confirm the documented request shape matches current runtime behavior, including `external_evidence` when the Stage 2 contract is advertised.
 
 ## APIs.guru Status
 
-APIs.guru submission:
+Historical submission issue:
 
 ```text
 https://github.com/APIs-guru/openapi-directory/issues/2665
 ```
 
-Status:
+Do not claim approval or listing until APIs.guru explicitly confirms acceptance. Verify the
+external issue state again before any current distribution claim.
 
-```text
-submitted_pending_review
-```
+## 2026-09-07 Audit Gate
 
-This is not approved and not listed until APIs.guru confirms acceptance.
+The hosted runtime still carried the older `Autonomous Execution Gateway` wording in the
+OpenAPI `info.description` during this audit, while runtime support for Stage 2
+`external_evidence` was not yet documented in the OpenAPI request schema.
 
-## Final Validation Result
+Treat that as a **distribution blocker**, not a runtime blocker: do not submit the OpenAPI
+contract to new directories until the hosted description and request documentation are
+aligned and revalidated. This note should be removed only after a production smoke confirms
+the corrected hosted contract.
 
-Latest hosted validation:
+## Validation
 
-```text
-swagger-cli: valid
-Redocly: 0 errors, 7 warnings
-```
-
-Accepted warnings:
-
-- `info.license` is not declared because the hosted core is proprietary and the
-  package is not open source.
-- Some reusable components are retained for public contract clarity even when
-  Redocly marks them unused.
+Run current OpenAPI validation immediately before distribution. Historical validator
+results are useful regression evidence but are not a substitute for validating the exact
+hosted contract being submitted.
