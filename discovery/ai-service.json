@@ -2,9 +2,9 @@
   "service_name": "InterAI Risk Oracle",
   "version": "0.1.3-beta",
   "base_url": "https://ai-risk-oracle.fly.dev",
-  "service_type": "autonomous_execution_gateway",
-  "category": "autonomous_execution_gateway",
-  "description": "Independent pre-execution decision layer for consequential autonomous-agent actions, returning allow, review_required, or block with durable trust receipts.",
+  "service_type": "pre_execution_decision_layer",
+  "category": "pre_execution_decision_layer",
+  "description": "Independent pre-execution decision layer for consequential agent actions, returning allow, review_required, or block with durable trust receipts. InterAI does not execute the external action.",
   "primary_path": [
     "discover",
     "pricing",
@@ -56,6 +56,13 @@
     "repo_path": "discovery/autonomous-adoption.json",
     "url": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json",
     "purpose": "Machine-readable guidance for agents and builders deciding when and how to use InterAI before execution"
+  },
+  "external_evidence_stage2": {
+    "protocol": "external-evidence/v0",
+    "revision": "rev6",
+    "scope": "parse -> verify -> bind -> record",
+    "authority": "none",
+    "affects_decision": false
   },
   "docs_url": "https://github.com/InterAILabs/ai-risk-oracle",
   "author": {
