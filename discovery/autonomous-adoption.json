@@ -1,8 +1,8 @@
 {
   "name": "InterAI Risk Oracle",
-  "service_type": "autonomous_execution_gateway",
+  "service_type": "pre_execution_decision_layer",
   "thesis": "Before an agent executes, InterAI verifies.",
-  "definition": "InterAI is agent-discoverable execution infrastructure.",
+  "definition": "InterAI is an independent pre-execution decision layer for consequential agent actions; it does not execute the external action.",
   "primary_consumer": [
     "autonomous_agent",
     "agent_orchestrator",
@@ -89,7 +89,14 @@
   "evidence": {
     "trust_receipt_id": true,
     "signed_receipt": true,
-    "receipt_lookup_endpoint": "https://ai-risk-oracle.fly.dev/trust/receipts/{receiptId}"
+    "receipt_lookup_endpoint": "https://ai-risk-oracle.fly.dev/trust/receipts/{receiptId}",
+    "external_evidence_stage2": {
+      "protocol": "external-evidence/v0",
+      "revision": "rev6",
+      "scope": "parse -> verify -> bind -> record",
+      "authority": "none",
+      "affects_decision": false
+    }
   },
   "adoption_signals": {
     "use_if_action_has_external_side_effects": true,
