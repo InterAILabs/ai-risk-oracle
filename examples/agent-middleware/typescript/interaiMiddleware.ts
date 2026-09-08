@@ -43,6 +43,8 @@ export type InterAIClientOptions = {
   baseUrl?: string
   agentId?: string
   environment?: "sandbox" | "staging" | "production"
+  operationId?: string
+  timeoutMs?: number
 }
 
 export type ExecutionDecision =
@@ -84,7 +86,9 @@ function clientOptions(options: InterAIClientOptions = {}) {
       process.env.INTERAI_BASE_URL ??
       "https://ai-risk-oracle.fly.dev",
     agentId: options.agentId ?? "example_agent_middleware",
-    environment: options.environment ?? "sandbox"
+    environment: options.environment ?? "sandbox",
+    operationId: options.operationId,
+    timeoutMs: options.timeoutMs ?? 10_000
   }
 }
 
@@ -111,6 +115,9 @@ export async function verifyBeforeExecution(
   if (!config.apiKey) {
     throw new Error("Missing INTERAI_API_KEY")
   }
+  if (!config.operationId) {
+    throw new Error("Missing operationId: use one stable identifier for the same logical action across retries")
+  }
 
   const request: VerifyRequest = {
     use_case: "agent-before-tool-execution",
@@ -129,6 +136,9 @@ export async function verifyBeforeExecution(
     }
   }
 
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), config.timeoutMs)
+
   let response: Response
   try {
     response = await fetch(`${config.baseUrl.replace(/\/+$/, "")}/verify`, {
@@ -136,16 +146,21 @@ export async function verifyBeforeExecution(
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${config.apiKey}`,
-        "x-idempotency-key": `agent-middleware-${Date.now()}`
+        "x-idempotency-key": `agent-middleware-${config.operationId}`
       },
-      body: JSON.stringify(request)
+      body: JSON.stringify(request),
+      signal: controller.signal
     })
   } catch (error) {
-    throw new Error(
-      `Network failure calling InterAI: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    )
+    const message =
+      error instanceof Error && error.name === "AbortError"
+        ? `InterAI verification timed out after ${config.timeoutMs}ms`
+        : `Network failure calling InterAI: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+    throw new Error(message)
+  } finally {
+    clearTimeout(timeout)
   }
 
   const text = await response.text()
@@ -190,7 +205,7 @@ export async function executeWithInterAIGate<T>(
     trust_receipt_id: base.trust_receipt_id
   })
 
-  if (recommendedAction === "allow") {
+  if (recommendedAction === "allow" && verification.policy_result === "allow") {
     const result = await executor(action)
     return {
       status: "executed",
@@ -200,7 +215,10 @@ export async function executeWithInterAIGate<T>(
     }
   }
 
-  if (recommendedAction === "review_required") {
+  if (
+    recommendedAction === "review_required" ||
+    verification.policy_result === "review_required"
+  ) {
     return {
       status: "review_required",
       recommended_action: "review_required",

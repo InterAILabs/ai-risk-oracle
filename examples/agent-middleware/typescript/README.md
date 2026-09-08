@@ -39,8 +39,13 @@ npm run start
 
 `interaiMiddleware.ts` calls `POST /verify`, then maps the decision:
 
-- `allow`: execute the sandbox executor
+- `allow` + `policy_result=allow`: execute the sandbox executor
 - `review_required`: return a review route
 - `block`: abort before execution
+- network failure, malformed response, or timeout: throw before the executor runs
+
+Pass one stable `operationId` for the same logical action across retries. The middleware derives the `X-Idempotency-Key` from that identifier instead of the current time, so a retry preserves operation identity rather than creating a second billable decision.
+
+The example also sets an explicit verification timeout (`timeoutMs`, default `10000`). A verification timeout fails closed: the action is not executed.
 
 Store `trust_receipt_id` with your job, payment, tool call, or workflow record.
