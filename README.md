@@ -4,7 +4,7 @@
 
 > Before an agent executes, InterAI verifies.
 
-Built by **Alejandro Bolognese / InterAI Labs** — ongoing work on agent infrastructure, execution control, trust boundaries, and production systems.
+I’m **Alejandro Bolognese**, building InterAI through **InterAI Labs** as ongoing work on agent infrastructure, execution control, trust boundaries, and production systems.
 
 **Live proof:** [Action Boundary Lab](https://ai-risk-oracle.fly.dev/lab) · [Controlled safe demo](https://ai-risk-oracle.fly.dev/demo) · [Architecture & authority boundary](docs/architecture.md) · [OpenAPI](https://ai-risk-oracle.fly.dev/.well-known/openapi.json)
 
@@ -63,7 +63,7 @@ For autonomous execution requests, InterAI returns:
 
 ### Policy authority boundary
 
-Hosted authenticated autonomous execution now composes policy in strict authority order:
+Hosted authenticated autonomous execution composes policy in strict authority order:
 
 ```text
 HOST -> ACCOUNT -> CALLER -> EFFECTIVE
@@ -77,6 +77,42 @@ HOST -> ACCOUNT -> CALLER -> EFFECTIVE
 Account policy administration is currently an **InterAI-administered control plane**. This is not yet customer self-service policy management, delegated tenant administration, or an enterprise policy-management product.
 
 Accountless/x402 execution has no account profile to resolve and therefore remains `HOST -> CALLER -> EFFECTIVE`.
+
+## External Evidence
+
+InterAI can accept verifiable assertions produced by external systems without transferring execution authority to those systems.
+
+**External evidence. Internal authority.**
+
+> The provider asserts. InterAI decides authority.
+
+The boundary is deliberate:
+
+```text
+external provider
+      |
+      | signed / verifiable assertion
+      v
+   InterAI
+parse -> verify -> bind -> record
+      |
+      v
+InterAI policy boundary
+      |
+      +--> ALLOW
+      +--> REVIEW_REQUIRED
+      +--> BLOCK
+```
+
+External evidence can contribute authenticated context about a domain, asset, transaction, counterparty, or other execution-relevant state. InterAI verifies whether that evidence is structurally valid, authentic under the supported scheme, applicable to the proposed action, and correctly bound to the relevant context before recording it.
+
+The provider’s verdict remains an **assertion**, not an InterAI execution instruction. An upstream `PASS`, `CAUTION`, or `BLOCK` does not directly become `ALLOW`, `REVIEW_REQUIRED`, or `BLOCK` inside InterAI.
+
+This separation matters because evidence and authority are different responsibilities. A specialized system may know something valuable about the world without becoming the system that decides whether an autonomous action is authorized to execute.
+
+The current external-evidence boundary is intentionally narrow and non-authoritative. Live reference resolution or any future authority-bearing mode would be a separate trust-boundary decision, not an implicit extension of the current contract.
+
+See [docs/external-evidence.md](docs/external-evidence.md) and [docs/architecture.md](docs/architecture.md).
 
 ## Example
 
@@ -194,6 +230,7 @@ pip install interai-risk-oracle==0.1.3b0
 Useful starting points:
 
 - [Architecture & authority boundary](docs/architecture.md)
+- [External evidence boundary](docs/external-evidence.md)
 - [Framework integration examples](examples/framework-integrations)
 - [OpenAI Agents SDK example](examples/framework-integrations/openai-agents)
 - [Mastra example](examples/framework-integrations/mastra)
@@ -218,6 +255,7 @@ Ready now:
 - enforced InterAI host policy floor
 - versioned account-specific authoritative policy for authenticated accounts
 - request-scoped caller policy that can only tighten higher-authority constraints
+- non-authoritative external evidence ingestion with verification, binding, and recording
 - signed, service-verifiable trust receipts with host/account/caller/effective policy provenance
 - public receipt lookup
 - idempotent paid verification, with account policy version/digest included in authenticated decision identity
@@ -227,6 +265,8 @@ Ready now:
 Not claimed yet:
 
 - customer self-service or delegated tenant policy administration
+- authority delegation to external evidence providers
+- unrestricted live reference resolution for external evidence
 - independently verifiable public-key receipt signatures
 - broad high-volume production readiness
 - enterprise procurement readiness
@@ -247,9 +287,9 @@ The production verification engine, billing infrastructure, trust logic, scoring
 
 ## Engineering
 
-The project deliberately keeps claims narrow: the goal is not to brand every agent interaction as a security problem, but to create a clear authority boundary before consequential execution.
+I keep InterAI’s claims deliberately narrow. I’m not trying to brand every agent interaction as a security problem; I’m building a clear authority boundary before consequential execution.
 
-**Alejandro Bolognese / InterAI Labs** builds InterAI as part of broader work on agent infrastructure, execution systems, trust boundaries, and production automation. Selected technical collaborations and infrastructure conversations are welcome at the contact below.
+I’m building InterAI as part of broader work on agent infrastructure, execution systems, trust boundaries, and production automation. I’m open to selected technical collaborations and infrastructure conversations where there is a concrete interoperability or execution-control problem to solve.
 
 ## Links
 
@@ -262,4 +302,4 @@ The project deliberately keeps claims narrow: the goal is not to brand every age
 - MCP: https://ai-risk-oracle.fly.dev/mcp
 - npm: https://www.npmjs.com/package/interai-risk-oracle
 - PyPI: https://pypi.org/project/interai-risk-oracle/0.1.3b0/
-- Support / security / partnerships: interailabs@gmail.com
+- Support / security / collaborations: interailabs@gmail.com
