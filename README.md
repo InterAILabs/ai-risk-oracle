@@ -95,16 +95,9 @@ external provider
       v
    InterAI
 parse -> verify -> bind -> record
-      |
-      v
-InterAI policy boundary
-      |
-      +--> ALLOW
-      +--> REVIEW_REQUIRED
-      +--> BLOCK
 ```
 
-External evidence can contribute authenticated context about a domain, asset, transaction, counterparty, or other execution-relevant state. InterAI verifies whether that evidence is structurally valid, authentic under the supported scheme, applicable to the proposed action, and correctly bound to the relevant context before recording it.
+Current Stage 2 evidence is verified, bound, and recorded as non-authoritative external evidence. It does not change the InterAI execution decision or risk score.
 
 The provider’s verdict remains an **assertion**, not an InterAI execution instruction. An upstream `PASS`, `CAUTION`, or `BLOCK` does not directly become `ALLOW`, `REVIEW_REQUIRED`, or `BLOCK` inside InterAI.
 
@@ -113,6 +106,14 @@ This separation matters because evidence and authority are different responsibil
 The current external-evidence boundary is intentionally narrow and non-authoritative. Live reference resolution or any future authority-bearing mode would be a separate trust-boundary decision, not an implicit extension of the current contract.
 
 See [docs/external-evidence.md](docs/external-evidence.md) and [docs/architecture.md](docs/architecture.md).
+
+### Insight ↔ InterAI
+
+**Verified interoperability**
+
+Insight and InterAI independently implemented and cross-verified interoperability against the frozen `external-evidence/v0` rev6 contract. The result demonstrates that a domain-specific provider can produce signed evidence that InterAI independently verifies, binds, and records as non-authoritative external evidence, while preserving the separation between provider assertion and InterAI execution authority.
+
+This is an independently implemented technical interoperability result. It does not imply a production partnership or live production dependency between Insight and InterAI.
 
 ## Example
 
