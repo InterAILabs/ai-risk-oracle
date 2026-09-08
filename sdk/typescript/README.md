@@ -1,12 +1,14 @@
 # TypeScript SDK
 
-Typed hosted API client for InterAI Risk Oracle. The package source is
-publish-ready; confirm the package has been released before using the registry
-command below.
+Typed hosted API client for InterAI Risk Oracle.
+
+Published package:
 
 ```bash
 npm install interai-risk-oracle
 ```
+
+Current published beta: `interai-risk-oracle@0.1.3-beta`.
 
 ```ts
 import { InterAIRiskOracleClient } from "interai-risk-oracle"

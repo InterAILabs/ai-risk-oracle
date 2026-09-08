@@ -66,7 +66,8 @@ Stage 2 does not change signals, score, `semantic_judge`, policy, or the final d
 - npm: `interai-risk-oracle@0.1.3-beta`
 - PyPI: `interai-risk-oracle==0.1.3b0`
 
-The PyPI 0.1.3b0 release is published through GitHub Actions Trusted Publishing with digital attestations.
+The TypeScript package is published on npm. The Python package is published on PyPI through
+GitHub Actions Trusted Publishing with digital attestations.
 
 ## Public URLs
 
@@ -84,9 +85,11 @@ The PyPI 0.1.3b0 release is published through GitHub Actions Trusted Publishing 
 
 ## Submission Notes
 
-This file is a draft for registry operators and ecosystem partners. Verify every target
-registry or directory immediately before submission. Do not announce placement, approval,
-or third-party health status until the external operator or registry confirms it.
+The hosted OpenAPI and MCP runtime identity/documentation gates were cleared in production at
+core commit `bdda078784e02e2bc544aaac9b07ac2cc23e8d2b`, with successful CI and Fly production
+smoke.
 
-Do not submit the hosted OpenAPI to new directories until the current OpenAPI copy/schema
-audit gate is cleared and the exact production contract is revalidated.
+This file is current submission copy for registry operators and ecosystem partners. Verify
+every target registry or directory immediately before submission. Do not announce placement,
+approval, third-party health status, ownership, or analytics state until the external operator
+or registry confirms it.

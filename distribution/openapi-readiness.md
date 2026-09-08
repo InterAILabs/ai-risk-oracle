@@ -75,17 +75,21 @@ https://github.com/APIs-guru/openapi-directory/issues/2665
 Do not claim approval or listing until APIs.guru explicitly confirms acceptance. Verify the
 external issue state again before any current distribution claim.
 
-## 2026-09-07 Audit Gate
+## 2026-09-07 Production Revalidation
 
-The production deployment at commit `96276a24b1fdc9f06c9880f4820b206ce0ef1308`
-passed CI and the Fly production smoke. The active OpenAPI source still carries the older
-`Autonomous Execution Gateway` wording in `info.description`, while Stage 2
-`external_evidence` runtime support is not yet represented in the OpenAPI request schema.
+The remaining OpenAPI distribution gate was cleared in production at core commit
+`bdda078784e02e2bc544aaac9b07ac2cc23e8d2b`.
 
-Treat that as a **distribution blocker**, not a runtime blocker: do not submit the OpenAPI
-contract to new directories until the hosted description and request documentation are
-aligned and revalidated. This note should be removed only after a production smoke confirms
-the corrected hosted contract.
+CI #140 completed successfully, followed by Fly deploy #50. The production deploy job
+successfully completed the exact-commit deploy, Fly machine-status check, and production
+health, contract, billing, and receipt smoke.
+
+The active OpenAPI source now uses the current independent pre-execution decision-layer
+positioning and documents Stage 2 `external_evidence` using the frozen rev6 schema already
+used by runtime validation.
+
+This is no longer an OpenAPI distribution blocker. External directory acceptance or listing
+state remains a separate, time-sensitive check and must not be claimed without confirmation.
 
 ## Validation
 

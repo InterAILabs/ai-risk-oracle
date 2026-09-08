@@ -176,13 +176,20 @@ See [docs/trust-receipts.md](docs/trust-receipts.md).
 InterAI is available as a hosted service and can be discovered or called through several public interfaces:
 
 - HTTPS API and OpenAPI 3.1
-- TypeScript SDK source
-- Python SDK source
+- published TypeScript SDK on npm: `interai-risk-oracle@0.1.3-beta`
+- published Python SDK on PyPI: `interai-risk-oracle==0.1.3b0`
 - MCP remote
 - A2A endpoint
 - `.well-known` discovery metadata
 - x402 / Base USDC payment path
 - prepaid API-key path
+
+Install the published SDKs:
+
+```bash
+npm install interai-risk-oracle
+pip install interai-risk-oracle==0.1.3b0
+```
 
 Useful starting points:
 
@@ -193,12 +200,12 @@ Useful starting points:
 - [Google ADK example](examples/framework-integrations/google-adk)
 - [Integration patterns](docs/integration-patterns.md)
 - [Tester readiness](docs/tester-readiness.md)
+- [TypeScript SDK](sdk/typescript/README.md)
+- [Python SDK](python/README.md)
 - [TypeScript middleware example](examples/agent-middleware/typescript)
 - [Python middleware example](examples/agent-middleware/python)
 - [Agent before payment](examples/agent-before-payment)
 - [Agent before tool execution](examples/agent-before-tool-execution)
-
-The framework examples call the hosted API directly; they do not imply that npm or PyPI publication has been independently verified.
 
 ## Current Product Scope
 
@@ -215,6 +222,7 @@ Ready now:
 - public receipt lookup
 - idempotent paid verification, with account policy version/digest included in authenticated decision identity
 - hosted OpenAPI, MCP, A2A, and machine-readable discovery
+- published TypeScript and Python SDK packages
 
 Not claimed yet:
 
@@ -252,4 +260,6 @@ The project deliberately keeps claims narrow: the goal is not to brand every age
 - Onboard: https://ai-risk-oracle.fly.dev/onboard
 - OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
 - MCP: https://ai-risk-oracle.fly.dev/mcp
+- npm: https://www.npmjs.com/package/interai-risk-oracle
+- PyPI: https://pypi.org/project/interai-risk-oracle/0.1.3b0/
 - Support / security / partnerships: interailabs@gmail.com
