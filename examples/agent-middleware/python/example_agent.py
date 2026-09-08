@@ -19,7 +19,12 @@ def fake_sandbox_executor(action: AgentAction):
 
 
 def main():
-    result = execute_with_interai_gate(SAFE_LOOKUP_ACTION, fake_sandbox_executor)
+    result = execute_with_interai_gate(
+        SAFE_LOOKUP_ACTION,
+        fake_sandbox_executor,
+        operation_id="demo-order-status-001",
+        timeout_seconds=15,
+    )
 
     if result["status"] == "executed":
         print("Tool executed in sandbox", result["result"])
