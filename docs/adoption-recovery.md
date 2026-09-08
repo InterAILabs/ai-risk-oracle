@@ -1,9 +1,6 @@
 # Adoption and activation
 
-InterAI's first-run product wedge is a centralized policy gate for consequential
-agent tool calls. The guided hosted demo lets a builder obtain an actual policy
-decision and public trust receipt before setting up billing or a production
-integration.
+InterAI's first-run product wedge is an independent pre-execution decision boundary for consequential agent actions. The guided hosted demo lets a builder obtain an actual authority/policy decision and public trust receipt before setting up billing or a production integration.
 
 ## Adoption metric
 

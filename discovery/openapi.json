@@ -3,7 +3,7 @@
   "info": {
     "title": "InterAI Risk Oracle Public API",
     "version": "0.1.3-beta",
-    "description": "Public hosted API contracts for InterAI Risk Oracle, a centralized policy gate for consequential autonomous-agent actions."
+    "description": "Public hosted API contracts for InterAI Risk Oracle, an independent pre-execution decision layer for consequential autonomous-agent actions."
   },
   "servers": [
     {
