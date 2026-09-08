@@ -1,6 +1,5 @@
 import json
 import os
-import time
 import urllib.error
 import urllib.request
 from typing import Any, Callable, Dict, Optional
@@ -34,10 +33,18 @@ def _validate_verify_response(value: Any) -> VerifyResponse:
     return value
 
 
-def verify_before_execution(action: AgentAction) -> VerifyResponse:
+def verify_before_execution(
+    action: AgentAction,
+    operation_id: str,
+    timeout_seconds: float = 15.0,
+) -> VerifyResponse:
     api_key = _api_key()
     if not api_key:
         raise RuntimeError("Missing INTERAI_API_KEY")
+    if not operation_id:
+        raise RuntimeError(
+            "Missing operation_id: use one stable identifier for the same logical action across retries"
+        )
 
     payload = {
         "use_case": "agent-before-tool-execution",
@@ -62,20 +69,24 @@ def verify_before_execution(action: AgentAction) -> VerifyResponse:
         headers={
             "content-type": "application/json",
             "authorization": f"Bearer {api_key}",
-            "x-idempotency-key": f"agent-middleware-python-{int(time.time() * 1000)}",
+            "x-idempotency-key": f"agent-middleware-python-{operation_id}",
         },
         method="POST",
     )
 
     try:
-        with urllib.request.urlopen(request, timeout=15) as response:
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
             text = response.read().decode("utf-8")
             return _validate_verify_response(json.loads(text))
     except urllib.error.HTTPError as error:
         body = error.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"InterAI /verify failed: HTTP {error.code} {body[:300]}") from error
     except urllib.error.URLError as error:
-        raise RuntimeError(f"Network failure calling InterAI: {error}") from error
+        raise RuntimeError(f"Network failure or timeout calling InterAI: {error}") from error
+    except TimeoutError as error:
+        raise RuntimeError(
+            f"InterAI verification timed out after {timeout_seconds} seconds"
+        ) from error
     except json.JSONDecodeError as error:
         raise RuntimeError("Malformed InterAI response: non-JSON body") from error
 
@@ -83,13 +94,16 @@ def verify_before_execution(action: AgentAction) -> VerifyResponse:
 def execute_with_interai_gate(
     action: AgentAction,
     executor: Callable[[AgentAction], Any],
+    operation_id: str,
+    timeout_seconds: float = 15.0,
 ) -> ExecutionDecision:
-    verification = verify_before_execution(action)
+    verification = verify_before_execution(action, operation_id, timeout_seconds)
     recommended_action = verification["recommended_action"]
+    policy_result = verification.get("policy_result")
     base = {
         "recommended_action": recommended_action,
         "risk_level": verification.get("risk_level"),
-        "policy_result": verification.get("policy_result"),
+        "policy_result": policy_result,
         "trust_receipt_id": _receipt_id(verification),
         "verification": verification,
     }
@@ -104,14 +118,14 @@ def execute_with_interai_gate(
         },
     )
 
-    if recommended_action == "allow":
+    if recommended_action == "allow" and policy_result == "allow":
         return {
             "status": "executed",
             **base,
             "result": executor(action),
         }
 
-    if recommended_action == "review_required":
+    if recommended_action == "review_required" or policy_result == "review_required":
         return {
             "status": "review_required",
             **base,
