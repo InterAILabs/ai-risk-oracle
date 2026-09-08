@@ -1,9 +1,9 @@
 {
   "name": "InterAI Risk Oracle",
   "tagline": "Before an agent executes, InterAI verifies.",
-  "description": "Autonomous Execution Gateway for pre-execution verification of autonomous agents.",
-  "category": "autonomous_execution_gateway",
-  "service_type": "autonomous_execution_gateway",
+  "description": "Independent pre-execution decision layer for consequential agent actions, with authoritative policy decisions and signed trust receipts.",
+  "category": "pre_execution_decision_infrastructure",
+  "service_type": "pre_execution_decision_layer",
   "submission_status": "candidate_not_submitted",
   "homepage_url": "https://ai-risk-oracle.fly.dev",
   "repository_url": "https://github.com/InterAILabs/ai-risk-oracle",
@@ -28,8 +28,9 @@
   },
   "capabilities": [
     "pre_execution_verification",
-    "autonomous_action_risk_scoring",
-    "policy_decisioning",
+    "authoritative_policy_decisioning",
+    "exact_action_binding",
+    "external_evidence_binding",
     "trust_receipts",
     "self_serve_onboarding",
     "base_usdc_x402"
@@ -51,7 +52,7 @@
       "medium",
       "high"
     ],
-    "score": "Risk score from 0 to 1. Higher means more risk.",
+    "score": "Execution-risk score from 0 to 1. Higher means more risk.",
     "signals": "Object"
   },
   "pricing": {
