@@ -28,19 +28,19 @@ InterAI Risk Oracle
 ## Short Description
 
 ```text
-Autonomous Execution Gateway for pre-execution verification of autonomous agents.
+Independent pre-execution decision API for consequential autonomous-agent actions.
 ```
 
 ## Long Description
 
 ```text
-InterAI Risk Oracle helps autonomous agents, orchestrators, wallet agents, and policy layers verify proposed actions before execution. Agents call InterAI before tool use, payment release, wallet signing, database updates, workflow approval, or other consequential actions. The API returns a risk score, signals object, recommended_action, policy_result, and trust receipt metadata so the caller can allow, route for review, or block under policy.
+InterAI Risk Oracle sits between an autonomous agent and a consequential action. The caller submits the exact proposed action before execution; InterAI evaluates it in context under authoritative policy and returns allow, review_required, or block, together with machine-readable findings and trust-receipt metadata. It complements identity, permissions, spend limits, wallet rules, and governance systems rather than replacing them.
 ```
 
 ## Tags
 
 ```text
-autonomous agents, AI agents, execution gateway, pre-execution verification, policy enforcement, trust receipts, OpenAPI, x402, Base USDC
+autonomous agents, AI agents, pre-execution decision layer, policy enforcement, action authorization, trust receipts, OpenAPI, MCP, A2A, x402, Base USDC
 ```
 
 ## Suggested Category
@@ -65,7 +65,7 @@ Machine Learning
 
 - Homepage: https://ai-risk-oracle.fly.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
-- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
+- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
 - Hosted service URL: https://ai-risk-oracle.fly.dev
 - Pricing URL: https://ai-risk-oracle.fly.dev/pricing
 - Onboard URL: https://ai-risk-oracle.fly.dev/onboard
@@ -98,7 +98,7 @@ https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
 ## Release URL
 
 ```text
-https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
+https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
 ```
 
 ## Beta Scope

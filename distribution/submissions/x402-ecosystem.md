@@ -33,26 +33,26 @@ InterAI Risk Oracle
 ## Short Description
 
 ```text
-x402-compatible Autonomous Execution Gateway for pre-execution verification.
+x402-compatible pre-execution decision layer for consequential agent actions.
 ```
 
 ## Long Description
 
 ```text
-InterAI Risk Oracle lets autonomous agents verify proposed actions before execution. It exposes self-serve pricing and onboarding, supports prepaid API keys and trial metadata, and exposes x402/Base USDC metadata for paid verification flows. Verification responses include recommended_action, policy_result, score, risk_level, signals, and trust receipt metadata so agents can allow, route for review, or block under policy.
+InterAI Risk Oracle lets autonomous agents verify an exact proposed action before execution. InterAI evaluates the action in context under authoritative policy and returns allow, review_required, or block, with machine-readable findings and trust-receipt metadata. The hosted beta supports prepaid API keys plus x402/Base USDC payment paths, so an agent can obtain a decision without turning payment infrastructure into the product's primary value proposition.
 ```
 
 ## Tags
 
 ```text
-x402, Base USDC, autonomous agents, AI agents, agent payments, pre-execution verification, execution gateway, trust receipts, developer API
+x402, Base USDC, autonomous agents, AI agents, agent payments, pre-execution verification, policy enforcement, trust receipts, developer API
 ```
 
 ## Links
 
 - Homepage: https://ai-risk-oracle.fly.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
-- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
+- Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
 - Hosted service URL: https://ai-risk-oracle.fly.dev
 - Pricing URL: https://ai-risk-oracle.fly.dev/pricing
 - Onboard URL: https://ai-risk-oracle.fly.dev/onboard
@@ -88,7 +88,7 @@ https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
 ## Release URL
 
 ```text
-https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
+https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
 ```
 
 ## Beta Scope
