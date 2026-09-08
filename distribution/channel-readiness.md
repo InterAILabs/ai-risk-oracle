@@ -8,10 +8,10 @@ This document states what is ready to use now and what still requires a current 
 |---|---|---|
 | GitHub release/topics/search | Ready | Public repo, releases, topics, README, Lab/demo links, hosted metadata, and GitHub About all use the current positioning. |
 | x402 ecosystem/directories | Prepared | Hosted pricing metadata exposes x402/Base USDC support. Verify each target directory before submission. |
-| APIs.guru / OpenAPI Directory | Blocked on current contract audit | Historical issue #2665 exists, but no approval may be claimed. The hosted OpenAPI identity/request documentation must be aligned and revalidated before a new submission push. |
-| Developer API directories | Prepared after OpenAPI gate | Core copy, docs, pricing, onboard, and SDK links exist; use `registry-submission.md` as current copy. |
+| APIs.guru / OpenAPI Directory | Ready for renewed submission; external acceptance unverified | The hosted OpenAPI identity/request documentation was aligned and revalidated in production at core commit `bdda078784e02e2bc544aaac9b07ac2cc23e8d2b`. Historical issue #2665 exists, but no approval may be claimed. |
+| Developer API directories | Ready for targeted submission | Core copy, docs, pricing, onboard, published SDKs, and hosted OpenAPI are coherent; use `registry-submission.md` as current copy and verify each directory before claims. |
 | AI agent/tool directories | Needs adaptation | InterAI fits agent-safety / execution-control categories, but each directory needs tailored copy and current availability checks. |
-| MCP Registry / MCP directories | Hosted endpoint healthy; listing state must be rechecked before claims | `server.json` targets `io.github.InterAILabs/ai-risk-oracle` and the hosted Streamable HTTP endpoint. External monitors have recently observed 9 healthy tools. |
+| MCP Registry / MCP directories | Runtime ready; listing state must be rechecked before claims | `server.json` targets `io.github.InterAILabs/ai-risk-oracle` and the hosted Streamable HTTP endpoint. Hosted MCP copy is aligned; third-party listing/health state remains time-sensitive. |
 | A2A/agent-card directories | Needs account or adaptation | Hosted legacy and A2A v1 cards exist; verify each directory and submission format before claiming placement. |
 | npm TypeScript SDK | Published | `interai-risk-oracle@0.1.3-beta` is present in npm; `latest` and `beta` currently point to `0.1.3-beta`. |
 | PyPI Python SDK | Published | `interai-risk-oracle 0.1.3b0` was published through GitHub Actions Trusted Publishing with digital attestations on 2026-09-07. |
@@ -35,10 +35,10 @@ Older release notes, first-wave submissions, submission-result logs, and date-sp
 ## Immediate Gates
 
 1. Keep Stage 2 frozen; do not start Stage 3 without a real integration requirement.
-2. Finish alignment of the remaining hosted machine-readable identity surfaces.
-3. Remove the OpenAPI distribution blocker and validate the exact hosted contract.
+2. Treat the hosted OpenAPI and MCP identity gates as cleared by the production revalidation at core commit `bdda078784e02e2bc544aaac9b07ac2cc23e8d2b`.
+3. Verify each external registry/directory immediately before submission or placement claims.
 4. Keep npm/PyPI publication metadata synchronized on the next real release; do not cut a release solely for copy changes.
-5. Use targeted distribution after the public surfaces are coherent.
+5. Use targeted distribution and measure independent adoption before expanding product scope.
 
 ## MCP
 
@@ -50,8 +50,8 @@ https://ai-risk-oracle.fly.dev/mcp
 ```
 
 The endpoint has been observed healthy by external MCP monitoring. Registry/listing state,
-third-party scores, and tool-health timestamps are time-sensitive; verify them immediately
-before outreach or a placement claim.
+third-party scores, ownership/analytics status, and tool-health timestamps are time-sensitive;
+verify them immediately before outreach or a placement claim.
 
 ## A2A
 

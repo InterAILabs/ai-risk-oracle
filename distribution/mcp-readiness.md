@@ -44,10 +44,15 @@ September 2026. Treat third-party listing state and scores as time-sensitive: ve
 again immediately before publication, outreach, or a registry claim rather than copying a
 historical status into current marketing material.
 
-## Remaining Runtime Copy Gate
+## 2026-09-07 Runtime Copy Revalidation
 
-The hosted MCP implementation still contains two embedded legacy descriptions using the
-older `Autonomous Execution Gateway` wording. Those strings do not change MCP behavior or
-tool definitions, but they should be replaced with the current decision-layer positioning
-before the next registry push. Treat this as a copy/distribution gate rather than a runtime
-failure.
+The remaining hosted MCP copy gate was cleared in production at core commit
+`bdda078784e02e2bc544aaac9b07ac2cc23e8d2b`.
+
+The service descriptor and agent-card descriptions now use the current independent
+pre-execution decision-layer positioning. CI #140 and Fly deploy #50 completed successfully,
+including the production health, contract, billing, and receipt smoke.
+
+There is no remaining MCP runtime-copy blocker for distribution. Registry placement,
+third-party health scores, and ownership/analytics status are external and time-sensitive and
+must still be rechecked before claims.
