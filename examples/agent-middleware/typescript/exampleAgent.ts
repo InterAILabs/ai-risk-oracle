@@ -25,7 +25,9 @@ async function main() {
     fakeSandboxExecutor,
     {
       agentId: "example_agent_typescript",
-      environment: "sandbox"
+      environment: "sandbox",
+      operationId: "demo-order-status-001",
+      timeoutMs: 10_000
     }
   )
 
