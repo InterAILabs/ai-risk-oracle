@@ -3,6 +3,12 @@
 Hosted API client for InterAI Risk Oracle. It uses Certifi's portable CA bundle
 by default and also accepts a custom `ssl_context` in the constructor.
 
+Published package:
+
+```bash
+pip install interai-risk-oracle==0.1.3b0
+```
+
 ```python
 import os
 
