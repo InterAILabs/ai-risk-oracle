@@ -49,17 +49,17 @@ Use InterAI when an agent is about to do something with real consequences: execu
 
 ## Decision Contract
 
-For autonomous execution requests, InterAI returns:
+For autonomous execution requests, the primary InterAI authority contract is:
 
 - `recommended_action`: `allow`, `review_required`, or `block`
 - `policy_result`: the authority result under the effective policy
-- `score`: execution-risk score from `0` to `1`
-- `risk_level`: `low`, `medium`, or `high`
-- `signals`: machine-readable action and risk signals
-- `policy_violations`: explicit policy findings
+- `policy_violations`: explicit policy findings when applicable
 - `trust_receipt_id`: durable decision evidence
+- effective host/account/caller policy provenance in authenticated decision receipts
 
 `review_required` means the current agent should not execute autonomously under the current policy. Review can be handled by a supervisor agent, policy system, governance queue, wallet rule, or human operator.
+
+The current hosted beta also returns `score`, `risk_level`, and machine-readable `signals`. Those fields remain part of the current compatibility surface and are useful for diagnostics and existing integrations, but they should not be interpreted as the fundamental authority contract. The execution boundary is the final `allow / review_required / block` decision under effective policy.
 
 ### Policy authority boundary
 
@@ -97,7 +97,7 @@ external provider
 parse -> verify -> bind -> record
 ```
 
-Current Stage 2 evidence is verified, bound, and recorded as non-authoritative external evidence. It does not change the InterAI execution decision or risk score.
+Current Stage 2 evidence is verified, bound, and recorded as non-authoritative external evidence. It does not change the InterAI execution decision or current compatibility risk signals.
 
 The provider’s verdict remains an **assertion**, not an InterAI execution instruction. An upstream `PASS`, `CAUTION`, or `BLOCK` does not directly become `ALLOW`, `REVIEW_REQUIRED`, or `BLOCK` inside InterAI.
 
@@ -136,26 +136,24 @@ This is an independently implemented technical interoperability result. It does 
     "user_confirmation": false
   },
   "policy": {
-    "max_risk_level": "medium",
     "require_trust_receipt": true,
-    "amount_usd_limit": 500,
-    "require_human_review_above": 0.75
+    "amount_usd_limit": 500
   }
 }
 ```
 
-Possible result:
+Possible authority result:
 
 ```json
 {
   "request_contract": "autonomous_execution",
-  "recommended_action": "review_required",
-  "policy_result": "review_required",
-  "risk_level": "medium",
-  "score": 0.42,
+  "recommended_action": "allow",
+  "policy_result": "allow",
   "trust_receipt_id": "tr_01JZPUBLICEXAMPLE"
 }
 ```
+
+The hosted beta currently includes additional compatibility fields such as `score` and `risk_level`; they are omitted above to keep the execution-authority boundary clear.
 
 The calling system then decides how to honor that authority decision:
 
@@ -192,7 +190,7 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
     "use_case":"agent-before-payment",
     "action":{"type":"payment","name":"release_vendor_payment","amount_usd":125,"currency":"USD","irreversible":false,"external_side_effect":true},
     "context":{"environment":"production","counterparty_id":"vendor_agent_456","user_confirmation":false},
-    "policy":{"max_risk_level":"medium","require_trust_receipt":true,"amount_usd_limit":500}
+    "policy":{"require_trust_receipt":true,"amount_usd_limit":500}
   }'
 ```
 
@@ -279,6 +277,8 @@ See [docs/professional-readiness.md](docs/professional-readiness.md) for the cur
 ## Legacy Compatibility
 
 InterAI still supports the earlier prompt/response verification contract for compatibility. The primary product direction is the `autonomous_execution` contract and pre-execution decision boundary.
+
+The hosted beta also retains score/risk compatibility fields used by the current implementation and existing integrations. They are not the long-term conceptual definition of InterAI's authority boundary.
 
 ## Repository Boundary
 
