@@ -1,6 +1,15 @@
 export type AutonomousRiskLevel = "low" | "medium" | "high"
 export type GatewayDecision = "allow" | "review_required" | "block"
 
+/** Public shape of the data domains bound by an execution-intent digest. Hosts populate authoritative_context from their own trusted runtime. */
+export type CanonicalExecutionIntent = {
+  schema: "interai-canonical-execution-intent/v1"
+  proposed_action: Record<string, unknown>
+  evidence_context: Record<string, unknown>
+  authoritative_context: Record<string, unknown>
+  policy_authority: Record<string, unknown>
+}
+
 export type VerifyRequest = {
   use_case: string
   action: {
@@ -69,6 +78,8 @@ export type VerifyResponse = {
   policy_result: GatewayDecision
   policy_violations: PolicyViolation[]
   trust_receipt_id?: string
+  /** Digest of the exact canonical intent evaluated; compare against the host's final intent before dispatch. */
+  execution_intent_digest?: string
   trust_receipt?: Record<string, unknown>
   [key: string]: unknown
 }

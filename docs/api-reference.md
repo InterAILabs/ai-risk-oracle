@@ -74,6 +74,7 @@ Important response fields:
 - `policy_result`: `allow`, `review_required`, or `block`.
 - `policy_violations`: machine-readable policy violations.
 - `trust_receipt_id`: receipt identifier when receipt creation is enabled.
+- `execution_intent_digest`: deterministic digest of the exact canonical intent evaluated. Before a side effect, the host must rebuild the final intent and compare this value; it is not a bearer token.
 
 `review_required` means the current agent should not execute autonomously under
 the current policy. The reviewer may be another agent, a policy system, a wallet

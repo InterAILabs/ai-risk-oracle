@@ -55,9 +55,16 @@ For autonomous execution requests, the primary InterAI authority contract is:
 - `policy_result`: the authority result under the effective policy
 - `policy_violations`: explicit policy findings when applicable
 - `trust_receipt_id`: durable decision evidence
+- `execution_intent_digest`: deterministic identifier for the exact intent evaluated
 - effective host/account/caller policy provenance in authenticated decision receipts
 
 `review_required` means the current agent should not execute autonomously under the current policy. Review can be handled by a supervisor agent, policy system, governance queue, wallet rule, or human operator.
+
+### Exact-action binding
+
+InterAI represents the evaluated action as a `CanonicalExecutionIntent` and returns `execution_intent_digest`. An `allow` authorizes only that exact intent. The runtime/host must rebuild the final invocation immediately before the side effect and compare its canonical digest to the authorized digest. A change to tool, arguments, authoritative actor, run, workspace, environment, resource/destination, or relevant policy invalidates the earlier `allow` and requires a new decision. `review_required` and `block` are non-authorizing.
+
+If review changes the action, it is a new proposed intent. In Pydantic AI: `proposal → review/override → final validation → InterAI → exact-intent check → execute`; apply `ToolApproved.override_args` before final validation and InterAI.
 
 The current hosted beta also returns `score`, `risk_level`, and machine-readable `signals`. Those fields remain part of the current compatibility surface and are useful for diagnostics and existing integrations, but they should not be interpreted as the fundamental authority contract. The execution boundary is the final `allow / review_required / block` decision under effective policy.
 
@@ -149,6 +156,7 @@ Possible authority result:
   "request_contract": "autonomous_execution",
   "recommended_action": "allow",
   "policy_result": "allow",
+  "execution_intent_digest": "sha256-hex-digest",
   "trust_receipt_id": "tr_01JZPUBLICEXAMPLE"
 }
 ```
@@ -158,12 +166,12 @@ The hosted beta currently includes additional compatibility fields such as `scor
 The calling system then decides how to honor that authority decision:
 
 ```text
-ALLOW             -> execute
+ALLOW             -> rebuild final intent, exact-intent check, then execute
 REVIEW_REQUIRED   -> route / pause / escalate
 BLOCK             -> abort
 ```
 
-InterAI does not execute the action. The surrounding execution layer is responsible for routing on the decision so the gated actor cannot simply bypass the boundary.
+InterAI does not execute the action. The surrounding execution layer must route on the decision and enforce the final exact-intent comparison.
 
 ## Try The Hosted Beta
 
@@ -198,7 +206,7 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
 
 Every consequential decision can produce a durable trust receipt. Receipts are designed to make pre-execution decisions inspectable and transportable across retries, handoffs, governance systems, and later audits.
 
-Authenticated autonomous receipts bind policy provenance for the host, resolved account profile when present, caller policy, and the resulting effective policy. Account profile version/digest is therefore part of the decision evidence rather than an untracked side configuration.
+Authenticated autonomous DecisionReceipts bind policy provenance and `execution_intent_digest`. An ExecutionReceipt is separate host/runtime evidence about dispatch or outcome. A DecisionReceipt is evidence of a decision, not a bearer token or proof that a side effect occurred.
 
 Current receipt signatures use HMAC-SHA256 and are **service-verifiable** by InterAI. That provides authenticated service-side integrity; it is not the same guarantee as an independently verifiable public-key signature that a third party can validate offline without InterAI.
 
@@ -256,6 +264,7 @@ Ready now:
 - request-scoped caller policy that can only tighten higher-authority constraints
 - non-authoritative external evidence ingestion with verification, binding, and recording
 - signed, service-verifiable trust receipts with host/account/caller/effective policy provenance
+- canonical execution-intent digest and exact-intent dispatch contract
 - public receipt lookup
 - idempotent paid verification, with account policy version/digest included in authenticated decision identity
 - hosted OpenAPI, MCP, A2A, and machine-readable discovery
@@ -267,6 +276,7 @@ Not claimed yet:
 - authority delegation to external evidence providers
 - unrestricted live reference resolution for external evidence
 - independently verifiable public-key receipt signatures
+- distributed single-use execution or concurrent replay prevention across external runtimes
 - broad high-volume production readiness
 - enterprise procurement readiness
 - universal factual truth guarantees

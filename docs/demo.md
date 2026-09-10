@@ -217,7 +217,7 @@ What the execution layer should do next: abort the action, log the decision, and
 
 ## What Should The Execution Layer Do Next?
 
-- `allow`: execute the action and store the trust receipt.
+- `allow`: rebuild the final intent, compare `execution_intent_digest`, then execute and store the DecisionReceipt.
 - `review_required`: pause execution and route to a supervisor agent, policy system, wallet rule, governance queue, or human operator.
 - `block`: abort the action, log the decision, and store the trust receipt.
 

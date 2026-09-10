@@ -26,23 +26,25 @@ human review process.
 ```text
 agent proposes action
 -> InterAI /verify
--> decision
+-> decision with execution_intent_digest
+-> rebuild final intent and compare digest
 -> execute / route / block
--> store trust receipt
+-> store decision and host execution evidence
 ```
 
 Decision mapping:
 
-- `allow`: execute the action under your normal permissions.
-- `review_required`: route to a supervisor, human, policy engine, or queue.
-- `block`: abort the action and log the decision.
+- `allow`: only execute after the host's final canonical intent matches `execution_intent_digest`.
+- `review_required`: non-authorizing; route to a supervisor, human, policy engine, or queue.
+- `block`: non-authorizing; abort and log the decision.
 
 ## Pseudocode
 
 ```text
-decision = interai.verify(action)
-if decision.allow:
-  execute(action)
+decision = interai.verify(proposed_action)
+final_intent = host.rebuild_final_intent()
+if decision.allow and final_intent.digest == decision.execution_intent_digest:
+  execute(final_intent)
 elif decision.review_required:
   route_to_review(action)
 else:
@@ -123,11 +125,14 @@ Wallet signing:
 Do not send raw private keys, seed phrases, authorization headers, API keys, or
 unnecessary sensitive data in verification payloads.
 
-## Trust Receipts
+## Exact intent, review, and Pydantic AI
+
+`CanonicalExecutionIntent` separates caller-supplied proposal/evidence from host-authoritative runtime context and policy authority. A material mutation, including review edits, is a new intent requiring a new decision. For Pydantic AI: `proposal -> review/ToolApproved.override_args -> final validation -> InterAI -> exact-intent check -> execute`.
+
+## Receipts
 
 Store `trust_receipt_id` with your job, tool call, workflow, payment, or audit
-record. A receipt helps prove that a pre-execution verification occurred and
-what InterAI recommended at that time.
+record. A DecisionReceipt helps prove a pre-execution decision and its intent digest. It is not a bearer token. An ExecutionReceipt is separate host/runtime evidence of dispatch or outcome; InterAI does not claim success without that evidence.
 
 Do not assume a trust receipt proves the underlying action is safe forever,
 guarantees factual truth, or replaces your own access controls. It is decision
@@ -156,7 +161,7 @@ message bodies, credentials, or bearer tokens.
   `examples/agent-middleware/python/`
 
 Both examples use a fake sandbox executor. Replace that executor only after the
-InterAI gate returns `allow`.
+InterAI gate returns `allow` and the final intent matches its digest.
 
 ## Beta Status
 

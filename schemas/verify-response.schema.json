@@ -161,6 +161,10 @@
     "trust_receipt_id": {
       "type": "string"
     },
+    "execution_intent_digest": {
+      "type": "string",
+      "description": "Deterministic digest of the exact canonical execution intent evaluated by InterAI."
+    },
     "trust_receipt": {
       "type": "object",
       "additionalProperties": true

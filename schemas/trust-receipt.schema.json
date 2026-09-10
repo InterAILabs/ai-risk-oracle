@@ -30,6 +30,10 @@
     "recommended_action": {
       "type": "string"
     },
+    "execution_intent_digest": {
+      "type": "string",
+      "description": "Deterministic digest linking this decision evidence to its evaluated canonical execution intent."
+    },
     "policy_summary": {
       "type": "object",
       "additionalProperties": true

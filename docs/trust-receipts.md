@@ -1,7 +1,6 @@
 # Trust Receipts
 
-Trust receipts are durable records that a verification decision happened before
-an autonomous action executed.
+DecisionReceipts are durable records that a verification decision happened before a host may attempt an autonomous action. They do not by themselves prove that an action executed.
 
 ## Public Fields
 
@@ -11,8 +10,13 @@ an autonomous action executed.
 - `use_case`
 - `risk_level`
 - `recommended_action`
+- `execution_intent_digest` when present for the autonomous contract
 - `policy_summary`
 - `signals`
+
+## DecisionReceipt and ExecutionReceipt
+
+A DecisionReceipt records InterAI's decision and bound intent. It is evidence, not a bearer token. A separate ExecutionReceipt is host/runtime-produced evidence of dispatch or outcome and must identify its evidence source. The current public contract does not claim distributed single-use execution or concurrent replay prevention across external runtimes.
 
 ## Uses
 
