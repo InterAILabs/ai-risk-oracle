@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "start": "tsx example.ts"
   },
   "dependencies": {
@@ -12,7 +13,8 @@
     "viem": "^2.50.4"
   },
   "devDependencies": {
+    "@types/node": "^22.13.4",
     "tsx": "^4.23.12",
-    "typescript": "^5.0.0"
+    "typescript": "^5.7.3"
   }
 }
