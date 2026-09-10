@@ -20,8 +20,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: examples/interai-before-x402/package-lock.json
       - run: npm install --package-lock-only
       - run: npm ci
       - run: npm run typecheck
