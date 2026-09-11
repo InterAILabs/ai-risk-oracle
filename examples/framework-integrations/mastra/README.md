@@ -1,38 +1,38 @@
 # Mastra + InterAI
 
-This example uses Mastra's agent-level `beforeToolCall` hook to ask InterAI for an independent decision immediately before a tool executes.
+This narrow reference integration treats InterAI as the independent pre-execution decision layer. Mastra owns orchestration, native approval suspension/resume, and execution.
 
-```text
-Mastra agent proposes tool
-          |
-          v
-    beforeToolCall
-          |
-          v
-       InterAI
-          |
-   ALLOW / REVIEW / BLOCK
-          |
-          v
-proceed or return blocked output
+```
+tool proposal
+  -> validated tool id + exact args
+  -> InterAI decision + execution_intent_digest
+  -> ALLOW ---------------------------> final exact-binding check -> execute
+  -> REVIEW_REQUIRED -> Mastra approval suspension -> approve -> final check -> execute
+                                                \-> decline -------------> no execution
+  -> BLOCK ---------------------------------------------------------------> skipped
 ```
 
-Mastra added agent-level tool hooks in `@mastra/core@1.49.0`. A `beforeToolCall` hook can return `proceed: false` plus a tool-shaped output, which prevents the real tool from running.
+The evaluated action uses stable identity `interai.mastra.releaseVendorPayment` and includes both `vendor_id` and `amount_usd`. InterAI returns `execution_intent_digest`; the local helper separately canonicalizes the final tool identity and arguments, so a call binding cannot be consumed with changed arguments. An allow for `vendor-a`/$250 cannot authorize `vendor-b`/$250.
 
-That is a useful boundary for InterAI because the framework still owns orchestration while InterAI owns the independent pre-execution decision.
+## Mastra seams
 
-The sample payment tool is simulation-only and performs no real side effect.
+- `onInputAvailable` receives parsed `input` and `toolCallId`; it evaluates InterAI and binds the result to that Mastra call.
+- Function-form `requireApproval` runs per parsed call and returns true only for `review_required`, invoking Mastra's native approval flow.
+- `beforeToolCall` skips `block`. Its tool-shaped output is a model-facing denial required by Mastra, not an execution result.
+- `execute` receives `context.agent.toolCallId`; immediately before the side effect it rebuilds the local canonical intent and consumes the call binding once. Mastra calls it for ALLOW, or after native approval resumes; decline does not call it.
 
-## Requirements
+The host drains `generate()` or `stream()` until pending approval, retains `runId` and `toolCallId`, then calls `approveToolCall({ runId, toolCallId })` or `declineToolCall({ runId, toolCallId })`. A DecisionReceipt records InterAI's decision; it is not a bearer token. An ExecutionReceipt is separate host/runtime evidence of dispatch or outcome.
 
-- Node.js 20+
-- `@mastra/core@1.49.0` or later
-- `zod`
-- provider credentials required by the model you select
-- `INTERAI_API_KEY`
+## Scope and limits
 
-The example calls the hosted InterAI API directly so it does not depend on npm publication of the InterAI SDK.
+Requires `@mastra/core` with tool hooks (1.49.0+) and an application-provided model/API key. This repository does not vend Mastra dependencies, so the focused tests cover the local binding helper; run the complete suspend/resume path in a Mastra application.
 
-## Alternative Mastra pattern
+`beforeToolCall` and function-form `requireApproval` receive input but not `toolCallId`; `onInputAvailable` and `execute` do. The bridge fails closed when an args-only lookup is ambiguous rather than sharing authorization between identical calls. It is process-local demonstration state, not a distributed single-use ledger or cross-process concurrent replay prevention; production resume/retry guarantees require durable host state.
 
-Mastra also supports tool approval (`requireApproval`) and explicitly allows a human or external system to approve or reject a tool call. That is useful when your application wants a suspended approval workflow. `beforeToolCall` is used here because it demonstrates the smallest synchronous InterAI boundary.
+This covers only this agent-tool path. Provider-native/client-side execution, delegated agents, workflows, and background jobs need their own final reconstruction and enforcement at their side-effect boundary. HMAC-backed receipts are service-verifiable integrity evidence, not independent third-party attestation.
+
+## Focused check
+
+```bash
+npx tsx --test examples/framework-integrations/mastra/intent-binding.test.ts
+```
