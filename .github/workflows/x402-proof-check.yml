@@ -1,0 +1,25 @@
+name: X402 proof check
+
+on:
+  pull_request:
+    paths:
+      - "examples/interai-before-x402/**"
+      - ".github/workflows/x402-proof-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/interai-before-x402
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --package-lock-only
+      - run: npm ci
+      - run: npm run typecheck

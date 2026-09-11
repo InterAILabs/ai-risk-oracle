@@ -1,0 +1,20 @@
+{
+  "name": "interai-before-x402-proof",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "start": "tsx example.ts"
+  },
+  "dependencies": {
+    "@x402/core": "2.25.0",
+    "@x402/evm": "2.25.0",
+    "@x402/fetch": "2.25.0",
+    "viem": "^2.50.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "tsx": "^4.23.12",
+    "typescript": "^5.7.3"
+  }
+}
