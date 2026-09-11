@@ -34,7 +34,7 @@ python example_agent.py
 
 `interai_middleware.py` calls `POST /verify`, then maps the decision:
 
-- `allow`: execute the sandbox executor
+- `allow`: do not dispatch until the host has verified the receipt and validated the exact canonical final intent plus `ExecutionAuthorization`; then execute the sandbox executor
 - `review_required`: route to supervisor, human, or policy engine
 - `block`: abort and log
 

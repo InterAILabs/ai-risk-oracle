@@ -96,6 +96,7 @@ def execute_with_interai_gate(
     executor: Callable[[AgentAction], Any],
     operation_id: str,
     timeout_seconds: float = 15.0,
+    validate_before_dispatch: Optional[Callable[[AgentAction, VerifyResponse], bool]] = None,
 ) -> ExecutionDecision:
     verification = verify_before_execution(action, operation_id, timeout_seconds)
     recommended_action = verification["recommended_action"]
@@ -119,6 +120,12 @@ def execute_with_interai_gate(
     )
 
     if recommended_action == "allow" and policy_result == "allow":
+        if validate_before_dispatch is None:
+            raise RuntimeError(
+                "Refusing dispatch: provide host validate_before_dispatch for exact intent and authorization validation"
+            )
+        if not validate_before_dispatch(action, verification):
+            raise RuntimeError("Refusing dispatch: final intent or execution authorization validation failed")
         return {
             "status": "executed",
             **base,

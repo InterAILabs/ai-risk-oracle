@@ -165,6 +165,34 @@
       "type": "string",
       "description": "Deterministic digest of the exact canonical execution intent evaluated by InterAI."
     },
+    "execution_intent": {
+      "type": "object",
+      "required": ["schema", "action_authority", "canonical_action", "evaluation_context", "authoritative_context", "policy_authority"],
+      "properties": {
+        "schema": { "const": "interai-canonical-execution-intent/v2" },
+        "action_authority": { "enum": ["host_attested_canonical", "caller_proposed_legacy"] },
+        "canonical_action": { "type": "object" },
+        "evaluation_context": { "type": "object" },
+        "authoritative_context": { "type": "object" },
+        "policy_authority": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "execution_authorization": {
+      "type": ["object", "null"],
+      "description": "Present only for an authenticated allow; validate signature, exact digest, TTL, and single use before dispatch.",
+      "properties": {
+        "schema": { "const": "interai-execution-authorization/v1" },
+        "decision_id": { "type": "string" },
+        "decision": { "const": "allow" },
+        "execution_intent_digest": { "type": "string" },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "single_use": { "const": true }
+      },
+      "required": ["schema", "decision_id", "decision", "execution_intent_digest", "issued_at", "expires_at", "single_use"],
+      "additionalProperties": false
+    },
     "trust_receipt": {
       "type": "object",
       "additionalProperties": true

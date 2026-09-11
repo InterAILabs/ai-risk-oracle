@@ -34,20 +34,30 @@ Request schema: [schemas/verify-request.schema.json](../schemas/verify-request.s
 
 Response schema: [schemas/verify-response.schema.json](../schemas/verify-response.schema.json)
 
+For executable pilot authorization, use a host-built canonical action and host-attested execution context. Legacy action objects remain supported for compatibility but do not receive executable authorization.
+
 Example request:
 
 ```json
 {
   "use_case": "agent-before-payment",
   "action": {
+    "schema": "interai-canonical-action/v1",
+    "tool_id": "payments.release_vendor_payment",
     "type": "payment",
-    "name": "release_vendor_payment",
-    "description": "Release vendor payment",
-    "amount_usd": 125,
-    "currency": "USD",
+    "operation": "release_vendor_payment",
+    "arguments": { "vendor_id": "vendor_agent_456", "amount_usd": 125, "currency": "USD" },
     "irreversible": false,
     "external_side_effect": true
   },
+  "execution_context": {
+    "schema": "interai-host-execution-context/v1",
+    "workspace_id": "workspace_123",
+    "environment": "production",
+    "actor_id": "agent_123",
+    "run_id": "run_456"
+  },
+  "authorization_ttl_seconds": 60,
   "context": {
     "agent_id": "agent_123",
     "environment": "production",
@@ -75,10 +85,14 @@ Important response fields:
 - `policy_violations`: machine-readable policy violations.
 - `trust_receipt_id`: receipt identifier when receipt creation is enabled.
 - `execution_intent_digest`: deterministic digest of the exact canonical intent evaluated. Before a side effect, the host must rebuild the final intent and compare this value; it is not a bearer token.
+- `execution_intent`: the canonical intent (`interai-canonical-execution-intent/v2`) whose digest was evaluated.
+- `execution_authorization`: `interai-execution-authorization/v1` only for authenticated `allow`; otherwise `null`. It is single-use, expires in 1–300 seconds (60 seconds default), and must be checked with service-side receipt signature verification before dispatch.
 
 `review_required` means the current agent should not execute autonomously under
 the current policy. The reviewer may be another agent, a policy system, a wallet
 rule, a governance queue, or a human operator.
+
+`review_required` and `block` never authorize execution. If a review changes any bound action or context value, construct a new canonical intent and request a new decision. The external host is responsible for durable, atomic single-use consumption where replay protection must survive processes or runtimes.
 
 ## GET /trust/receipts/{receiptId}
 

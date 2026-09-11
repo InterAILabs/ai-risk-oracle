@@ -45,6 +45,8 @@ export type InterAIClientOptions = {
   environment?: "sandbox" | "staging" | "production"
   operationId?: string
   timeoutMs?: number
+  /** Required before dispatch: host-owned exact-intent, signature, TTL, and replay validation. */
+  validateBeforeDispatch?: (input: { action: AgentAction; verification: VerifyResponse }) => Promise<boolean> | boolean
 }
 
 export type ExecutionDecision =
@@ -206,6 +208,12 @@ export async function executeWithInterAIGate<T>(
   })
 
   if (recommendedAction === "allow" && verification.policy_result === "allow") {
+    if (!options.validateBeforeDispatch) {
+      throw new Error("Refusing dispatch: provide host validateBeforeDispatch for exact intent and authorization validation")
+    }
+    if (!(await options.validateBeforeDispatch({ action, verification }))) {
+      throw new Error("Refusing dispatch: final intent or execution authorization validation failed")
+    }
     const result = await executor(action)
     return {
       status: "executed",

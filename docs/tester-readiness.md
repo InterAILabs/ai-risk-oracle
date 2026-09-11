@@ -120,7 +120,7 @@ Agent behavior: abort the action, log the decision, and store the trust receipt 
 
 ## Decision Handling
 
-- `allow`: rebuild the final intent, compare `execution_intent_digest`, then execute and store the DecisionReceipt.
+- `allow`: verify the receipt, rebuild the final intent, validate `execution_intent_digest`, TTL, and single-use authorization, then execute and store the DecisionReceipt.
 - `review_required`: the current agent should not execute autonomously under the current policy; route to a supervisor agent, policy system, wallet rule, governance queue, or human operator.
 - `block`: abort and log.
 

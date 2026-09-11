@@ -39,7 +39,7 @@ npm run start
 
 `interaiMiddleware.ts` calls `POST /verify`, then maps the decision:
 
-- `allow` + `policy_result=allow`: execute the sandbox executor
+- `allow` + `policy_result=allow`: do not dispatch until the host has verified the receipt and validated the exact canonical final intent plus `ExecutionAuthorization`; then execute the sandbox executor
 - `review_required`: return a review route
 - `block`: abort before execution
 - network failure, malformed response, or timeout: throw before the executor runs

@@ -62,7 +62,9 @@ For autonomous execution requests, the primary InterAI authority contract is:
 
 ### Exact-action binding
 
-InterAI represents the evaluated action as a `CanonicalExecutionIntent` and returns `execution_intent_digest`. An `allow` authorizes only that exact intent. The runtime/host must rebuild the final invocation immediately before the side effect and compare its canonical digest to the authorized digest. A change to tool, arguments, authoritative actor, run, workspace, environment, resource/destination, or relevant policy invalidates the earlier `allow` and requires a new decision. `review_required` and `block` are non-authorizing.
+For executable pilot authorization, the host constructs the trusted action envelope `interai-canonical-action/v1` and the host-attested execution context `interai-host-execution-context/v1`. InterAI returns a `CanonicalExecutionIntent` (`interai-canonical-execution-intent/v2`), `execution_intent_digest`, and—only for an authenticated `allow`—an `ExecutionAuthorization` (`interai-execution-authorization/v1`). The host must verify the receipt, rebuild the final invocation immediately before the side effect, recompute the canonical digest, validate the authorization, and fail closed on any mismatch. A change to tool, arguments, authoritative actor, run, workspace, environment, resource/destination, or relevant policy invalidates the earlier `allow` and requires a new decision. `review_required` and `block` are non-authorizing.
+
+Execution authorization is single-use and short lived: 1–300 seconds, 60 seconds by default. InterAI does not provide universal distributed replay prevention across external runtimes; the host must atomically and durably consume the authorization when that guarantee is required.
 
 If review changes the action, it is a new proposed intent. In Pydantic AI: `proposal → review/override → final validation → InterAI → exact-intent check → execute`; apply `ToolApproved.override_args` before final validation and InterAI.
 
@@ -166,7 +168,7 @@ The hosted beta currently includes additional compatibility fields such as `scor
 The calling system then decides how to honor that authority decision:
 
 ```text
-ALLOW             -> rebuild final intent, exact-intent check, then execute
+ALLOW             -> verify receipt + exact intent + authorization, then execute
 REVIEW_REQUIRED   -> route / pause / escalate
 BLOCK             -> abort
 ```

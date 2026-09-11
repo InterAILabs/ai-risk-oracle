@@ -21,9 +21,18 @@ const client = new InterAIRiskOracleClient({
 const decision = await client.verify({
   use_case: "agent-before-tool-execution",
   action: {
-    type: "tool_call",
-    description: "Send account notice",
-    external_side_effect: true
+    schema: "interai-canonical-action/v1",
+    tool_id: "notifications.send_account_notice",
+    type: "email_send",
+    operation: "send_account_notice",
+    arguments: { account_id: "account_123" },
+    external_side_effect: true,
+    irreversible: false
+  },
+  execution_context: {
+    schema: "interai-host-execution-context/v1",
+    workspace_id: "workspace_123",
+    environment: "production"
   },
   context: {
     agent_id: "agent_123",
@@ -36,6 +45,21 @@ const decision = await client.verify({
     require_human_review_above: 0.75
   }
 }, "stable-business-operation-id")
+```
+
+For an `allow`, verify the DecisionReceipt with the service, rebuild the final host intent, then validate the exact binding before dispatch. `ExecutionAuthorization` is single-use and expires in 1–300 seconds (60 seconds default); persist atomic consumption in your own runtime when replay protection must survive processes.
+
+```ts
+import { validateExecutionAuthorization } from "interai-risk-oracle"
+
+const lookup = await client.getTrustReceipt(decision.trust_receipt_id!)
+const signature = await client.verifyTrustReceiptSignature(lookup)
+const gate = await validateExecutionAuthorization({
+  authorization: decision.execution_authorization,
+  finalIntent: rebuildFinalIntentAtHostBoundary(),
+  receiptSignatureValid: signature.valid
+})
+if (!gate.ok) throw new Error(`Do not dispatch: ${gate.code}`)
 ```
 
 `verify` generates an idempotency key when one is not provided. Supply a stable

@@ -25,25 +25,26 @@ human review process.
 
 ```text
 agent proposes action
+-> host builds trusted canonical action + execution context
 -> InterAI /verify
--> decision with execution_intent_digest
--> rebuild final intent and compare digest
+-> decision, execution_intent_digest, DecisionReceipt, and allow-only authorization
+-> host verifies receipt, rebuilds exact final intent, validates digest/TTL/single-use
 -> execute / route / block
--> store decision and host execution evidence
+-> store decision and separate host execution evidence
 ```
 
 Decision mapping:
 
-- `allow`: only execute after the host's final canonical intent matches `execution_intent_digest`.
+- `allow`: only execute after service-side receipt verification and exact final-intent, TTL, and single-use authorization validation.
 - `review_required`: non-authorizing; route to a supervisor, human, policy engine, or queue.
 - `block`: non-authorizing; abort and log the decision.
 
 ## Pseudocode
 
 ```text
-decision = interai.verify(proposed_action)
+decision = interai.verify(host.canonical_action_and_context())
 final_intent = host.rebuild_final_intent()
-if decision.allow and final_intent.digest == decision.execution_intent_digest:
+if decision.allow and verify_receipt(decision) and validate_authorization(decision, final_intent):
   execute(final_intent)
 elif decision.review_required:
   route_to_review(action)
@@ -127,12 +128,12 @@ unnecessary sensitive data in verification payloads.
 
 ## Exact intent, review, and Pydantic AI
 
-`CanonicalExecutionIntent` separates caller-supplied proposal/evidence from host-authoritative runtime context and policy authority. A material mutation, including review edits, is a new intent requiring a new decision. For Pydantic AI: `proposal -> review/ToolApproved.override_args -> final validation -> InterAI -> exact-intent check -> execute`.
+`CanonicalExecutionIntent` (`interai-canonical-execution-intent/v2`) binds a host-attested canonical action, evaluation context, authenticated/host authority context, and policy authority. A material mutation, including review edits, is a new intent requiring a new decision. For Pydantic AI: `proposal -> review/ToolApproved.override_args -> host canonicalization -> InterAI -> receipt + exact-intent/authorization validation -> execute`.
 
 ## Receipts
 
 Store `trust_receipt_id` with your job, tool call, workflow, payment, or audit
-record. A DecisionReceipt helps prove a pre-execution decision and its intent digest. It is not a bearer token. An ExecutionReceipt is separate host/runtime evidence of dispatch or outcome; InterAI does not claim success without that evidence.
+record. A DecisionReceipt helps prove a pre-execution decision and its intent digest. It is not a bearer token. `ExecutionAuthorization` is allow-only, single-use, and valid for 1–300 seconds (60 seconds default); external hosts must durably consume it atomically when needed. An ExecutionReceipt is separate host/runtime evidence of dispatch or outcome; InterAI does not claim success without that evidence.
 
 Do not assume a trust receipt proves the underlying action is safe forever,
 guarantees factual truth, or replaces your own access controls. It is decision

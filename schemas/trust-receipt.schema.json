@@ -34,6 +34,14 @@
       "type": "string",
       "description": "Deterministic digest linking this decision evidence to its evaluated canonical execution intent."
     },
+    "execution_intent": {
+      "type": "object",
+      "description": "Canonical execution intent v2 bound to the decision when the autonomous contract is used."
+    },
+    "execution_authorization": {
+      "type": ["object", "null"],
+      "description": "Allow-only, short-lived single-use authorization; external hosts provide durable atomic consumption when required."
+    },
     "policy_summary": {
       "type": "object",
       "additionalProperties": true

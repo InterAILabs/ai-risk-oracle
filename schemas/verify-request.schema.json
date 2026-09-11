@@ -17,10 +17,6 @@
     },
     "action": {
       "type": "object",
-      "required": [
-        "type",
-        "description"
-      ],
       "properties": {
         "type": {
           "type": "string"
@@ -47,8 +43,28 @@
           "description": "Declare explicitly. If omitted, the response signal is null and policy requires review."
         }
       },
-      "additionalProperties": true
+      "additionalProperties": true,
+      "oneOf": [
+        { "required": ["type", "description"] },
+        {
+          "required": ["schema", "tool_id", "type", "operation", "arguments", "external_side_effect", "irreversible"],
+          "properties": { "schema": { "const": "interai-canonical-action/v1" } }
+        }
+      ]
     },
+    "execution_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "workspace_id", "environment"],
+      "properties": {
+        "schema": { "const": "interai-host-execution-context/v1" },
+        "workspace_id": { "type": "string", "minLength": 1 },
+        "environment": { "type": "string", "minLength": 1 },
+        "actor_id": { "type": "string", "minLength": 1 },
+        "run_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "authorization_ttl_seconds": { "type": "integer", "minimum": 1, "maximum": 300, "default": 60 },
     "context": {
       "type": "object",
       "properties": {

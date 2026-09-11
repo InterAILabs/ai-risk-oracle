@@ -31,7 +31,7 @@
     ],
     "authority_boundary": "The gated actor proposes; InterAI decides under policy; the surrounding execution layer must honor allow, review_required, or block.",
     "agent_decision_mapping": {
-      "allow": "execute",
+      "allow": "verify_receipt_and_exact_intent_then_execute",
       "review_required": "route_to_supervisor_policy_or_escalation_layer",
       "block": "abort"
     }

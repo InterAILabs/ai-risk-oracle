@@ -16,7 +16,7 @@ DecisionReceipts are durable records that a verification decision happened befor
 
 ## DecisionReceipt and ExecutionReceipt
 
-A DecisionReceipt records InterAI's decision and bound intent. It is evidence, not a bearer token. A separate ExecutionReceipt is host/runtime-produced evidence of dispatch or outcome and must identify its evidence source. The current public contract does not claim distributed single-use execution or concurrent replay prevention across external runtimes.
+A DecisionReceipt records InterAI's decision and bound intent. It is evidence, not a bearer token and not proof of execution. A separate ExecutionReceipt is host/runtime-produced evidence of dispatch or outcome and must identify its evidence source. `ExecutionAuthorization` is separate, is emitted only for an authenticated `allow`, and is bound to `execution_intent_digest`; it expires after 1–300 seconds (60 seconds by default) and is single-use. The host verifies the DecisionReceipt signature and provides durable, atomic consumption when protection must span external runtimes. InterAI does not claim universal distributed replay prevention or exactly-once execution.
 
 ## Uses
 
