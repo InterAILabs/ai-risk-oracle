@@ -156,6 +156,7 @@ export type VerifyRequest = {
   }
   domain?: string
   mode?: "fast_heuristic" | "semantic_judge"
+  external_evidence?: unknown[]
 }
 
 export type PolicyViolation = {
@@ -205,6 +206,47 @@ export type InterAIClientOptions = {
   baseUrl: string
   apiKey?: string
   clientName?: string
+  timeoutMs?: number
+}
+
+export type OnboardResponse = Record<string, unknown> & {
+  api_key?: string
+}
+
+export type X402PaymentRequiredResponse = Record<string, unknown> & {
+  x402Version: number
+  accepts: unknown[]
+}
+
+export class OracleHttpError extends Error {
+  readonly status: number
+  readonly body: unknown
+  readonly code: string | null
+  readonly headers: Record<string, string>
+  readonly paymentRequired: X402PaymentRequiredResponse | null
+
+  constructor(input: {
+    method: string
+    path: string
+    status: number
+    body: unknown
+    headers: Record<string, string>
+  }) {
+    super(`InterAI request failed: ${input.method} ${input.path} ${input.status} ${JSON.stringify(input.body)}`)
+    this.name = "OracleHttpError"
+    this.status = input.status
+    this.body = input.body
+    this.headers = input.headers
+    this.code = input.body && typeof input.body === "object" && "error" in input.body &&
+      typeof (input.body as { error?: unknown }).error === "string"
+      ? String((input.body as { error: string }).error)
+      : null
+    this.paymentRequired = input.status === 402 && input.body && typeof input.body === "object" &&
+      (input.body as { x402Version?: unknown }).x402Version === 2 &&
+      Array.isArray((input.body as { accepts?: unknown }).accepts)
+      ? input.body as X402PaymentRequiredResponse
+      : null
+  }
 }
 
 /** Anonymous receipt lookup: existence reference only, never signed evidence. */
@@ -245,26 +287,58 @@ function defaultIdempotencyKey(): string {
   return random || `interai-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
+function responseHeaders(response: Response): Record<string, string> {
+  const headers: Record<string, string> = {}
+  response.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+  return headers
+}
+
 export class InterAIRiskOracleClient {
   readonly baseUrl: string
-  readonly apiKey?: string
+  apiKey?: string
   readonly clientName: string
+  readonly timeoutMs: number
 
   constructor(options: InterAIClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "")
     this.apiKey = options.apiKey
     this.clientName = options.clientName || "typescript-sdk/0.1.3-beta"
+    this.timeoutMs = options.timeoutMs ?? 10_000
   }
 
-  private async jsonRequest(path: string, init?: RequestInit): Promise<unknown> {
-    const response = await fetch(`${this.baseUrl}${path}`, {
-      ...init,
-      headers: {
-        ...(this.apiKey ? { authorization: `Bearer ${this.apiKey}` } : {}),
-        "x-interai-client": this.clientName,
-        ...(init?.headers || {})
-      }
-    })
+  setApiKey(apiKey: string): void {
+    this.apiKey = apiKey
+  }
+
+  private async jsonRequest(path: string, init?: RequestInit, timeoutMs?: number): Promise<unknown> {
+    const controller = new AbortController()
+    const callerSignal = init?.signal
+    const abortFromCaller = () => controller.abort(callerSignal?.reason)
+    if (callerSignal?.aborted) abortFromCaller()
+    else callerSignal?.addEventListener("abort", abortFromCaller, { once: true })
+    const timeout = setTimeout(
+      () => controller.abort(new Error("InterAI request timed out")),
+      timeoutMs ?? this.timeoutMs
+    )
+
+    let response: Response
+    try {
+      response = await fetch(`${this.baseUrl}${path}`, {
+        ...init,
+        signal: controller.signal,
+        headers: {
+          ...(this.apiKey ? { authorization: `Bearer ${this.apiKey}` } : {}),
+          "x-interai-client": this.clientName,
+          ...(init?.headers || {})
+        }
+      })
+    } finally {
+      clearTimeout(timeout)
+      callerSignal?.removeEventListener("abort", abortFromCaller)
+    }
+
     const text = await response.text()
     let body: unknown
     try {
@@ -273,14 +347,94 @@ export class InterAIRiskOracleClient {
       body = { error: "invalid_json_response", raw: text.slice(0, 500) }
     }
     if (!response.ok) {
-      throw new Error(`InterAI request failed: ${response.status} ${JSON.stringify(body)}`)
+      throw new OracleHttpError({
+        method: init?.method || "GET",
+        path,
+        status: response.status,
+        body,
+        headers: responseHeaders(response)
+      })
     }
     return body
   }
 
+  async getPricing(): Promise<Record<string, unknown>> {
+    return this.jsonRequest("/pricing") as Promise<Record<string, unknown>>
+  }
+
+  async getDiscoveryBundle(): Promise<Record<string, unknown>> {
+    return this.jsonRequest("/.well-known/discovery-bundle.json") as Promise<Record<string, unknown>>
+  }
+
+  async onboard(input: {
+    name?: string
+    account_id?: string
+    api_key_name?: string
+    recommended_topup_usdc?: string
+  } = {}): Promise<OnboardResponse> {
+    const result = await this.jsonRequest("/onboard", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(input)
+    }) as OnboardResponse
+    if (typeof result.api_key === "string" && result.api_key) this.apiKey = result.api_key
+    return result
+  }
+
+  async me(): Promise<Record<string, unknown>> {
+    return this.jsonRequest("/me") as Promise<Record<string, unknown>>
+  }
+
+  async ledger(limit = 20): Promise<Record<string, unknown>> {
+    return this.jsonRequest(`/ledger?limit=${encodeURIComponent(String(limit))}`) as Promise<Record<string, unknown>>
+  }
+
+  async usage(limit = 20): Promise<Record<string, unknown>> {
+    return this.jsonRequest(`/usage?limit=${encodeURIComponent(String(limit))}`) as Promise<Record<string, unknown>>
+  }
+
+  async quote(input: {
+    service?: "verify"
+    mode?: "fast" | "batch"
+    items_count?: number
+  } = {}): Promise<Record<string, unknown>> {
+    return this.jsonRequest("/quote", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        service: input.service ?? "verify",
+        mode: input.mode ?? "fast",
+        ...(input.items_count !== undefined ? { items_count: input.items_count } : {})
+      })
+    }) as Promise<Record<string, unknown>>
+  }
+
+  async createTopup(amountUsdc = "0.10"): Promise<Record<string, unknown>> {
+    return this.jsonRequest("/topup/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ amount_usdc: amountUsdc })
+    }) as Promise<Record<string, unknown>>
+  }
+
+  async topupStatus(topupId: string): Promise<Record<string, unknown>> {
+    return this.jsonRequest(`/topup/${encodeURIComponent(topupId)}`) as Promise<Record<string, unknown>>
+  }
+
+  async confirmTopup(topupId: string, txHash: string): Promise<Record<string, unknown>> {
+    return this.jsonRequest("/topup/confirm", {
+      method: "POST",
+      headers: {
+        "X-Topup-Id": topupId,
+        "X-Tx-Hash": txHash
+      }
+    }) as Promise<Record<string, unknown>>
+  }
+
   async verify(
     request: VerifyRequest,
-    idempotencyKey = defaultIdempotencyKey()
+    idempotencyKey = defaultIdempotencyKey(),
+    options: { signal?: AbortSignal; timeoutMs?: number } = {}
   ): Promise<VerifyResponse> {
     return this.jsonRequest("/verify", {
       method: "POST",
@@ -288,8 +442,25 @@ export class InterAIRiskOracleClient {
         "content-type": "application/json",
         "x-idempotency-key": idempotencyKey
       },
-      body: JSON.stringify(request)
-    }) as Promise<VerifyResponse>
+      body: JSON.stringify(request),
+      signal: options.signal
+    }, options.timeoutMs) as Promise<VerifyResponse>
+  }
+
+  async verifyBatch(
+    requests: VerifyRequest[],
+    idempotencyKey = defaultIdempotencyKey(),
+    options: { signal?: AbortSignal; timeoutMs?: number } = {}
+  ): Promise<Record<string, unknown>> {
+    return this.jsonRequest("/verify/batch", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-idempotency-key": idempotencyKey
+      },
+      body: JSON.stringify({ items: requests }),
+      signal: options.signal
+    }, options.timeoutMs) as Promise<Record<string, unknown>>
   }
 
   /** Return the privacy-aware lookup union without requiring owner credentials. */
