@@ -207,6 +207,18 @@ export type InterAIClientOptions = {
   clientName?: string
 }
 
+/** Anonymous receipt lookup: existence reference only, never signed evidence. */
+export type TrustReceiptPublicSummary = {
+  ok: true
+  visibility: "public_summary"
+  receipt: {
+    receipt_id: string
+    issued_at: string
+  }
+  full_receipt_requires_owner: true
+}
+
+/** Complete owner-authenticated receipt lookup with opaque signed payload bytes. */
 export type TrustReceiptLookup = {
   ok: true
   receipt: Record<string, unknown> & { receipt_id: string }
@@ -214,9 +226,18 @@ export type TrustReceiptLookup = {
     signed: boolean
     signature: string | null
     signature_alg: "hmac-sha256" | null
+    verification_scope?: "service_verifiable"
     signed_payload: string | null
+    signature_valid?: boolean
   }
+  metadata?: Record<string, unknown>
   [key: string]: unknown
+}
+
+export type TrustReceiptLookupResponse = TrustReceiptLookup | TrustReceiptPublicSummary
+
+function isPublicReceiptSummary(value: TrustReceiptLookupResponse): value is TrustReceiptPublicSummary {
+  return "visibility" in value && value.visibility === "public_summary"
 }
 
 function defaultIdempotencyKey(): string {
@@ -271,11 +292,19 @@ export class InterAIRiskOracleClient {
     }) as Promise<VerifyResponse>
   }
 
-  async getTrustReceipt(receiptId: string): Promise<TrustReceiptLookup> {
-    const result = await this.jsonRequest(
+  /** Return the privacy-aware lookup union without requiring owner credentials. */
+  async getTrustReceiptReference(receiptId: string): Promise<TrustReceiptLookupResponse> {
+    return this.jsonRequest(
       `/trust/receipts/${encodeURIComponent(receiptId)}`
-    ) as TrustReceiptLookup
-    if (result.visibility === "public_summary") throw new Error("Complete receipt requires the owning account API key")
+    ) as Promise<TrustReceiptLookupResponse>
+  }
+
+  /** Return complete signed evidence; throws when the service only returns the anonymous summary. */
+  async getTrustReceipt(receiptId: string): Promise<TrustReceiptLookup> {
+    const result = await this.getTrustReceiptReference(receiptId)
+    if (isPublicReceiptSummary(result)) {
+      throw new Error("Complete receipt requires the owning account API key")
+    }
     return result
   }
 
