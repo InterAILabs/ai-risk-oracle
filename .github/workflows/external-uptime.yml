@@ -1,0 +1,71 @@
+name: External uptime
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-api:
+    name: Canonical API health and readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check canonical health and readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_endpoint() {
+            local url="$1"
+            local expected_field="$2"
+            local attempt
+
+            for attempt in 1 2 3; do
+              body_file="$(mktemp)"
+              status="$(curl \
+                --silent \
+                --show-error \
+                --location \
+                --connect-timeout 5 \
+                --max-time 10 \
+                --output "$body_file" \
+                --write-out '%{http_code}' \
+                "$url" || true)"
+
+              if [[ "$status" =~ ^2[0-9][0-9]$ ]] && node -e '
+                const fs = require("node:fs");
+                const [file, field] = process.argv.slice(1);
+                const payload = JSON.parse(fs.readFileSync(file, "utf8"));
+                if (payload[field] !== true) process.exit(1);
+              ' "$body_file" "$expected_field"; then
+                echo "OK $url ($status, $expected_field=true)"
+                rm -f "$body_file"
+                return 0
+              fi
+
+              echo "Attempt $attempt failed for $url (HTTP ${status:-curl_error})" >&2
+              cat "$body_file" >&2 || true
+              rm -f "$body_file"
+
+              if [[ "$attempt" -lt 3 ]]; then
+                sleep 10
+              fi
+            done
+
+            return 1
+          }
+
+          check_endpoint "https://api.interailabs.dev/health" "ok"
+          check_endpoint "https://api.interailabs.dev/ready" "ready"
+
+      - name: Diagnose technical origin only after canonical failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "Canonical public API check failed. Fly is diagnostic fallback only; a healthy origin does not make the canonical check pass."
+          curl --silent --show-error --location --connect-timeout 5 --max-time 10 \
+            https://ai-risk-oracle.fly.dev/health || true
