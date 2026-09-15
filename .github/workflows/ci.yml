@@ -25,6 +25,9 @@ jobs:
       - name: Discovery contract
         run: node tests/discovery-contract.mjs
 
+      - name: OpenAI Agents integration contract
+        run: node tests/openai-agents-integration-contract.mjs
+
       - name: Install TypeScript SDK dependencies
         working-directory: sdk/typescript
         run: npm ci
@@ -46,6 +49,14 @@ jobs:
       - name: Inspect npm package contents
         working-directory: sdk/typescript
         run: npm pack --dry-run
+
+      - name: Install OpenAI Agents integration dependencies
+        working-directory: examples/framework-integrations/openai-agents
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Type-check OpenAI Agents integration
+        working-directory: examples/framework-integrations/openai-agents
+        run: npm run typecheck
 
       - name: Setup Python
         uses: actions/setup-python@v5
