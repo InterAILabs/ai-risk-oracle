@@ -63,11 +63,11 @@ Stage 2 does not change signals, score, `semantic_judge`, policy, or the final d
 
 ## SDKs
 
-- npm: `interai-risk-oracle@0.1.3-beta`
-- PyPI: `interai-risk-oracle==0.1.3b0`
+- npm: `interai-risk-oracle@0.1.4-beta` (`beta` dist-tag)
+- PyPI: `interai-risk-oracle==0.1.4b0`
 
-The TypeScript package is published on npm. The Python package is published on PyPI through
-GitHub Actions Trusted Publishing with digital attestations.
+The TypeScript package is published on npm with GitHub Actions provenance. The Python package is published on PyPI through
+GitHub Actions Trusted Publishing with digital attestations. SDK package versions are independent from the hosted runtime version.
 
 ## Public URLs
 
