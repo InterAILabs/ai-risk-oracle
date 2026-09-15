@@ -38,7 +38,9 @@ For delayed Slack/UI/human review, the original frame is gone. Treat `review_req
 
 ## Scope
 
-`interai_hook.py` registers the gate on CrewAI's `PRE_TOOL_CALL` point. The included request marks the proposed operation as an external side effect and non-irreversible as a narrow reference shape; production integrations must provide truthful action metadata for each protected capability and ensure every equivalent consequential execution path is covered.
+The checked-in registration is intentionally narrow: it protects the example `release_vendor_payment` tool through CrewAI's `tools=` filter. The canonical request includes the exact arguments and conservatively marks that example capability as an irreversible external side effect. Production integrations must classify each protected capability truthfully and include every equivalent consequential execution path.
+
+The reusable `build_interai_gate()` helper is not tied to that payment tool. You can register it globally or against a broader tool set once your host can construct truthful action metadata for those capabilities.
 
 CrewAI blocks a single tool call and lets the agent run continue. An agent may retry or choose another tool. Coverage is therefore a host responsibility: all tools or execution paths capable of the consequential effect must traverse an InterAI gate.
 
