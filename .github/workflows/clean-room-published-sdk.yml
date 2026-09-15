@@ -1,0 +1,43 @@
+name: Published SDK clean-room
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "audit/clean-room-*"
+
+permissions:
+  contents: read
+
+jobs:
+  first-verify:
+    name: Install package and reach first verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout clean-room script only
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Create empty builder workspace
+        run: |
+          rm -rf /tmp/interai-clean-room
+          mkdir -p /tmp/interai-clean-room
+          cp tests/clean-room-published-sdk.mjs /tmp/interai-clean-room/clean-room.mjs
+          cd /tmp/interai-clean-room
+          npm init -y >/dev/null
+
+      - name: Install published beta from npm
+        working-directory: /tmp/interai-clean-room
+        run: npm install --ignore-scripts --no-audit --no-fund interai-risk-oracle@0.1.7-beta
+
+      - name: First verify from published package
+        working-directory: /tmp/interai-clean-room
+        env:
+          INTERAI_BASE_URL: https://api.interailabs.dev
+          INTERAI_CLEAN_ROOM_MAX_MS: "300000"
+        run: node clean-room.mjs
