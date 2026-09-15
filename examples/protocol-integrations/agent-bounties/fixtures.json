@@ -19,6 +19,7 @@
     "decision": "allow",
     "issuer": "interai:test",
     "decision_id": "decision-001",
+    "execution_intent_digest": "1274f3151854471d0c5f943db5ed8848439853c5737b2b253c0f048cc44b12f2",
     "policy_version": 6,
     "policy_hash": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
     "issued_at": "2026-09-15T11:59:59+00:00",
