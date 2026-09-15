@@ -6,7 +6,6 @@ import os
 import threading
 import uuid
 from collections.abc import Callable, Mapping
-from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Any, Literal
 from urllib.parse import quote
@@ -33,6 +32,23 @@ def _normalize_json(value: Any) -> Any:
     if isinstance(value, dict):
         return {key: _normalize_json(value[key]) for key in sorted(value)}
     return value
+
+
+def _json_equivalent(left: Any, right: Any) -> bool:
+    """Compare JSON values without confusing booleans with numeric values."""
+    if isinstance(left, bool) or isinstance(right, bool):
+        return type(left) is type(right) and left == right
+    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+        return left == right
+    if isinstance(left, dict) and isinstance(right, dict):
+        if left.keys() != right.keys():
+            return False
+        return all(_json_equivalent(left[key], right[key]) for key in left)
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(
+            _json_equivalent(a, b) for a, b in zip(left, right)
+        )
+    return type(left) is type(right) and left == right
 
 
 def _execution_intent_digest(intent: Mapping[str, Any]) -> str:
@@ -231,14 +247,14 @@ def validate_allow_for_dispatch(
         raise InvalidInterAIDecision("Unexpected execution intent schema")
     if intent.get("action_authority") != "host_attested_canonical":
         raise InvalidInterAIDecision("Execution intent is not host-attested canonical")
-    if intent.get("canonical_action") != request_body["action"]:
+    if not _json_equivalent(intent.get("canonical_action"), request_body["action"]):
         raise InvalidInterAIDecision("Final CrewAI action differs from the evaluated action")
 
     authoritative_context = intent.get("authoritative_context")
     if not isinstance(authoritative_context, Mapping):
         raise InvalidInterAIDecision("Execution intent lacks authoritative context")
     for key, value in request_body["execution_context"].items():
-        if authoritative_context.get(key) != value:
+        if not _json_equivalent(authoritative_context.get(key), value):
             raise InvalidInterAIDecision(f"Execution context mismatch for {key}")
 
     if authorization.get("schema") != "interai-execution-authorization/v1":
@@ -258,9 +274,7 @@ def validate_allow_for_dispatch(
     if expires_at <= now or expires_at <= issued_at:
         raise InvalidInterAIDecision("Execution authorization is expired or invalid")
 
-    final_intent = deepcopy(dict(intent))
-    final_intent["canonical_action"] = deepcopy(request_body["action"])
-    computed_digest = _execution_intent_digest(final_intent)
+    computed_digest = _execution_intent_digest(intent)
     if computed_digest != response_digest:
         raise InvalidInterAIDecision("Final execution intent digest does not match authorization")
 
