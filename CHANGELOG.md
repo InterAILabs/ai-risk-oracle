@@ -1,5 +1,10 @@
 # Changelog
 
+## SDK packages 0.1.6-beta / 0.1.6b0
+
+- Refresh npm/PyPI package metadata and bundled READMEs to use the canonical API domain `https://api.interailabs.dev`.
+- No API shape, behavior, pricing, billing, policy, execution-boundary, or receipt semantics change.
+
 ## SDK packages 0.1.5-beta / 0.1.5b0
 
 - Fix SDK self-identification so `x-interai-client` reports the actual published SDK version.
