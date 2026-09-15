@@ -43,6 +43,30 @@ def verify_with_interai(tool_name: str, tool_input: dict[str, Any]) -> Mapping[s
     if not api_key:
         raise RuntimeError("INTERAI_API_KEY is required")
 
+    action: dict[str, Any] = {
+        "schema": "interai-canonical-action/v1",
+        "tool_id": f"crewai.{tool_name}",
+        "type": "tool_call",
+        "operation": tool_name,
+        "arguments": dict(tool_input),
+        # Conservative defaults for this consequential-tool example. Production
+        # adapters should classify each protected capability truthfully.
+        "irreversible": True,
+        "external_side_effect": True,
+    }
+
+    amount_usd = tool_input.get("amount_usd")
+    if isinstance(amount_usd, (int, float)) and not isinstance(amount_usd, bool):
+        action["amount_usd"] = amount_usd
+
+    context: dict[str, Any] = {
+        "environment": os.environ.get("INTERAI_ENVIRONMENT", "production"),
+        "user_confirmation": False,
+    }
+    vendor_id = tool_input.get("vendor_id")
+    if isinstance(vendor_id, str) and vendor_id:
+        context["counterparty_id"] = vendor_id
+
     response = requests.post(
         f"{INTERAI_BASE_URL}/verify",
         headers={
@@ -52,20 +76,9 @@ def verify_with_interai(tool_name: str, tool_input: dict[str, Any]) -> Mapping[s
         },
         json={
             "use_case": "crewai-before-tool-execution",
-            "action": {
-                "schema": "interai-canonical-action/v1",
-                "tool_id": f"crewai.{tool_name}",
-                "type": "tool_call",
-                "operation": tool_name,
-                "arguments": tool_input,
-                "irreversible": False,
-                "external_side_effect": True,
-            },
+            "action": action,
             "authorization_ttl_seconds": 60,
-            "context": {
-                "environment": os.environ.get("INTERAI_ENVIRONMENT", "production"),
-                "user_confirmation": False,
-            },
+            "context": context,
             "policy": {"require_trust_receipt": True},
         },
         timeout=10,
@@ -115,6 +128,10 @@ def build_interai_gate(
     return gate
 
 
-# CrewAI's native pre-execution boundary. InterAI decides; CrewAI remains the executor.
+# Narrow reference registration. Add every consequential equivalent tool/path
+# in production, or register a global gate with truthful per-tool action metadata.
 interai_pre_tool_gate = build_interai_gate()
-on(InterceptionPoint.PRE_TOOL_CALL)(interai_pre_tool_gate)
+on(
+    InterceptionPoint.PRE_TOOL_CALL,
+    tools=["release_vendor_payment"],
+)(interai_pre_tool_gate)
