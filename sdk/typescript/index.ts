@@ -1,6 +1,7 @@
 export type AutonomousRiskLevel = "low" | "medium" | "high"
 export type GatewayDecision = "allow" | "review_required" | "block"
 
+export const SDK_VERSION = "0.1.5-beta" as const
 export const CANONICAL_ACTION_SCHEMA = "interai-canonical-action/v1" as const
 export const HOST_EXECUTION_CONTEXT_SCHEMA = "interai-host-execution-context/v1" as const
 export const EXECUTION_INTENT_SCHEMA = "interai-canonical-execution-intent/v2" as const
@@ -304,7 +305,7 @@ export class InterAIRiskOracleClient {
   constructor(options: InterAIClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "")
     this.apiKey = options.apiKey
-    this.clientName = options.clientName || "typescript-sdk/0.1.3-beta"
+    this.clientName = options.clientName || `typescript-sdk/${SDK_VERSION}`
     this.timeoutMs = options.timeoutMs ?? 10_000
   }
 
