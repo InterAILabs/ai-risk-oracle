@@ -1,5 +1,13 @@
 # Changelog
 
+## SDK packages 0.1.7-beta / 0.1.7b0
+
+- Expose the controlled `demo_trial` onboarding scope in the package-facing TypeScript and Python clients so a new builder can reach a first hosted verification without funding an account first.
+- Keep trial creation subject to the hosted TTL, per-client limits, shared credit budget, and maximum-verification controls; the SDK does not bypass or enlarge trial authority.
+- Route TypeScript package exports through a public entrypoint that reports `typescript-sdk/0.1.7-beta` while preserving the existing execution-boundary implementation.
+- Route Python package exports through a public client that reports `python-sdk/0.1.7-beta` and makes `get_trust_receipt()` reject an anonymous `public_summary` instead of treating it as complete owner evidence.
+- Add zero-funding builder quickstarts for both SDKs. Hosted runtime behavior, pricing, billing, policy authority, and decision semantics remain unchanged.
+
 ## SDK packages 0.1.6-beta / 0.1.6b0
 
 - Refresh npm/PyPI package metadata and bundled READMEs to use the canonical API domain `https://api.interailabs.dev`.

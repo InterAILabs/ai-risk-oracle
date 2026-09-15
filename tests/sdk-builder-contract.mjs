@@ -3,7 +3,7 @@ import {
   InterAIRiskOracleClient,
   OracleHttpError,
   SDK_VERSION
-} from "../sdk/typescript/dist/index.js"
+} from "../sdk/typescript/dist/public.js"
 
 const originalFetch = globalThis.fetch
 const captured = []
@@ -49,15 +49,17 @@ globalThis.fetch = async (url, init = {}) => {
 }
 
 try {
-  assert.equal(SDK_VERSION, "0.1.6-beta")
+  assert.equal(SDK_VERSION, "0.1.7-beta")
 
   const client = new InterAIRiskOracleClient({
     baseUrl: "https://interai.invalid/",
     timeoutMs: 500
   })
 
-  await client.onboard({ name: "builder-test" })
+  await client.onboard({ name: "builder-test", scope: "demo_trial" })
   assert.equal(client.apiKey, "builder-key")
+  const onboardBody = JSON.parse(captured.at(-1).init.body)
+  assert.equal(onboardBody.scope, "demo_trial")
 
   await client.me()
   const meRequest = captured.at(-1)
