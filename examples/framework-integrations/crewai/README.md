@@ -49,7 +49,7 @@ Any digest or serialization mismatch fails closed. That keeps the authority boun
 
 The request uses `interai-canonical-action/v1` and binds the exact CrewAI `tool_name` plus `ctx.tool_input` as canonical `arguments`. It also supplies `interai-host-execution-context/v1`, including a required `INTERAI_WORKSPACE_ID` and the environment used for the execution boundary.
 
-The current synchronous `PRE_TOOL_CALL` frame exposes the same mutable `ctx.tool_input` dictionary CrewAI will pass toward the tool. The adapter compares that final action with the host-attested intent returned by InterAI and refuses authorization if it differs.
+The current synchronous `PRE_TOOL_CALL` frame exposes the same mutable `ctx.tool_input` dictionary CrewAI will pass toward the tool. The adapter compares that final action with the host-attested intent returned by InterAI and refuses authorization if it differs. JSON numeric values are compared by numeric value rather than Python's broader truthy equality, so booleans cannot masquerade as numbers while `250` and `250.0` remain equivalent JSON numbers.
 
 ### Hook ordering is part of the boundary
 
@@ -102,7 +102,7 @@ cd examples/framework-integrations/crewai
 pytest -q test_interai_hook.py
 ```
 
-The focused tests cover 19 logical cases, including:
+The focused tests cover 20 logical cases, including:
 
 - a naive external-oracle `TimeoutError` demonstrating CrewAI's generic fail-open hook behavior;
 - explicit validated ALLOW;
@@ -110,7 +110,7 @@ The focused tests cover 19 logical cases, including:
 - timeout, connection failure, HTTP 502-style errors, and malformed responses;
 - invalid decision payloads;
 - failure inside final ALLOW authorization validation;
-- exact tool/argument binding;
+- exact tool/argument binding and JSON numeric normalization;
 - execution-intent digest, TTL, expiry, and process-local single-use checks;
 - changed final arguments failing closed.
 
