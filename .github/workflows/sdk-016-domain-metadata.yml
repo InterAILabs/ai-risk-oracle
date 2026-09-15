@@ -1,0 +1,99 @@
+name: Prepare SDK 0.1.6 domain metadata
+
+on:
+  push:
+    branches:
+      - release/sdk-0.1.6-domain-metadata
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/sdk-0.1.6-domain-metadata
+          fetch-depth: 0
+
+      - name: Bump package metadata versions only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          ts_paths = [
+              "README.md",
+              "sdk/typescript/README.md",
+              "sdk/typescript/index.ts",
+              "sdk/typescript/package.json",
+              "sdk/typescript/package-lock.json",
+              "tests/sdk-builder-contract.mjs",
+              "python/interai_risk_oracle/client.py",
+              "tests/python-sdk-builder-contract.py",
+              "distribution/registry-submission.md",
+          ]
+          py_paths = [
+              "README.md",
+              "python/README.md",
+              "python/pyproject.toml",
+              "distribution/registry-submission.md",
+          ]
+
+          for name in ts_paths:
+              path = Path(name)
+              text = path.read_text(encoding="utf-8")
+              if "0.1.5-beta" not in text:
+                  raise SystemExit(f"expected 0.1.5-beta in {name}")
+              path.write_text(text.replace("0.1.5-beta", "0.1.6-beta"), encoding="utf-8")
+
+          for name in py_paths:
+              path = Path(name)
+              text = path.read_text(encoding="utf-8")
+              if "0.1.5b0" not in text:
+                  raise SystemExit(f"expected 0.1.5b0 in {name}")
+              path.write_text(text.replace("0.1.5b0", "0.1.6b0"), encoding="utf-8")
+
+          changelog = Path("CHANGELOG.md")
+          text = changelog.read_text(encoding="utf-8")
+          marker = "# Changelog\n"
+          section = (
+              "# Changelog\n\n"
+              "## SDK packages 0.1.6-beta / 0.1.6b0\n\n"
+              "- Refresh npm/PyPI package metadata and bundled READMEs to use the canonical API domain `https://api.interailabs.dev`.\n"
+              "- No API shape, behavior, pricing, billing, policy, execution-boundary, or receipt semantics change.\n"
+          )
+          if not text.startswith(marker):
+              raise SystemExit("unexpected CHANGELOG header")
+          changelog.write_text(section + text[len(marker):], encoding="utf-8")
+          PY
+
+      - name: Remove one-shot preparation workflow
+        run: rm .github/workflows/sdk-016-domain-metadata.yml
+
+      - name: Verify release metadata
+        shell: bash
+        run: |
+          grep -q '"version": "0.1.6-beta"' sdk/typescript/package.json
+          grep -q 'export const SDK_VERSION = "0.1.6-beta"' sdk/typescript/index.ts
+          grep -q 'version = "0.1.6b0"' python/pyproject.toml
+          grep -q 'SDK_VERSION = "0.1.6-beta"' python/interai_risk_oracle/client.py
+          test "$(git grep -l '0.1.5-beta' | tr '\n' ' ')" = "CHANGELOG.md "
+          test "$(git grep -l '0.1.5b0' | tr '\n' ' ')" = "CHANGELOG.md "
+          if git grep -n 'ai-risk-oracle\.fly\.dev'; then
+            echo 'legacy Fly hostname returned during release preparation'
+            exit 1
+          fi
+          git diff --check
+
+      - name: Commit release preparation
+        shell: bash
+        run: |
+          git config user.name "InterAILabs"
+          git config user.email "interailabs@gmail.com"
+          git add -A
+          git commit -m "release: prepare SDK packages 0.1.6"
+          git push origin HEAD:release/sdk-0.1.6-domain-metadata
