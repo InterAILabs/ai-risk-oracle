@@ -90,6 +90,12 @@
     "trust_receipt_id": true,
     "signed_receipt": true,
     "receipt_lookup_endpoint": "https://ai-risk-oracle.fly.dev/trust/receipts/{receiptId}",
+    "receipt_lookup_privacy": {
+      "anonymous": "receipt_id_and_issued_at_only",
+      "owner_bearer": "complete_signed_evidence",
+      "accountless_x402": "retain_original_verification_evidence",
+      "signed_payload": "opaque_forward_unchanged"
+    },
     "external_evidence_stage2": {
       "protocol": "external-evidence/v0",
       "revision": "rev6",

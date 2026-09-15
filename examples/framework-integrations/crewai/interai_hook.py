@@ -174,6 +174,7 @@ def _verify_receipt_signature(
     receipt_id: str,
     decision_id: str,
     execution_intent_digest: str,
+    expected_authorization: Mapping[str, Any],
 ) -> None:
     lookup_response = requests.get(
         f"{INTERAI_BASE_URL}/trust/receipts/{quote(receipt_id, safe='')}",
@@ -191,8 +192,12 @@ def _verify_receipt_signature(
         raise InvalidInterAIDecision("Trust receipt lookup is incomplete")
     if receipt.get("receipt_id") != receipt_id:
         raise InvalidInterAIDecision("Trust receipt id mismatch")
-    if receipt.get("decision_id") != decision_id:
+    if receipt.get("receipt_schema_version") != "trust-receipt/v2":
+        raise InvalidInterAIDecision("Expected an autonomous v2 receipt")
+    if receipt.get("receipt_id") != decision_id:
         raise InvalidInterAIDecision("Trust receipt decision id mismatch")
+    if not _json_equivalent(receipt.get("execution_authorization"), expected_authorization):
+        raise InvalidInterAIDecision("Authorization differs from the signed receipt")
     if receipt.get("execution_intent_digest") != execution_intent_digest:
         raise InvalidInterAIDecision("Trust receipt execution intent mismatch")
 
@@ -204,7 +209,7 @@ def _verify_receipt_signature(
         raise InvalidInterAIDecision("Trust receipt is not signed")
     if signature_alg != "hmac-sha256":
         raise InvalidInterAIDecision("Unexpected trust receipt signature algorithm")
-    if receipt.get("recommended_action") not in (None, "allow"):
+    if receipt.get("final_decision") != "allow":
         raise InvalidInterAIDecision("Trust receipt does not record an allow decision")
 
     check_response = requests.post(
@@ -212,6 +217,7 @@ def _verify_receipt_signature(
         headers={**_auth_headers(), "Content-Type": "application/json"},
         json={
             "receipt_id": receipt_id,
+            "receipt": dict(receipt),
             "signed_payload": signed_payload,
             "signature": signature,
             "signature_alg": signature_alg,
@@ -253,8 +259,11 @@ def validate_allow_for_dispatch(
     authoritative_context = intent.get("authoritative_context")
     if not isinstance(authoritative_context, Mapping):
         raise InvalidInterAIDecision("Execution intent lacks authoritative context")
+    host_context = authoritative_context.get("host_attested")
+    if not isinstance(host_context, Mapping):
+        raise InvalidInterAIDecision("Execution intent lacks host-attested context")
     for key, value in request_body["execution_context"].items():
-        if not _json_equivalent(authoritative_context.get(key), value):
+        if not _json_equivalent(host_context.get(key), value):
             raise InvalidInterAIDecision(f"Execution context mismatch for {key}")
 
     if authorization.get("schema") != "interai-execution-authorization/v1":
@@ -278,7 +287,7 @@ def validate_allow_for_dispatch(
     if computed_digest != response_digest:
         raise InvalidInterAIDecision("Final execution intent digest does not match authorization")
 
-    _verify_receipt_signature(receipt_id, decision_id, computed_digest)
+    _verify_receipt_signature(receipt_id, decision_id, computed_digest, authorization)
 
     authorization_key = f"{decision_id}:{computed_digest}"
     with _consumption_lock:

@@ -96,7 +96,30 @@ rule, a governance queue, or a human operator.
 
 ## GET /trust/receipts/{receiptId}
 
-Retrieves the canonical public trust receipt representation by receipt ID.
+Retrieves a minimal public reference, or the complete signed receipt for its authenticated owner.
+
+Response schema: [schemas/trust-receipt-lookup.schema.json](../schemas/trust-receipt-lookup.schema.json)
+
+Without credentials the response is a `public_summary` containing only `receipt_id` and `issued_at`. With an active Bearer key belonging to the receipt account, the response contains the complete receipt plus `verification.signed_payload`, signature metadata and authorization evidence. Invalid, expired or revoked keys return `401`; a different account receives `404`.
+
+Accountless x402/payment-reference clients cannot recover private receipt contents later through the public lookup. They must retain the complete evidence returned by the original verification.
+
+## POST /trust/verify-signature
+
+Performs service-side HMAC-SHA256 verification of receipt evidence. The current signature model is service-verifiable, not independently public-key verifiable.
+
+Prefer forwarding the exact opaque `verification.signed_payload` returned by the owner-authenticated lookup or original x402 verification:
+
+```json
+{
+  "receipt_id": "receipt-id",
+  "signed_payload": "opaque-canonical-payload",
+  "signature": "hex-signature",
+  "signature_alg": "hmac-sha256"
+}
+```
+
+Do not parse and reserialize `signed_payload`; byte-level canonicalization is part of the signature contract. A structured `receipt` may also be sent for compatibility, but it does not replace the opaque signed payload when exact portable verification is available.
 
 ## GET /.well-known/ai-service.json
 
@@ -109,5 +132,21 @@ hosted API also exposes discovery aliases such as `/.well-known/ai-risk-oracle`,
 - `400`: invalid request.
 - `401`: missing or invalid authentication.
 - `403`: account or policy access denied.
+- `404`: receipt/resource not found or hidden by ownership boundary.
 - `429`: rate limit exceeded.
 - `500`: service unavailable or internal error.
+
+## Receipt privacy (September 2026)
+
+`GET /trust/receipts/{receiptId}` without credentials returns only a
+`public_summary` containing receipt ID and issuance time. It is not signed
+evidence or an execution authorization. Supply an active Bearer key belonging
+to the receipt account for the complete receipt, original opaque
+`verification.signed_payload`, signature and authorization. Invalid, expired or
+revoked keys return 401; another account receives 404. Responses must not be
+cached.
+
+Accountless x402/payment-reference clients must preserve the complete evidence
+returned by their original verification; a public lookup cannot recover private
+contents. Demo links also show only the public reference. Do not put API keys
+in receipt URLs. Keep the signed payload bytes unchanged when verifying.

@@ -108,6 +108,7 @@ class InterAIRiskOracleClient:
             "/trust/verify-signature",
             body={
                 "receipt_id": receipt_id,
+                "receipt": dict(receipt),
                 "signed_payload": signed_payload,
                 "signature": signature,
                 "signature_alg": verification.get("signature_alg"),

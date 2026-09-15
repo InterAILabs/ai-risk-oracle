@@ -55,6 +55,86 @@
         }
       }
     },
+    "/trust/receipts/{receiptId}": {
+      "get": {
+        "summary": "Get public receipt reference or owner-authenticated evidence",
+        "description": "Without credentials returns only receipt_id and issued_at. With an active Bearer key belonging to the receipt account returns the complete receipt, signature and original opaque signed_payload. Another account receives 404; invalid, expired or revoked credentials receive 401.",
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "receiptId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Privacy-aware trust receipt lookup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/trust-receipt-lookup.schema.json"
+                }
+              }
+            }
+          },
+          "401": { "description": "Invalid, expired or revoked Bearer credential" },
+          "404": { "description": "Receipt not found or not owned by the authenticated account" }
+        }
+      }
+    },
+    "/trust/verify-signature": {
+      "post": {
+        "summary": "Verify a trust receipt signature with the InterAI service",
+        "description": "Service-side HMAC verification. Forward signed_payload unchanged; it is opaque canonical evidence and must not be parsed and reserialized before verification.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["receipt_id", "signed_payload", "signature"],
+                "properties": {
+                  "receipt_id": { "type": "string" },
+                  "receipt": { "type": "object" },
+                  "signed_payload": { "type": "string" },
+                  "signature": { "type": "string" },
+                  "signature_alg": {
+                    "type": "string",
+                    "const": "hmac-sha256"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signature verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["valid"],
+                  "properties": {
+                    "valid": { "type": "boolean" },
+                    "signature_alg": { "type": "string" }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/.well-known/autonomous-adoption.json": {
       "get": {
         "summary": "Get autonomous adoption contract",

@@ -88,3 +88,17 @@ Because account policy version/digest is also part of authenticated decision ide
 ## Administration Scope
 
 The account policy enforcement boundary is live, but account policy administration is currently an **InterAI-administered control plane**. InterAI does not yet claim customer self-service policy editing, delegated tenant policy administrators, or a customer-managed policy version lifecycle.
+
+## Receipt privacy (September 2026)
+
+`GET /trust/receipts/{receiptId}` without credentials returns only a
+`public_summary` containing receipt ID and issuance time. It is not signed
+evidence or an execution authorization. Supply an active Bearer key belonging
+to the receipt account for the complete receipt, original opaque
+`verification.signed_payload`, signature and authorization. Invalid keys return
+401; another account receives 404. Responses must not be cached.
+
+Accountless x402/payment-reference clients must preserve the complete evidence
+returned by their original verification; a public lookup cannot recover private
+contents. Demo links also show only the public reference. Do not put API keys
+in receipt URLs. Keep the signed payload bytes unchanged when verifying.

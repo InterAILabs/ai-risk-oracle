@@ -2,54 +2,186 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/InterAILabs/ai-risk-oracle/main/schemas/trust-receipt.schema.json",
   "title": "InterAI Trust Receipt",
-  "type": "object",
-  "required": [
-    "trust_receipt_id",
-    "decision_id",
-    "issued_at",
-    "risk_level",
-    "recommended_action"
-  ],
-  "properties": {
-    "trust_receipt_id": {
-      "type": "string"
-    },
-    "decision_id": {
-      "type": "string"
-    },
-    "issued_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "use_case": {
-      "type": "string"
-    },
-    "risk_level": {
-      "type": "string"
-    },
-    "recommended_action": {
-      "type": "string"
-    },
-    "execution_intent_digest": {
-      "type": "string",
-      "description": "Deterministic digest linking this decision evidence to its evaluated canonical execution intent."
-    },
-    "execution_intent": {
+  "description": "Canonical receipt object returned as signed evidence. v1 is the legacy trust-evaluation receipt; v2 authenticates the final autonomous pre-execution decision and its execution intent.",
+  "oneOf": [
+    {
+      "title": "Legacy Trust Receipt v1",
       "type": "object",
-      "description": "Canonical execution intent v2 bound to the decision when the autonomous contract is used."
+      "additionalProperties": false,
+      "required": [
+        "receipt_id",
+        "issued_at",
+        "oracle_version",
+        "signals_version",
+        "request_hash",
+        "verdict",
+        "confidence",
+        "risk_level",
+        "confidence_band",
+        "risk_factors",
+        "claims_checked",
+        "claims_supported",
+        "claims_uncertain",
+        "decision_basis"
+      ],
+      "properties": {
+        "receipt_id": { "type": "string" },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "oracle_version": { "type": "string" },
+        "signals_version": { "type": "string" },
+        "request_hash": { "type": "string" },
+        "verdict": { "type": "string", "enum": ["accept", "review", "reject"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "confidence_band": { "type": "string", "enum": ["low", "medium", "high"] },
+        "risk_factors": { "type": "array", "items": { "type": "string" } },
+        "claims_checked": { "type": "integer", "minimum": 0 },
+        "claims_supported": { "type": "integer", "minimum": 0 },
+        "claims_uncertain": { "type": "integer", "minimum": 0 },
+        "decision_basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dominant_negatives", "dominant_positives"],
+          "properties": {
+            "dominant_negatives": { "type": "array", "items": { "type": "string" } },
+            "dominant_positives": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
     },
-    "execution_authorization": {
-      "type": ["object", "null"],
-      "description": "Allow-only, short-lived single-use authorization; external hosts provide durable atomic consumption when required."
-    },
-    "policy_summary": {
+    {
+      "title": "Autonomous Decision Receipt v2",
       "type": "object",
-      "additionalProperties": true
-    },
-    "signals": {
-      "type": "object",
-      "additionalProperties": true
+      "additionalProperties": false,
+      "required": [
+        "receipt_schema_version",
+        "receipt_id",
+        "issued_at",
+        "oracle_version",
+        "signals_version",
+        "request_hash",
+        "request_contract",
+        "action_digest",
+        "decision_context_digest",
+        "execution_intent_digest",
+        "execution_intent",
+        "execution_authorization",
+        "policy_authority",
+        "trust_evaluation",
+        "verdict",
+        "risk_level",
+        "final_decision",
+        "policy_result",
+        "policy_violations",
+        "external_evidence",
+        "correlation",
+        "signing"
+      ],
+      "properties": {
+        "receipt_schema_version": { "const": "trust-receipt/v2" },
+        "receipt_id": { "type": "string" },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "oracle_version": { "type": "string" },
+        "signals_version": { "type": "string" },
+        "request_hash": { "type": "string" },
+        "request_contract": { "const": "autonomous_execution" },
+        "action_digest": { "type": "string" },
+        "decision_context_digest": { "type": "string" },
+        "execution_intent_digest": { "type": "string" },
+        "execution_intent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "action_authority",
+            "canonical_action",
+            "evaluation_context",
+            "authoritative_context",
+            "policy_authority"
+          ],
+          "properties": {
+            "schema": { "const": "interai-canonical-execution-intent/v2" },
+            "action_authority": {
+              "type": "string",
+              "enum": ["host_attested_canonical", "caller_proposed_legacy"]
+            },
+            "canonical_action": { "type": "object" },
+            "evaluation_context": { "type": "object" },
+            "authoritative_context": { "type": "object" },
+            "policy_authority": { "type": "object" }
+          }
+        },
+        "execution_authorization": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "schema",
+                "decision_id",
+                "decision",
+                "execution_intent_digest",
+                "issued_at",
+                "expires_at",
+                "single_use"
+              ],
+              "properties": {
+                "schema": { "const": "interai-execution-authorization/v1" },
+                "decision_id": { "type": "string" },
+                "decision": { "const": "allow" },
+                "execution_intent_digest": { "type": "string" },
+                "issued_at": { "type": "string", "format": "date-time" },
+                "expires_at": { "type": "string", "format": "date-time" },
+                "single_use": { "const": true }
+              }
+            }
+          ]
+        },
+        "policy_authority": { "type": "object" },
+        "trust_evaluation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["verdict", "trust_score", "risk_level"],
+          "properties": {
+            "verdict": { "type": "string", "enum": ["accept", "review", "reject"] },
+            "trust_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "risk_level": { "type": "string", "enum": ["low", "medium", "high"] }
+          }
+        },
+        "verdict": { "type": "string", "enum": ["accept", "review", "reject"] },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "final_decision": {
+          "type": "string",
+          "enum": ["allow", "review_required", "block"]
+        },
+        "policy_result": {
+          "type": "string",
+          "enum": ["allow", "review_required", "block"]
+        },
+        "policy_violations": { "type": "array", "items": { "type": "object" } },
+        "external_evidence": { "type": "object" },
+        "correlation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["account_id", "usage_id", "payment_ref"],
+          "properties": {
+            "account_id": { "type": ["string", "null"] },
+            "usage_id": { "type": ["string", "null"] },
+            "payment_ref": { "type": ["string", "null"] }
+          }
+        },
+        "signing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "key_id", "verification_scope"],
+          "properties": {
+            "algorithm": { "const": "hmac-sha256" },
+            "key_id": { "type": ["string", "null"] },
+            "verification_scope": { "const": "service_verifiable" }
+          }
+        }
+      }
     }
-  },
-  "additionalProperties": true
+  ]
 }

@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/InterAILabs/ai-risk-oracle/main/schemas/trust-receipt-lookup.schema.json",
+  "title": "InterAI Trust Receipt Lookup Response",
+  "description": "Privacy-aware response contract for GET /trust/receipts/{receiptId}. Anonymous callers receive only a receipt ID and issuance time. The owning active Bearer account receives complete signed evidence. Accountless x402 clients must retain the evidence returned by the original verification.",
+  "oneOf": [
+    {
+      "title": "Anonymous public summary",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "visibility", "receipt", "full_receipt_requires_owner"],
+      "properties": {
+        "ok": { "const": true },
+        "visibility": { "const": "public_summary" },
+        "receipt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["receipt_id", "issued_at"],
+          "properties": {
+            "receipt_id": { "type": "string" },
+            "issued_at": { "type": "string", "format": "date-time" }
+          }
+        },
+        "full_receipt_requires_owner": { "const": true }
+      }
+    },
+    {
+      "title": "Owner-authenticated signed evidence",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["ok", "receipt", "verification", "metadata"],
+      "properties": {
+        "ok": { "const": true },
+        "receipt": {
+          "type": "object",
+          "required": ["receipt_id", "issued_at"],
+          "properties": {
+            "receipt_id": { "type": "string" },
+            "issued_at": { "type": "string", "format": "date-time" },
+            "receipt_schema_version": {
+              "type": "string",
+              "enum": ["trust-receipt/v1", "trust-receipt/v2"]
+            },
+            "execution_authorization": {
+              "type": ["object", "null"]
+            },
+            "execution_intent_digest": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "signed",
+            "signature",
+            "signature_alg",
+            "verification_scope",
+            "signed_payload",
+            "signature_valid"
+          ],
+          "properties": {
+            "signed": { "type": "boolean" },
+            "signature": { "type": ["string", "null"] },
+            "signature_alg": {
+              "type": ["string", "null"],
+              "enum": ["hmac-sha256", null]
+            },
+            "verification_scope": { "const": "service_verifiable" },
+            "signed_payload": {
+              "type": ["string", "null"],
+              "description": "Opaque canonical bytes represented as a string. Forward unchanged; do not parse and reserialize for signature verification."
+            },
+            "signature_valid": { "type": "boolean" }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "required": [
+            "product_version",
+            "engine_version",
+            "receipt_schema_version",
+            "signature_verification_scope"
+          ],
+          "properties": {
+            "product_version": { "type": "string" },
+            "engine_version": { "type": "string" },
+            "receipt_schema_version": {
+              "type": "string",
+              "enum": ["trust-receipt/v1", "trust-receipt/v2"]
+            },
+            "signature_verification_scope": { "const": "service_verifiable" }
+          },
+          "additionalProperties": true
+        },
+        "presentation": { "type": "object" },
+        "trust": { "type": "object" },
+        "legacy_compatibility": { "type": "object" }
+      }
+    }
+  ]
+}

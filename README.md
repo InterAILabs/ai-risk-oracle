@@ -316,3 +316,17 @@ I’m building InterAI as part of broader work on agent infrastructure, executio
 - npm: https://www.npmjs.com/package/interai-risk-oracle
 - PyPI: https://pypi.org/project/interai-risk-oracle/0.1.3b0/
 - Support / security / collaborations: interailabs@gmail.com
+
+## Receipt privacy (September 2026)
+
+`GET /trust/receipts/{receiptId}` without credentials returns only a
+`public_summary` containing receipt ID and issuance time. It is not signed
+evidence or an execution authorization. Supply an active Bearer key belonging
+to the receipt account for the complete receipt, original opaque
+`verification.signed_payload`, signature and authorization. Invalid keys return
+401; another account receives 404. Responses must not be cached.
+
+Accountless x402/payment-reference clients must preserve the complete evidence
+returned by their original verification; a public lookup cannot recover private
+contents. Demo links also show only the public reference. Do not put API keys
+in receipt URLs. Keep the signed payload bytes unchanged when verifying.
