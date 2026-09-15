@@ -221,8 +221,8 @@ See [docs/trust-receipts.md](docs/trust-receipts.md).
 InterAI is available as a hosted service and can be discovered or called through several public interfaces:
 
 - HTTPS API and OpenAPI 3.1
-- published TypeScript SDK on npm: `interai-risk-oracle@0.1.6-beta` (`beta` dist-tag)
-- published Python SDK on PyPI: `interai-risk-oracle==0.1.6b0`
+- published TypeScript SDK on npm: `interai-risk-oracle@0.1.7-beta` (`beta` dist-tag)
+- published Python SDK on PyPI: `interai-risk-oracle==0.1.7b0`
 - MCP remote
 - A2A endpoint
 - `.well-known` discovery metadata
@@ -234,8 +234,8 @@ SDK package versioning is independent from the hosted runtime version. The hoste
 Install the published SDKs:
 
 ```bash
-npm install interai-risk-oracle@0.1.6-beta
-pip install interai-risk-oracle==0.1.6b0
+npm install interai-risk-oracle@0.1.7-beta
+pip install interai-risk-oracle==0.1.7b0
 ```
 
 Useful starting points:
@@ -316,7 +316,7 @@ I’m building InterAI as part of broader work on agent infrastructure, executio
 - OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
 - MCP: https://api.interailabs.dev/mcp
 - npm: https://www.npmjs.com/package/interai-risk-oracle
-- PyPI: https://pypi.org/project/interai-risk-oracle/0.1.6b0/
+- PyPI: https://pypi.org/project/interai-risk-oracle/0.1.7b0/
 - Support / security / collaborations: interailabs@gmail.com
 
 ## Receipt privacy (September 2026)

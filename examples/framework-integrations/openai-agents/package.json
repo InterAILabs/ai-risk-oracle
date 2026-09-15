@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@openai/agents": "0.18.0",
-    "interai-risk-oracle": "0.1.4-beta",
+    "interai-risk-oracle": "0.1.7-beta",
     "zod": "4.6.5"
   },
   "devDependencies": {
