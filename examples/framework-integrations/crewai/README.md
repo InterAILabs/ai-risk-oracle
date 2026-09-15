@@ -39,23 +39,27 @@ For the authenticated canonical-action contract used here, a plain `recommended_
 - checks the authorization `decision_id` and `execution_intent_digest` bindings;
 - checks `issued_at` / `expires_at` and rejects expired authorization;
 - verifies the exact canonical CrewAI action and host execution context;
-- recomputes the final execution-intent SHA-256 digest;
+- recomputes the execution-intent SHA-256 digest using the public recursive key-sorting JSON contract;
 - fetches the DecisionReceipt and verifies its service-side HMAC signature;
 - consumes the authorization once in the current process before returning normally.
 
-That keeps the authority boundary precise: InterAI supplies the decision and authorization evidence; the CrewAI host validates it; CrewAI remains the executor. A DecisionReceipt is decision evidence, not proof that execution happened. Execution outcome evidence remains separate.
+Any digest or serialization mismatch fails closed. That keeps the authority boundary precise: InterAI supplies the decision and authorization evidence; the CrewAI host validates it; CrewAI remains the executor. A DecisionReceipt is decision evidence, not proof that execution happened. Execution outcome evidence remains separate.
 
 ## Exact action binding
 
 The request uses `interai-canonical-action/v1` and binds the exact CrewAI `tool_name` plus `ctx.tool_input` as canonical `arguments`. It also supplies `interai-host-execution-context/v1`, including a required `INTERAI_WORKSPACE_ID` and the environment used for the execution boundary.
 
-The current synchronous `PRE_TOOL_CALL` frame exposes the same mutable `ctx.tool_input` dictionary CrewAI will pass toward the tool. The adapter reconstructs the final canonical action from that state and refuses authorization if it differs from the intent returned by InterAI.
+The current synchronous `PRE_TOOL_CALL` frame exposes the same mutable `ctx.tool_input` dictionary CrewAI will pass toward the tool. The adapter compares that final action with the host-attested intent returned by InterAI and refuses authorization if it differs.
 
 ### Hook ordering is part of the boundary
 
 CrewAI executes `PRE_TOOL_CALL` hooks in registration order. Register the InterAI gate **after any hook that is allowed to mutate `ctx.tool_input`**. If a later pre-tool hook can change the arguments after InterAI returns, the final action is no longer the one InterAI validated.
 
 For deployments that cannot guarantee this ordering, put the final authorization validation in a host-owned executor wrapper immediately around the side effect instead of relying on a non-terminal hook position.
+
+### Synchronous hook latency
+
+CrewAI's current interception hooks are synchronous. This reference therefore uses a bounded synchronous HTTP call and fails closed on timeout. For latency-sensitive production paths, keep the decision service close to the executor (for example through a local gateway/sidecar) and use tight timeouts rather than turning oracle unavailability into implicit permission.
 
 ## REVIEW_REQUIRED
 
@@ -98,7 +102,7 @@ cd examples/framework-integrations/crewai
 pytest -q test_interai_hook.py
 ```
 
-The focused tests cover 18 logical cases, including:
+The focused tests cover 19 logical cases, including:
 
 - a naive external-oracle `TimeoutError` demonstrating CrewAI's generic fail-open hook behavior;
 - explicit validated ALLOW;
@@ -107,7 +111,7 @@ The focused tests cover 18 logical cases, including:
 - invalid decision payloads;
 - failure inside final ALLOW authorization validation;
 - exact tool/argument binding;
-- execution-intent digest, TTL, and process-local single-use checks;
+- execution-intent digest, TTL, expiry, and process-local single-use checks;
 - changed final arguments failing closed.
 
 All side effects in this example are simulated.
