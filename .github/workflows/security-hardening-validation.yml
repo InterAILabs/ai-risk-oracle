@@ -45,17 +45,12 @@ jobs:
             examples/framework-integrations/crewai/interai_hook.py \
             examples/framework-integrations/crewai/test_interai_hook.py
 
-      - name: Validate TypeScript SDK
+      - name: Validate and build TypeScript SDK
+        working-directory: sdk/typescript
         run: |
-          npx --yes -p typescript@5.8.3 tsc \
-            --noEmit \
-            --strict \
-            --skipLibCheck \
-            --target ES2022 \
-            --lib ES2022,DOM \
-            --module NodeNext \
-            --moduleResolution NodeNext \
-            sdk/typescript/index.ts
+          npm ci
+          npm run typecheck
+          npm run build
 
       - name: Validate execution boundary
         run: node --test tests/execution-boundary.test.mjs
