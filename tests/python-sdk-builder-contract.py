@@ -50,10 +50,17 @@ def fake_urlopen(request: object, timeout: float, context: object) -> FakeRespon
             "request_contract": "autonomous_execution",
             "recommended_action": "allow",
         })
+    if url.endswith("/trust/receipts/public-only"):
+        return FakeResponse({
+            "ok": True,
+            "visibility": "public_summary",
+            "receipt": {"receipt_id": "public-only", "issued_at": "2026-09-15T00:00:00Z"},
+            "full_receipt_requires_owner": True,
+        })
     return FakeResponse({"ok": True})
 
 
-assert SDK_VERSION == "0.1.6-beta"
+assert SDK_VERSION == "0.1.7-beta"
 
 client = InterAIRiskOracleClient(
     base_url="https://interai.invalid/",
@@ -61,8 +68,10 @@ client = InterAIRiskOracleClient(
 )
 
 with patch("urllib.request.urlopen", side_effect=fake_urlopen):
-    client.onboard(name="builder-test")
+    client.onboard(name="builder-test", scope="demo_trial")
     assert client.api_key == "builder-key"
+    onboard_body = json.loads(captured[-1][0].data.decode("utf-8"))
+    assert onboard_body["scope"] == "demo_trial"
 
     client.me()
     me_request, me_timeout, _ = captured[-1]
@@ -126,5 +135,12 @@ with patch("urllib.request.urlopen", side_effect=fake_urlopen):
         assert error.code == "service_unavailable"
         assert error.method == "GET"
         assert error.path == "/pricing"
+
+    anonymous = InterAIRiskOracleClient(base_url="https://interai.invalid/")
+    try:
+        anonymous.get_trust_receipt("public-only")
+        raise AssertionError("Expected complete receipt ownership failure")
+    except ValueError as error:
+        assert "owning account API key" in str(error)
 
 print("[OK] public Python builder contract")
