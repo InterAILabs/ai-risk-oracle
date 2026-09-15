@@ -1,5 +1,16 @@
 # Changelog
 
+## SDK packages 0.1.4-beta / 0.1.4b0
+
+- Add builder-safe onboarding helpers that retain the issued API key.
+- Add account inspection helpers for `/me`, ledger, and usage.
+- Add quote and prepaid top-up create/status/confirm helpers.
+- Add bounded batch verification to the public SDK surfaces.
+- Add configurable request timeouts and structured HTTP error metadata.
+- Preserve the existing fail-closed execution-intent binding, receipt verification, and durable replay contract.
+- Add public CI covering TypeScript typecheck/build, offline builder contracts, durable execution-boundary tests, npm package inspection, Python compilation/contracts, and Python package build.
+- Keep the hosted service/discovery runtime version at `0.1.3-beta`; this entry versions SDK distribution artifacts only.
+
 ## v0.1.3-beta
 
 - Publish fast pricing at `0.010000 USDC` and semantic pricing at
