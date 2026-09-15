@@ -83,6 +83,69 @@ def _allow_payload(request: dict[str, Any], *, expired: bool = False) -> dict[st
     }
 
 
+class _FakeResponse:
+    def __init__(self, payload: dict[str, Any], status_code: int = 200):
+        self._payload = deepcopy(payload)
+        self.status_code = status_code
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise requests.HTTPError(f"HTTP {self.status_code}")
+
+    def json(self) -> dict[str, Any]:
+        return deepcopy(self._payload)
+
+
+def _install_receipt_transport(
+    monkeypatch,
+    payload: dict[str, Any],
+    *,
+    signature_valid: bool = True,
+    receipt_authorization: dict[str, Any] | None = None,
+    signed_payload: str = '{"opaque":"bytes-must-not-be-reserialized"}',
+) -> list[dict[str, Any]]:
+    receipt = {
+        "receipt_schema_version": "trust-receipt/v2",
+        "receipt_id": payload["trust_receipt_id"],
+        "execution_intent_digest": payload["execution_intent_digest"],
+        "execution_authorization": deepcopy(
+            receipt_authorization
+            if receipt_authorization is not None
+            else payload["execution_authorization"]
+        ),
+        "final_decision": "allow",
+    }
+    lookup = {
+        "ok": True,
+        "receipt": receipt,
+        "verification": {
+            "signed": True,
+            "signature": "deadbeef",
+            "signature_alg": "hmac-sha256",
+            "signed_payload": signed_payload,
+            "signature_valid": True,
+        },
+    }
+    verification_requests: list[dict[str, Any]] = []
+
+    def fake_get(url, *, headers, timeout):
+        assert url.endswith("/trust/receipts/receipt-1")
+        assert headers["Authorization"] == "Bearer test-key"
+        assert timeout == 10
+        return _FakeResponse(lookup)
+
+    def fake_post(url, *, headers, json, timeout):
+        assert url.endswith("/trust/verify-signature")
+        assert headers["Authorization"] == "Bearer test-key"
+        assert timeout == 10
+        verification_requests.append(deepcopy(json))
+        return _FakeResponse({"valid": signature_valid})
+
+    monkeypatch.setattr(interai_hook.requests, "get", fake_get)
+    monkeypatch.setattr(interai_hook.requests, "post", fake_post)
+    return verification_requests
+
+
 def test_naive_timeout_is_fail_open_in_crewai_hook_dispatch():
     def naive_external_oracle(_ctx):
         raise TimeoutError("oracle timed out")
@@ -247,3 +310,94 @@ def test_changed_final_action_fails_closed(monkeypatch):
     monkeypatch.setattr(interai_hook, "_verify_receipt_signature", lambda *_args: None)
     with pytest.raises(interai_hook.InvalidInterAIDecision, match="differs"):
         interai_hook.validate_allow_for_dispatch(payload, request)
+
+
+def test_real_v2_receipt_verification_preserves_opaque_signed_payload(monkeypatch):
+    request = interai_hook._build_verify_request(_ctx())
+    payload = _allow_payload(request)
+    opaque = '{"z":1,"amount":250.00,"a":"keep-exactly"}'
+    verification_requests = _install_receipt_transport(
+        monkeypatch,
+        payload,
+        signed_payload=opaque,
+    )
+
+    interai_hook.validate_allow_for_dispatch(payload, request)
+
+    assert len(verification_requests) == 1
+    sent = verification_requests[0]
+    assert sent["receipt_id"] == "receipt-1"
+    assert sent["signed_payload"] == opaque
+    assert sent["signature"] == "deadbeef"
+    assert sent["signature_alg"] == "hmac-sha256"
+    assert sent["receipt"]["execution_authorization"] == payload["execution_authorization"]
+
+
+def test_invalid_receipt_signature_fails_closed(monkeypatch):
+    request = interai_hook._build_verify_request(_ctx())
+    payload = _allow_payload(request)
+    _install_receipt_transport(monkeypatch, payload, signature_valid=False)
+
+    with pytest.raises(interai_hook.InvalidInterAIDecision, match="signature is invalid"):
+        interai_hook.validate_allow_for_dispatch(payload, request)
+
+
+def test_signed_receipt_authorization_mismatch_fails_closed(monkeypatch):
+    request = interai_hook._build_verify_request(_ctx())
+    payload = _allow_payload(request)
+    altered = deepcopy(payload["execution_authorization"])
+    altered["expires_at"] = (
+        datetime.now(timezone.utc) + timedelta(minutes=10)
+    ).isoformat()
+    _install_receipt_transport(
+        monkeypatch,
+        payload,
+        receipt_authorization=altered,
+    )
+
+    with pytest.raises(
+        interai_hook.InvalidInterAIDecision,
+        match="Authorization differs from the signed receipt",
+    ):
+        interai_hook.validate_allow_for_dispatch(payload, request)
+
+
+def test_nested_host_attested_context_is_bound_exactly(monkeypatch):
+    request = interai_hook._build_verify_request(_ctx())
+    request["execution_context"]["delegation"] = {
+        "principal": {"workspace": "workspace-test", "roles": ["buyer", "operator"]},
+        "constraints": {"max_amount_usd": 500, "regions": ["AR", "UY"]},
+    }
+    payload = _allow_payload(request)
+    _install_receipt_transport(monkeypatch, payload)
+
+    interai_hook.validate_allow_for_dispatch(payload, request)
+
+    tampered_request = deepcopy(request)
+    tampered_request["execution_context"]["delegation"]["constraints"][
+        "max_amount_usd"
+    ] = 501
+    interai_hook._consumed_authorizations.clear()
+    with pytest.raises(interai_hook.InvalidInterAIDecision, match="Execution context mismatch"):
+        interai_hook.validate_allow_for_dispatch(payload, tampered_request)
+
+
+def test_expired_authorization_blocks_crewai_before_dispatch(monkeypatch):
+    signature_checked = False
+
+    def should_not_verify_signature(*_args):
+        nonlocal signature_checked
+        signature_checked = True
+        raise AssertionError("expired authorization must fail before signature lookup")
+
+    def provider(request):
+        return _allow_payload(request, expired=True)
+
+    monkeypatch.setattr(interai_hook, "_verify_receipt_signature", should_not_verify_signature)
+    gate = build_interai_gate(provider, interai_hook.validate_allow_for_dispatch)
+
+    blocked, executed = _run_like_crewai(gate)
+
+    assert blocked is True
+    assert executed == []
+    assert signature_checked is False
