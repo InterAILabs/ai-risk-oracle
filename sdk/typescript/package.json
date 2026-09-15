@@ -1,6 +1,6 @@
 {
   "name": "interai-risk-oracle",
-  "version": "0.1.6-beta",
+  "version": "0.1.7-beta",
   "description": "TypeScript client for InterAI's independent pre-execution decision layer for consequential agent actions.",
   "homepage": "https://api.interailabs.dev/",
   "repository": {
@@ -12,12 +12,12 @@
     "url": "https://github.com/InterAILabs/ai-risk-oracle/issues"
   },
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/public.js",
+  "types": "./dist/public.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/public.d.ts",
+      "import": "./dist/public.js"
     }
   },
   "files": [
