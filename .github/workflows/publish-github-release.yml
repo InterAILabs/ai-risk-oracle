@@ -1,0 +1,114 @@
+name: Publish GitHub SDK release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact TypeScript SDK version to release, for example 0.1.6-beta
+        required: true
+        type: string
+  push:
+    branches:
+      - "publish/release-*"
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Publish SDK release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Require publish branch to match current main
+        if: github.event_name == 'push'
+        run: |
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+
+      - name: Resolve package versions
+        id: versions
+        shell: bash
+        run: |
+          ts_version="$(node -p "require('./sdk/typescript/package.json').version")"
+          py_version="$(python - <<'PY'
+          import pathlib, re
+          text = pathlib.Path('python/pyproject.toml').read_text()
+          match = re.search(r'^version\s*=\s*"([^"]+)"', text, re.M)
+          if not match:
+              raise SystemExit('python package version not found')
+          print(match.group(1))
+          PY
+          )"
+          echo "ts_version=$ts_version" >> "$GITHUB_OUTPUT"
+          echo "py_version=$py_version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$ts_version" >> "$GITHUB_OUTPUT"
+
+      - name: Confirm requested version
+        if: github.event_name == 'workflow_dispatch'
+        run: test "${{ steps.versions.outputs.ts_version }}" = "${{ inputs.version }}"
+
+      - name: Require matching changelog entry
+        shell: bash
+        run: |
+          grep -F "## SDK packages ${{ steps.versions.outputs.ts_version }} / ${{ steps.versions.outputs.py_version }}" CHANGELOG.md
+
+      - name: Refuse an existing tag or release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.versions.outputs.tag }}
+        shell: bash
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists; refusing to overwrite it."
+            exit 1
+          fi
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; refusing to overwrite it."
+            exit 1
+          fi
+
+      - name: Build release notes from canonical changelog
+        env:
+          TS_VERSION: ${{ steps.versions.outputs.ts_version }}
+          PY_VERSION: ${{ steps.versions.outputs.py_version }}
+        shell: bash
+        run: |
+          cat > release-notes.md <<EOF
+          # InterAI Risk Oracle SDK $TS_VERSION
+
+          This is an SDK/public-surface package release. The hosted InterAI runtime has an independent version lifecycle.
+
+          Canonical API: https://api.interailabs.dev
+
+          - TypeScript: \`npm install interai-risk-oracle@$TS_VERSION\`
+          - Python: \`pip install interai-risk-oracle==$PY_VERSION\`
+          - Source: https://github.com/InterAILabs/ai-risk-oracle
+
+          ## Changes
+          EOF
+          awk -v heading="## SDK packages $TS_VERSION / $PY_VERSION" '
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md >> release-notes.md
+
+      - name: Publish GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.versions.outputs.tag }}
+          TS_VERSION: ${{ steps.versions.outputs.ts_version }}
+        shell: bash
+        run: |
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "SDK $TAG — InterAI Risk Oracle" \
+            --prerelease \
+            --notes-file release-notes.md
