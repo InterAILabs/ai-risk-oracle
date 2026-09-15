@@ -46,10 +46,10 @@ AI infrastructure / Autonomous Execution Gateway
 
 Links:
 
-- Homepage: https://ai-risk-oracle.fly.dev
-- OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- Pricing: https://ai-risk-oracle.fly.dev/pricing
-- Onboard: https://ai-risk-oracle.fly.dev/onboard
+- Homepage: https://api.interailabs.dev
+- OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+- Pricing: https://api.interailabs.dev/pricing
+- Onboard: https://api.interailabs.dev/onboard
 - GitHub: https://github.com/InterAILabs/ai-risk-oracle
 
 What not to claim:
@@ -86,10 +86,10 @@ InterAI Risk Oracle exposes pricing and payment metadata for paid verification f
 
 Links:
 
-- Pricing: https://ai-risk-oracle.fly.dev/pricing
-- Verify endpoint: https://ai-risk-oracle.fly.dev/verify
-- AI service descriptor: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Autonomous adoption descriptor: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Pricing: https://api.interailabs.dev/pricing
+- Verify endpoint: https://api.interailabs.dev/verify
+- AI service descriptor: https://api.interailabs.dev/.well-known/ai-service.json
+- Autonomous adoption descriptor: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 
 What not to claim:
 
@@ -133,8 +133,8 @@ Links:
 
 - Docs: https://github.com/InterAILabs/ai-risk-oracle
 - API reference: https://github.com/InterAILabs/ai-risk-oracle/blob/main/docs/api-reference.md
-- OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- Onboard: https://ai-risk-oracle.fly.dev/onboard
+- OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+- Onboard: https://api.interailabs.dev/onboard
 
 ## GitHub/Release Discovery Blurb
 

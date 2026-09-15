@@ -4,7 +4,7 @@ import { createTool } from "@mastra/core/tools"
 import { z } from "zod"
 import { DecisionBindings, canonicalPaymentIntent, type PaymentArgs } from "./intent-binding.js"
 
-const INTERAI_BASE_URL = process.env.INTERAI_BASE_URL ?? "https://ai-risk-oracle.fly.dev"
+const INTERAI_BASE_URL = process.env.INTERAI_BASE_URL ?? "https://api.interailabs.dev"
 const INTERAI_API_KEY = process.env.INTERAI_API_KEY
 if (!INTERAI_API_KEY) throw new Error("Set INTERAI_API_KEY before running this example")
 

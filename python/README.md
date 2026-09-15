@@ -16,7 +16,7 @@ The client can onboard a builder, retain the returned API key, inspect account s
 from interai_risk_oracle import InterAIRiskOracleClient
 
 client = InterAIRiskOracleClient(
-    base_url="https://ai-risk-oracle.fly.dev",
+    base_url="https://api.interailabs.dev",
 )
 
 onboarding = client.onboard(name="my-agent")
@@ -37,7 +37,7 @@ import os
 from interai_risk_oracle import InterAIRiskOracleClient
 
 client = InterAIRiskOracleClient(
-    base_url="https://ai-risk-oracle.fly.dev",
+    base_url="https://api.interailabs.dev",
     api_key=os.environ["INTERAI_API_KEY"],
 )
 

@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://ai-risk-oracle.fly.dev/"
+Homepage = "https://api.interailabs.dev/"
 Documentation = "https://github.com/InterAILabs/ai-risk-oracle#readme"
 Repository = "https://github.com/InterAILabs/ai-risk-oracle"
 Issues = "https://github.com/InterAILabs/ai-risk-oracle/issues"

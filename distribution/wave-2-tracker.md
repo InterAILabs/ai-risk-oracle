@@ -51,9 +51,9 @@ c65acb6c-c60c-4067-a7dc-e339f588c3b8 and
 10a30a3d-8631-4ca5-8340-c2315a848821.
 
 Service: InterAI Risk Oracle
-Demo: https://ai-risk-oracle.fly.dev/demo
-Pricing: https://ai-risk-oracle.fly.dev/pricing
-OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+Demo: https://api.interailabs.dev/demo
+Pricing: https://api.interailabs.dev/pricing
+OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
 ```
 
 - Rules:

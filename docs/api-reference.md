@@ -3,7 +3,7 @@
 Base URL:
 
 ```text
-https://ai-risk-oracle.fly.dev
+https://api.interailabs.dev
 ```
 
 ## Authentication
@@ -19,8 +19,8 @@ when retrying the same business operation after a timeout.
 Humans and agents can discover pricing and onboarding directly:
 
 ```text
-GET https://ai-risk-oracle.fly.dev/pricing
-POST https://ai-risk-oracle.fly.dev/onboard
+GET https://api.interailabs.dev/pricing
+POST https://api.interailabs.dev/onboard
 ```
 
 Email is for support, security, enterprise access, partnerships, or manual

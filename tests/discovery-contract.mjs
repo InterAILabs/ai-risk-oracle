@@ -19,12 +19,12 @@ assert.equal(Object.hasOwn(card, "url"), false, "A2A 1.0 card must use supported
 
 assert.ok(Array.isArray(card.supportedInterfaces) && card.supportedInterfaces.length > 0)
 const primaryInterface = card.supportedInterfaces[0]
-assert.equal(primaryInterface.url, "https://ai-risk-oracle.fly.dev/a2a/v1")
+assert.equal(primaryInterface.url, "https://api.interailabs.dev/a2a/v1")
 assert.equal(primaryInterface.protocolBinding, "JSONRPC")
 assert.equal(primaryInterface.protocolVersion, "1.0")
 
-assert.equal(card.documentationUrl, "https://ai-risk-oracle.fly.dev/.well-known/openapi.json")
-assert.equal(card.provider?.url, "https://ai-risk-oracle.fly.dev")
+assert.equal(card.documentationUrl, "https://api.interailabs.dev/.well-known/openapi.json")
+assert.equal(card.provider?.url, "https://api.interailabs.dev")
 assert.equal(card.capabilities?.streaming, false)
 assert.equal(card.capabilities?.pushNotifications, false)
 
@@ -39,9 +39,9 @@ assert.ok(skillIds.has("verify_batch"))
 
 assert.equal(
   service.endpoints?.a2a_v1_agent_card,
-  "https://ai-risk-oracle.fly.dev/.well-known/agent-card.json"
+  "https://api.interailabs.dev/.well-known/agent-card.json"
 )
 assert.equal(registry.remotes?.[0]?.type, "streamable-http")
-assert.equal(registry.remotes?.[0]?.url, "https://ai-risk-oracle.fly.dev/mcp")
+assert.equal(registry.remotes?.[0]?.url, "https://api.interailabs.dev/mcp")
 
 console.log("Public discovery contract OK")

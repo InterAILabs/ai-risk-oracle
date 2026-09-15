@@ -18,7 +18,7 @@ channel below needs an operator submission, review, or follow-up.
 | Developer API directories | Reach developers searching for paid APIs, AI infrastructure, risk, governance, and agent tooling. | Good fit if listed as developer infrastructure rather than consumer AI app. | API description, OpenAPI URL, docs URL, pricing/onboarding URL, SDK links. | Public assets exist. | Need account creation and directory-specific categories. | Submit to developer API directories after GitHub release is final. | Manual first pass. | P1 |
 | A2A and agent-card directories | Make the agent card discoverable where A2A catalogs exist. | Conditional fit. InterAI exposes an agent card and A2A endpoint, but directories may be immature. | Agent card URL, A2A endpoint, skill list, examples, security notes. | Hosted agent card exists. | Need identify active A2A directories and their submission formats. | Monitor ecosystem and submit only to credible A2A indexes. | Manual research now; automate later if directories stabilize. | P2 |
 | Search, indexing, and SEO | Make docs and hosted metadata easy to find by humans and crawlers. | Strong fit. The public repo and hosted `.well-known` endpoints are crawlable. | README, docs, metadata URLs, repository topics, backlinks, domain plan. | Public repo content is ready; Fly URL works. | No custom domain yet; limited external backlinks. | Add GitHub topics, release, directory backlinks, and decide domain route. | Mixed: manual setup, automated checks. | P0 |
-| Future domain-owned path | Move from Fly subdomain to a durable brand-controlled endpoint. | Strong fit for credibility and long-term distribution. | Domain, DNS, TLS, canonical URL policy, redirects, metadata update plan. | Hosted service runs on `ai-risk-oracle.fly.dev`. | Need domain choice, DNS ownership, Fly cert setup, canonical URL migration plan. | Choose domain route and plan migration after beta distribution starts. | Manual infrastructure step. | P1 |
+| Future domain-owned path | Move from Fly subdomain to a durable brand-controlled endpoint. | Strong fit for credibility and long-term distribution. | Domain, DNS, TLS, canonical URL policy, redirects, metadata update plan. | Hosted service runs on `api.interailabs.dev`. | Need domain choice, DNS ownership, Fly cert setup, canonical URL migration plan. | Choose domain route and plan migration after beta distribution starts. | Manual infrastructure step. | P1 |
 
 ## Execution Order
 
@@ -68,7 +68,7 @@ Use hosted `/pricing` as the source of truth for:
 
 ## Domain Recommendation
 
-### Continue With `ai-risk-oracle.fly.dev`
+### Continue With `api.interailabs.dev`
 
 Pros:
 
@@ -110,7 +110,7 @@ Cons:
 
 ### Recommendation
 
-Use `ai-risk-oracle.fly.dev` for the current `v0.1.0-beta` distribution wave.
+Use `api.interailabs.dev` for the current `v0.1.0-beta` distribution wave.
 Plan `oracle.interailabs.com` as the next canonical domain for this product, with
 `api.interailabs.com` reserved for future platform-level APIs.
 

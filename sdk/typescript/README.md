@@ -16,7 +16,7 @@ The client can onboard a builder, retain the returned API key, inspect the accou
 import { InterAIRiskOracleClient } from "interai-risk-oracle"
 
 const client = new InterAIRiskOracleClient({
-  baseUrl: "https://ai-risk-oracle.fly.dev"
+  baseUrl: "https://api.interailabs.dev"
 })
 
 const onboarding = await client.onboard({
@@ -36,7 +36,7 @@ Top-up helpers cover `createTopup()`, `topupStatus()`, and `confirmTopup()`. Acc
 
 ```ts
 const client = new InterAIRiskOracleClient({
-  baseUrl: "https://ai-risk-oracle.fly.dev",
+  baseUrl: "https://api.interailabs.dev",
   apiKey: process.env.INTERAI_API_KEY
 })
 

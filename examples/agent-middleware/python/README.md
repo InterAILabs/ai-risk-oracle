@@ -11,7 +11,7 @@ cp .env.example .env
 
 ```env
 INTERAI_API_KEY=YOUR_API_KEY
-INTERAI_BASE_URL=https://ai-risk-oracle.fly.dev
+INTERAI_BASE_URL=https://api.interailabs.dev
 ```
 
 Do not commit `.env` or real API keys.
@@ -20,7 +20,7 @@ Do not commit `.env` or real API keys.
 
 ```bash
 export INTERAI_API_KEY="YOUR_API_KEY"
-export INTERAI_BASE_URL="https://ai-risk-oracle.fly.dev"
+export INTERAI_BASE_URL="https://api.interailabs.dev"
 python example_agent.py
 ```
 
@@ -28,7 +28,7 @@ PowerShell:
 
 ```powershell
 $env:INTERAI_API_KEY="YOUR_API_KEY"
-$env:INTERAI_BASE_URL="https://ai-risk-oracle.fly.dev"
+$env:INTERAI_BASE_URL="https://api.interailabs.dev"
 python example_agent.py
 ```
 

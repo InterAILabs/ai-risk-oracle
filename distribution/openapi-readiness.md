@@ -2,8 +2,8 @@
 
 InterAI Risk Oracle exposes the hosted OpenAPI contract at:
 
-- `https://ai-risk-oracle.fly.dev/.well-known/openapi.json`
-- `https://ai-risk-oracle.fly.dev/openapi.json`
+- `https://api.interailabs.dev/.well-known/openapi.json`
+- `https://api.interailabs.dev/openapi.json`
 
 The hosted contract is OpenAPI 3.1.0.
 

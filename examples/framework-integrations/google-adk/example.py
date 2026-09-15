@@ -6,7 +6,7 @@ import requests
 from google.adk.agents import LlmAgent
 from google.adk.tools import BaseTool, ToolContext
 
-INTERAI_BASE_URL = os.environ.get("INTERAI_BASE_URL", "https://ai-risk-oracle.fly.dev")
+INTERAI_BASE_URL = os.environ.get("INTERAI_BASE_URL", "https://api.interailabs.dev")
 INTERAI_API_KEY = os.environ["INTERAI_API_KEY"]
 
 

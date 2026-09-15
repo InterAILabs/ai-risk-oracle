@@ -13,7 +13,7 @@ from urllib.parse import quote
 import requests
 from crewai.hooks import HookAborted, InterceptionPoint, ToolCallHookContext, on
 
-INTERAI_BASE_URL = os.environ.get("INTERAI_BASE_URL", "https://ai-risk-oracle.fly.dev")
+INTERAI_BASE_URL = os.environ.get("INTERAI_BASE_URL", "https://api.interailabs.dev")
 Decision = Literal["allow", "review_required", "block"]
 DecisionProvider = Callable[[dict[str, Any]], Mapping[str, Any]]
 AllowValidator = Callable[[Mapping[str, Any], dict[str, Any]], None]

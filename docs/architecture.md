@@ -130,10 +130,10 @@ That split is deliberate: the public contract should be inspectable enough to in
 
 ## See it operate
 
-- Action Boundary Lab: https://ai-risk-oracle.fly.dev/lab
-- Controlled safe demo: https://ai-risk-oracle.fly.dev/demo
-- OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- MCP remote: https://ai-risk-oracle.fly.dev/mcp
+- Action Boundary Lab: https://api.interailabs.dev/lab
+- Controlled safe demo: https://api.interailabs.dev/demo
+- OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+- MCP remote: https://api.interailabs.dev/mcp
 - Policy details: [policies.md](policies.md)
 - External evidence: [external-evidence.md](external-evidence.md)
 - Trust receipts: [trust-receipts.md](trust-receipts.md)

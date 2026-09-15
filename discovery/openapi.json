@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://ai-risk-oracle.fly.dev"
+      "url": "https://api.interailabs.dev"
     }
   ],
   "paths": {

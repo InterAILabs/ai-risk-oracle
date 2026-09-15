@@ -15,7 +15,7 @@ Public discovery files live in [../discovery](../discovery):
 The A2A 1.0 discovery path is:
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/agent-card.json
+https://api.interailabs.dev/.well-known/agent-card.json
 ```
 
 The public `a2a-card.json` is kept in sync with that hosted contract and declares

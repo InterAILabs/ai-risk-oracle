@@ -46,14 +46,14 @@ governance queue, or human operator.
 
 ## Public Links
 
-- Hosted service: https://ai-risk-oracle.fly.dev
-- Pricing: https://ai-risk-oracle.fly.dev/pricing
-- Onboard: https://ai-risk-oracle.fly.dev/onboard
-- OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- AI service descriptor: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Discovery bundle: https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json
-- Agent card: https://ai-risk-oracle.fly.dev/.well-known/agent.json
-- Autonomous adoption: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Hosted service: https://api.interailabs.dev
+- Pricing: https://api.interailabs.dev/pricing
+- Onboard: https://api.interailabs.dev/onboard
+- OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+- AI service descriptor: https://api.interailabs.dev/.well-known/ai-service.json
+- Discovery bundle: https://api.interailabs.dev/.well-known/discovery-bundle.json
+- Agent card: https://api.interailabs.dev/.well-known/agent.json
+- Autonomous adoption: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 
 ## Manual Operator Checklist
 

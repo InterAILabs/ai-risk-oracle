@@ -55,4 +55,4 @@ The current beta price remains:
 Base USDC
 ```
 
-Use `https://ai-risk-oracle.fly.dev/pricing` as the source of truth.
+Use `https://api.interailabs.dev/pricing` as the source of truth.

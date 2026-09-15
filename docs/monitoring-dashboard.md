@@ -25,7 +25,7 @@ public production endpoint.
 Optional environment variables:
 
 ```bash
-IARO_BASE_URL=https://ai-risk-oracle.fly.dev
+IARO_BASE_URL=https://api.interailabs.dev
 IARO_ADMIN_TOKEN=YOUR_ADMIN_TOKEN
 IARO_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 IARO_GITHUB_REPO=InterAILabs/ai-risk-oracle
@@ -300,7 +300,7 @@ http://127.0.0.1:8787/api/diagnostics
 Check:
 
 - `fetchAvailable`: whether the current Node runtime exposes `globalThis.fetch`
-- `dns`: whether `ai-risk-oracle.fly.dev` and `api.github.com` resolve
+- `dns`: whether `api.interailabs.dev` and `api.github.com` resolve
 - `outboundTests`: whether local GET requests to production health and GitHub API
   succeed
 - `lastError`: the latest safe error details

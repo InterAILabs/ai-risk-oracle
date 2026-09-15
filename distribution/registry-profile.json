@@ -5,9 +5,9 @@
   "category": "pre_execution_decision_infrastructure",
   "service_type": "pre_execution_decision_layer",
   "submission_status": "candidate_not_submitted",
-  "homepage_url": "https://ai-risk-oracle.fly.dev",
+  "homepage_url": "https://api.interailabs.dev",
   "repository_url": "https://github.com/InterAILabs/ai-risk-oracle",
-  "hosted_base_url": "https://ai-risk-oracle.fly.dev",
+  "hosted_base_url": "https://api.interailabs.dev",
   "primary_path": [
     "discover",
     "pricing",
@@ -17,14 +17,14 @@
     "store_receipt"
   ],
   "endpoints": {
-    "pricing": "https://ai-risk-oracle.fly.dev/pricing",
-    "onboard": "https://ai-risk-oracle.fly.dev/onboard",
-    "verify": "https://ai-risk-oracle.fly.dev/verify",
-    "openapi": "https://ai-risk-oracle.fly.dev/.well-known/openapi.json",
-    "agent_card": "https://ai-risk-oracle.fly.dev/.well-known/agent.json",
-    "ai_service": "https://ai-risk-oracle.fly.dev/.well-known/ai-service.json",
-    "discovery_bundle": "https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json",
-    "autonomous_adoption": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json"
+    "pricing": "https://api.interailabs.dev/pricing",
+    "onboard": "https://api.interailabs.dev/onboard",
+    "verify": "https://api.interailabs.dev/verify",
+    "openapi": "https://api.interailabs.dev/.well-known/openapi.json",
+    "agent_card": "https://api.interailabs.dev/.well-known/agent.json",
+    "ai_service": "https://api.interailabs.dev/.well-known/ai-service.json",
+    "discovery_bundle": "https://api.interailabs.dev/.well-known/discovery-bundle.json",
+    "autonomous_adoption": "https://api.interailabs.dev/.well-known/autonomous-adoption.json"
   },
   "capabilities": [
     "pre_execution_verification",
@@ -57,7 +57,7 @@
   },
   "pricing": {
     "model": "hosted_api_self_serve_metadata",
-    "pricing_url": "https://ai-risk-oracle.fly.dev/pricing",
+    "pricing_url": "https://api.interailabs.dev/pricing",
     "supports_prepaid_api_key": true,
     "supports_trial": true,
     "supports_x402": true,

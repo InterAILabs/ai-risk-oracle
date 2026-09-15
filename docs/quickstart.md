@@ -13,8 +13,8 @@ pricing -> onboard/API key/trial or x402 -> verify -> receipt
 Discover pricing and onboarding from the hosted API:
 
 ```text
-https://ai-risk-oracle.fly.dev/pricing
-https://ai-risk-oracle.fly.dev/onboard
+https://api.interailabs.dev/pricing
+https://api.interailabs.dev/onboard
 ```
 
 Use self-serve onboarding for an API key and trial/prepaid balance, or use x402 where supported. Email interailabs@gmail.com is available for support, security, enterprise, partnerships, or manual integration help; it is not required for the default self-serve path.
@@ -22,7 +22,7 @@ Use self-serve onboarding for an API key and trial/prepaid balance, or use x402 
 ## 2. Verify Before Execution
 
 ```bash
-curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
+curl -sS -X POST https://api.interailabs.dev/verify \
   -H "Authorization: Bearer <interai_credential>" \
   -H "Content-Type: application/json" \
   -H "X-Idempotency-Key: quickstart-operation-1" \

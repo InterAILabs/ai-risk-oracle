@@ -18,7 +18,7 @@ cp .env.example .env
 
 ```env
 INTERAI_API_KEY=YOUR_API_KEY
-INTERAI_BASE_URL=https://ai-risk-oracle.fly.dev
+INTERAI_BASE_URL=https://api.interailabs.dev
 ```
 
 Do not commit `.env` or real API keys.
@@ -33,7 +33,7 @@ PowerShell:
 
 ```powershell
 $env:INTERAI_API_KEY="YOUR_API_KEY"
-$env:INTERAI_BASE_URL="https://ai-risk-oracle.fly.dev"
+$env:INTERAI_BASE_URL="https://api.interailabs.dev"
 npm run start
 ```
 
