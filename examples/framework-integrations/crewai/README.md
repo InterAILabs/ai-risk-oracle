@@ -11,7 +11,13 @@ CrewAI PRE_TOOL_CALL
       v
     InterAI
       |
-      +-- ALLOW --------------------> return normally -> CrewAI may execute
+      +-- ALLOW -> verify DecisionReceipt + ExecutionAuthorization
+      |             + exact action/context binding
+      |             + intent digest
+      |             + TTL + single-use
+      |             + receipt signature
+      |             -> return normally -> CrewAI may execute
+      |
       +-- REVIEW_REQUIRED ----------> HookAborted ----> no execution now
       +-- BLOCK --------------------> HookAborted ----> no execution
       +-- timeout / 5xx / bad JSON -> HookAborted ----> no execution
@@ -21,28 +27,66 @@ CrewAI PRE_TOOL_CALL
 
 CrewAI intentionally treats ordinary hook exceptions as fail-open: exceptions other than `HookAborted` are swallowed so a buggy user hook does not break the framework. That is a reasonable generic framework default, but it is unsafe for an external authorization dependency if transport or validation errors are allowed to escape.
 
-The InterAI adapter therefore has one execution-authorizing path only: a valid response where both `recommended_action` and `policy_result` resolve to `allow`. `block`, `review_required`, conflicting decisions, missing fields, unknown enum values, timeouts, connection failures, HTTP errors, malformed JSON, and other ordinary provider failures are converted into `HookAborted` before the tool runs.
+The InterAI adapter catches oracle, receipt, parsing, binding, and authorization failures inside the adapter and translates them into `HookAborted`. An outage or malformed response therefore cannot accidentally become permission to execute.
 
-This preserves the authority boundary:
+## ALLOW is necessary, but not sufficient
 
-- InterAI returns `allow`, `review_required`, or `block`.
-- The CrewAI hook enforces that decision at the pre-tool seam.
-- CrewAI remains the executor.
-- A DecisionReceipt is decision evidence, not proof that the tool executed.
+For the authenticated canonical-action contract used here, a plain `recommended_action == "allow"` is not the dispatch boundary. Before returning control to CrewAI, this example also:
+
+- requires `request_contract == "autonomous_execution"`;
+- requires a host-attested `execution_intent`;
+- requires `execution_authorization` with `decision == "allow"` and `single_use == true`;
+- checks the authorization `decision_id` and `execution_intent_digest` bindings;
+- checks `issued_at` / `expires_at` and rejects expired authorization;
+- verifies the exact canonical CrewAI action and host execution context;
+- recomputes the final execution-intent SHA-256 digest;
+- fetches the DecisionReceipt and verifies its service-side HMAC signature;
+- consumes the authorization once in the current process before returning normally.
+
+That keeps the authority boundary precise: InterAI supplies the decision and authorization evidence; the CrewAI host validates it; CrewAI remains the executor. A DecisionReceipt is decision evidence, not proof that execution happened. Execution outcome evidence remains separate.
 
 ## Exact action binding
 
-The request uses `interai-canonical-action/v1` and sends the exact CrewAI `tool_name` plus `ctx.tool_input` as canonical `arguments`. In the synchronous `PRE_TOOL_CALL` path, `ctx.tool_input` is the same mutable input dictionary CrewAI passes to the tool, so there is no separate approval/execution re-binding step inside that frame.
+The request uses `interai-canonical-action/v1` and binds the exact CrewAI `tool_name` plus `ctx.tool_input` as canonical `arguments`. It also supplies `interai-host-execution-context/v1`, including a required `INTERAI_WORKSPACE_ID` and the environment used for the execution boundary.
 
-For delayed Slack/UI/human review, the original frame is gone. Treat `review_required` as **no authorization to execute now**. Persist the proposal and decision evidence, then re-evaluate or validate the exact canonical intent before any later dispatch. Changed arguments require a new decision.
+The current synchronous `PRE_TOOL_CALL` frame exposes the same mutable `ctx.tool_input` dictionary CrewAI will pass toward the tool. The adapter reconstructs the final canonical action from that state and refuses authorization if it differs from the intent returned by InterAI.
 
-## Scope
+### Hook ordering is part of the boundary
 
-The checked-in registration is intentionally narrow: it protects the example `release_vendor_payment` tool through CrewAI's `tools=` filter. The canonical request includes the exact arguments and conservatively marks that example capability as an irreversible external side effect. Production integrations must classify each protected capability truthfully and include every equivalent consequential execution path.
+CrewAI executes `PRE_TOOL_CALL` hooks in registration order. Register the InterAI gate **after any hook that is allowed to mutate `ctx.tool_input`**. If a later pre-tool hook can change the arguments after InterAI returns, the final action is no longer the one InterAI validated.
 
-The reusable `build_interai_gate()` helper is not tied to that payment tool. You can register it globally or against a broader tool set once your host can construct truthful action metadata for those capabilities.
+For deployments that cannot guarantee this ordering, put the final authorization validation in a host-owned executor wrapper immediately around the side effect instead of relying on a non-terminal hook position.
 
-CrewAI blocks a single tool call and lets the agent run continue. An agent may retry or choose another tool. Coverage is therefore a host responsibility: all tools or execution paths capable of the consequential effect must traverse an InterAI gate.
+## REVIEW_REQUIRED
+
+`review_required` does not authorize the current call. This example raises `HookAborted`, so the consequential tool does not execute now.
+
+For delayed Slack/UI/human review, the original synchronous frame may be gone. Persist the proposal and decision evidence, then re-evaluate or validate the exact canonical intent before a later dispatch. If arguments or authoritative context change, request a new decision.
+
+## Scope and replay protection
+
+The checked-in registration is intentionally narrow: it protects the example `release_vendor_payment` tool through CrewAI's `tools=` filter. The example classifies that simulated capability as a reversible external side effect. Production integrations must classify each protected capability truthfully and include every equivalent consequential execution path.
+
+CrewAI blocks one tool call and lets the agent run continue. An agent may retry or choose another tool, so all tools or paths capable of the same consequential effect must traverse an equivalent boundary.
+
+The included single-use set protects this demonstration inside one Python process. Durable, atomic replay prevention across workers, restarts, or distributed runtimes remains the host's responsibility and should use persistent state keyed by decision/intent identity.
+
+## Configuration
+
+```bash
+export INTERAI_API_KEY="..."
+export INTERAI_WORKSPACE_ID="workspace_123"
+export INTERAI_ENVIRONMENT="production"
+```
+
+Optional host identity fields:
+
+```bash
+export INTERAI_ACTOR_ID="agent_123"
+export INTERAI_RUN_ID="run_456"
+```
+
+`INTERAI_OPERATION_ID` may be supplied as a stable business-operation idempotency key for retries of the same logical proposal. Do not reuse one operation ID across unrelated actions. If omitted, the reference adapter generates a fresh UUID-based key.
 
 ## Focused repro
 
@@ -54,12 +98,16 @@ cd examples/framework-integrations/crewai
 pytest -q test_interai_hook.py
 ```
 
-The tests demonstrate both sides of the boundary:
+The focused tests cover 18 logical cases, including:
 
-- a naive external-oracle hook that raises `TimeoutError` is fail-open under CrewAI's generic hook dispatcher;
-- the InterAI gate converts provider failures into `HookAborted` and fails closed;
-- explicit valid `ALLOW` proceeds;
-- `BLOCK` and `REVIEW_REQUIRED` do not execute;
-- timeout, connection failure, HTTP 502-style errors, malformed JSON, and invalid decision payloads do not execute.
+- a naive external-oracle `TimeoutError` demonstrating CrewAI's generic fail-open hook behavior;
+- explicit validated ALLOW;
+- BLOCK and REVIEW_REQUIRED;
+- timeout, connection failure, HTTP 502-style errors, and malformed responses;
+- invalid decision payloads;
+- failure inside final ALLOW authorization validation;
+- exact tool/argument binding;
+- execution-intent digest, TTL, and process-local single-use checks;
+- changed final arguments failing closed.
 
 All side effects in this example are simulated.
