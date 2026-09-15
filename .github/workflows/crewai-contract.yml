@@ -1,0 +1,40 @@
+name: CrewAI integration contract
+
+on:
+  pull_request:
+    paths:
+      - "examples/framework-integrations/crewai/**"
+      - ".github/workflows/crewai-contract.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "examples/framework-integrations/crewai/**"
+      - ".github/workflows/crewai-contract.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 13 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: CrewAI 1.15.21 fail-closed contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned CrewAI integration dependencies
+        run: python -m pip install "crewai==1.15.21" requests pytest
+
+      - name: Run focused CrewAI contract
+        working-directory: examples/framework-integrations/crewai
+        run: python -m pytest -q test_interai_hook.py
