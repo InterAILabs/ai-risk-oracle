@@ -1,4 +1,4 @@
-from .client import (
+from .public_client import (
     InterAIRiskOracleClient,
     InterAIError,
     OracleHttpError,
