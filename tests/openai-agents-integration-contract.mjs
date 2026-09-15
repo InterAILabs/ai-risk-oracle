@@ -16,7 +16,7 @@ const pkg = JSON.parse(
   )
 )
 
-assert.equal(pkg.dependencies["interai-risk-oracle"], "0.1.4-beta")
+assert.equal(pkg.dependencies["interai-risk-oracle"], "0.1.7-beta")
 assert.equal(pkg.dependencies["@openai/agents"], "0.18.0")
 assert.match(source, /defineToolInputGuardrail/)
 assert.match(source, /inputGuardrails:\s*\[interaiGuardrail\]/)
