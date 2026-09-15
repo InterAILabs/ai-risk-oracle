@@ -1,7 +1,8 @@
 import assert from "node:assert/strict"
 import {
   InterAIRiskOracleClient,
-  OracleHttpError
+  OracleHttpError,
+  SDK_VERSION
 } from "../sdk/typescript/dist/index.js"
 
 const originalFetch = globalThis.fetch
@@ -48,6 +49,8 @@ globalThis.fetch = async (url, init = {}) => {
 }
 
 try {
+  assert.equal(SDK_VERSION, "0.1.5-beta")
+
   const client = new InterAIRiskOracleClient({
     baseUrl: "https://interai.invalid/",
     timeoutMs: 500
@@ -59,7 +62,7 @@ try {
   await client.me()
   const meRequest = captured.at(-1)
   assert.equal(meRequest.init.headers.authorization, "Bearer builder-key")
-  assert.equal(meRequest.init.headers["x-interai-client"], "typescript-sdk/0.1.3-beta")
+  assert.equal(meRequest.init.headers["x-interai-client"], `typescript-sdk/${SDK_VERSION}`)
 
   await client.createTopup("0.10")
   const createBody = JSON.parse(captured.at(-1).init.body)
