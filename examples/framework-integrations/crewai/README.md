@@ -102,7 +102,7 @@ cd examples/framework-integrations/crewai
 pytest -q test_interai_hook.py
 ```
 
-The focused tests cover 20 logical cases, including:
+The focused tests cover, among other cases:
 
 - a naive external-oracle `TimeoutError` demonstrating CrewAI's generic fail-open hook behavior;
 - explicit validated ALLOW;
@@ -112,6 +112,10 @@ The focused tests cover 20 logical cases, including:
 - failure inside final ALLOW authorization validation;
 - exact tool/argument binding and JSON numeric normalization;
 - execution-intent digest, TTL, expiry, and process-local single-use checks;
-- changed final arguments failing closed.
+- changed final arguments failing closed;
+- real v2 receipt-signature verification with the opaque `signed_payload` preserved byte-for-byte;
+- invalid signatures and signed-authorization mismatches failing closed;
+- exact `authoritative_context.host_attested` binding;
+- authorization expiry preventing CrewAI dispatch before signature lookup.
 
 All side effects in this example are simulated.
