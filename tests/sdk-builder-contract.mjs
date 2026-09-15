@@ -49,7 +49,7 @@ globalThis.fetch = async (url, init = {}) => {
 }
 
 try {
-  assert.equal(SDK_VERSION, "0.1.5-beta")
+  assert.equal(SDK_VERSION, "0.1.6-beta")
 
   const client = new InterAIRiskOracleClient({
     baseUrl: "https://interai.invalid/",

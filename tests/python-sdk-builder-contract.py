@@ -53,7 +53,7 @@ def fake_urlopen(request: object, timeout: float, context: object) -> FakeRespon
     return FakeResponse({"ok": True})
 
 
-assert SDK_VERSION == "0.1.5-beta"
+assert SDK_VERSION == "0.1.6-beta"
 
 client = InterAIRiskOracleClient(
     base_url="https://interai.invalid/",

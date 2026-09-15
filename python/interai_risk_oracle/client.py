@@ -14,7 +14,7 @@ except ImportError:  # Keep direct source-checkout usage working before installa
     certifi = None
 
 
-SDK_VERSION = "0.1.5-beta"
+SDK_VERSION = "0.1.6-beta"
 Json = dict[str, Any]
 
 
