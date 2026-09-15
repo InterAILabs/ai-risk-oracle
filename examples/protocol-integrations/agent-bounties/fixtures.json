@@ -1,0 +1,27 @@
+{
+  "note": "Synthetic/redacted fixture only. No production wallet, signer, or private material.",
+  "action": {
+    "chain_id": 8453,
+    "wallet": "0x1111111111111111111111111111111111111111",
+    "delegate": "0x2222222222222222222222222222222222222222",
+    "target": "0x3333333333333333333333333333333333333333",
+    "calldata_hash": "0xabababababababababababababababababababababababababababababababab",
+    "token": "0x4444444444444444444444444444444444444444",
+    "amount": 2500000,
+    "nonce": 17,
+    "expiry": 1800000000
+  },
+  "policy": {
+    "version": 6,
+    "policy_hash": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+  },
+  "decision": {
+    "decision": "allow",
+    "issuer": "interai:test",
+    "decision_id": "decision-001",
+    "policy_version": 6,
+    "policy_hash": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+    "issued_at": "2026-09-15T11:59:59+00:00",
+    "expires_at": "2026-09-15T12:01:00+00:00"
+  }
+}
