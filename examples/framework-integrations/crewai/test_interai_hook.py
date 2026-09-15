@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -54,9 +55,9 @@ def _allow_payload(request: dict[str, Any], *, expired: bool = False) -> dict[st
     intent = {
         "schema": "interai-canonical-execution-intent/v2",
         "action_authority": "host_attested_canonical",
-        "canonical_action": request["action"],
+        "canonical_action": deepcopy(request["action"]),
         "evaluation_context": {},
-        "authoritative_context": request["execution_context"],
+        "authoritative_context": deepcopy(request["execution_context"]),
         "policy_authority": {},
     }
     digest = interai_hook._execution_intent_digest(intent)
@@ -209,6 +210,21 @@ def test_local_authorization_validation_checks_digest_ttl_and_single_use(monkeyp
 
     with pytest.raises(interai_hook.InvalidInterAIDecision, match="already consumed"):
         interai_hook.validate_allow_for_dispatch(payload, request)
+
+
+def test_json_integer_and_integral_float_bind_as_same_number(monkeypatch):
+    request = interai_hook._build_verify_request(_ctx())
+    request["action"]["arguments"]["amount_usd"] = 250.0
+    request["action"]["amount_usd"] = 250.0
+    payload = _allow_payload(request)
+    payload["execution_intent"]["canonical_action"]["arguments"]["amount_usd"] = 250
+    payload["execution_intent"]["canonical_action"]["amount_usd"] = 250
+    digest = interai_hook._execution_intent_digest(payload["execution_intent"])
+    payload["execution_intent_digest"] = digest
+    payload["execution_authorization"]["execution_intent_digest"] = digest
+
+    monkeypatch.setattr(interai_hook, "_verify_receipt_signature", lambda *_args: None)
+    interai_hook.validate_allow_for_dispatch(payload, request)
 
 
 def test_expired_execution_authorization_fails_closed(monkeypatch):
