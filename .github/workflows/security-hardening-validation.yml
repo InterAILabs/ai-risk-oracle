@@ -1,0 +1,68 @@
+name: Security hardening validation
+
+on:
+  push:
+    branches:
+      - codex/security-hardening-20260915
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate JSON contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for root in (Path('schemas'), Path('discovery')):
+              for path in sorted(root.rglob('*.json')):
+                  with path.open('r', encoding='utf-8') as handle:
+                      json.load(handle)
+                  print(f'json ok: {path}')
+          PY
+
+      - name: Validate Python syntax
+        run: |
+          python -m py_compile \
+            python/interai_risk_oracle/client.py \
+            examples/framework-integrations/crewai/interai_hook.py \
+            examples/framework-integrations/crewai/test_interai_hook.py
+
+      - name: Validate TypeScript SDK
+        run: |
+          npx --yes -p typescript@5.8.3 tsc \
+            --noEmit \
+            --strict \
+            --skipLibCheck \
+            --target ES2022 \
+            --lib ES2022,DOM \
+            --module NodeNext \
+            --moduleResolution NodeNext \
+            sdk/typescript/index.ts
+
+      - name: Validate execution boundary
+        run: node --test tests/execution-boundary.test.mjs
+
+      - name: Install CrewAI validation dependencies
+        run: python -m pip install "crewai==1.15.21" requests pytest
+
+      - name: Validate CrewAI fail-closed integration
+        working-directory: examples/framework-integrations/crewai
+        run: pytest -q test_interai_hook.py
