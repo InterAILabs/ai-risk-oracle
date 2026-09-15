@@ -2,15 +2,15 @@
 
 Typed hosted API client for InterAI Risk Oracle.
 
-Package version: `interai-risk-oracle@0.1.6-beta`.
+Package version: `interai-risk-oracle@0.1.7-beta`.
 
 ```bash
-npm install interai-risk-oracle@0.1.6-beta
+npm install interai-risk-oracle@0.1.7-beta
 ```
 
-## Builder workflow
+## Zero-funding builder trial
 
-The client can onboard a builder, retain the returned API key, inspect the account, quote usage, and manage a prepaid top-up without hand-building HTTP requests:
+A new builder can reach a first hosted verification without moving funds. The controlled demo trial is bounded by InterAI's trial TTL, per-client limits, shared budget, and maximum-verification count.
 
 ```ts
 import { InterAIRiskOracleClient } from "interai-risk-oracle"
@@ -20,7 +20,44 @@ const client = new InterAIRiskOracleClient({
 })
 
 const onboarding = await client.onboard({
-  name: "my-agent"
+  name: "my-agent",
+  scope: "demo_trial"
+})
+
+const decision = await client.verify({
+  use_case: "agent-before-tool-execution",
+  action: {
+    type: "read_only_lookup",
+    name: "check_order_status",
+    description: "Read an order status in a sandbox",
+    external_side_effect: false,
+    irreversible: false
+  },
+  context: {
+    agent_id: "my-agent",
+    environment: "sandbox",
+    user_confirmation: true
+  },
+  policy: { require_trust_receipt: true }
+})
+
+const receipt = await client.getTrustReceipt(decision.trust_receipt_id!)
+```
+
+`onboard()` stores the returned API key on the client when one is issued. The demo trial is for bounded integration evaluation; it is not a source of transferable funds and does not bypass normal production funding requirements.
+
+## Funded builder workflow
+
+The same client can create a standard account, retain the returned API key, inspect the account, quote usage, and manage a prepaid top-up without hand-building HTTP requests:
+
+```ts
+const client = new InterAIRiskOracleClient({
+  baseUrl: "https://api.interailabs.dev"
+})
+
+await client.onboard({
+  name: "my-funded-agent",
+  scope: "standard"
 })
 
 const account = await client.me()
@@ -28,7 +65,7 @@ const quote = await client.quote({ mode: "fast" })
 const topup = await client.createTopup("0.10")
 ```
 
-`onboard()` stores the returned API key on the client when one is issued. You can also set a key explicitly with `setApiKey()`.
+You can also set a key explicitly with `setApiKey()`.
 
 Top-up helpers cover `createTopup()`, `topupStatus()`, and `confirmTopup()`. Account helpers include `me()`, `ledger()`, and `usage()`. HTTP failures raise `OracleHttpError` with `status`, structured API `code`, response headers, body, and parsed x402 payment requirements when present.
 
