@@ -2,7 +2,7 @@
 
 Typed hosted API client for InterAI Risk Oracle.
 
-Package release candidate: `interai-risk-oracle@0.1.4-beta`.
+Package version: `interai-risk-oracle@0.1.4-beta`.
 
 ```bash
 npm install interai-risk-oracle@0.1.4-beta
