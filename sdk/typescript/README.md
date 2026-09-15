@@ -2,10 +2,10 @@
 
 Typed hosted API client for InterAI Risk Oracle.
 
-Package version: `interai-risk-oracle@0.1.4-beta`.
+Package version: `interai-risk-oracle@0.1.5-beta`.
 
 ```bash
-npm install interai-risk-oracle@0.1.4-beta
+npm install interai-risk-oracle@0.1.5-beta
 ```
 
 ## Builder workflow
