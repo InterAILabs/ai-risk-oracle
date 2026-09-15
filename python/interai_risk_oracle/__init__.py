@@ -1,4 +1,13 @@
-from .client import InterAIRiskOracleClient, InterAIError
+from .client import (
+    InterAIRiskOracleClient,
+    InterAIError,
+    OracleHttpError,
+    SDK_VERSION,
+)
 
-__all__ = ["InterAIRiskOracleClient", "InterAIError"]
-
+__all__ = [
+    "InterAIRiskOracleClient",
+    "InterAIError",
+    "OracleHttpError",
+    "SDK_VERSION",
+]
