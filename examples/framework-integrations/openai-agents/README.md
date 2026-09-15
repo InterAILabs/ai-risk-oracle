@@ -1,6 +1,6 @@
 # OpenAI Agents SDK + InterAI
 
-This example places InterAI at the OpenAI Agents SDK **function-tool execution boundary** and uses the published `interai-risk-oracle@0.1.4-beta` SDK.
+This example places InterAI at the OpenAI Agents SDK **function-tool execution boundary** and uses the published `interai-risk-oracle@0.1.7-beta` SDK.
 
 ```text
 agent proposes function tool
@@ -35,7 +35,7 @@ A mismatch, expired authorization, invalid receipt signature, replay, timeout, n
 
 - Node.js 22.13+ (`node:sqlite` is used for the durable replay store)
 - `@openai/agents@0.18.0`
-- `interai-risk-oracle@0.1.4-beta`
+- `interai-risk-oracle@0.1.7-beta`
 - `zod@4.6.5`
 - `OPENAI_API_KEY`
 - `INTERAI_API_KEY`
