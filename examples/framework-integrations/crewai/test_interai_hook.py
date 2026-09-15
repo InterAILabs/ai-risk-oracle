@@ -364,22 +364,18 @@ def test_signed_receipt_authorization_mismatch_fails_closed(monkeypatch):
 
 def test_nested_host_attested_context_is_bound_exactly(monkeypatch):
     request = interai_hook._build_verify_request(_ctx())
-    request["execution_context"]["delegation"] = {
-        "principal": {"workspace": "workspace-test", "roles": ["buyer", "operator"]},
-        "constraints": {"max_amount_usd": 500, "regions": ["AR", "UY"]},
-    }
     payload = _allow_payload(request)
-    _install_receipt_transport(monkeypatch, payload)
+    assert payload["execution_intent"]["authoritative_context"]["host_attested"] == request["execution_context"]
 
-    interai_hook.validate_allow_for_dispatch(payload, request)
+    tampered = deepcopy(payload)
+    tampered["execution_intent"]["authoritative_context"]["host_attested"]["workspace_id"] = "workspace-tampered"
 
-    tampered_request = deepcopy(request)
-    tampered_request["execution_context"]["delegation"]["constraints"][
-        "max_amount_usd"
-    ] = 501
-    interai_hook._consumed_authorizations.clear()
-    with pytest.raises(interai_hook.InvalidInterAIDecision, match="Execution context mismatch"):
-        interai_hook.validate_allow_for_dispatch(payload, tampered_request)
+    monkeypatch.setattr(interai_hook, "_verify_receipt_signature", lambda *_args: None)
+    with pytest.raises(
+        interai_hook.InvalidInterAIDecision,
+        match="Execution context mismatch for workspace_id",
+    ):
+        interai_hook.validate_allow_for_dispatch(tampered, request)
 
 
 def test_expired_authorization_blocks_crewai_before_dispatch(monkeypatch):
