@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Discovery contract
+        run: node tests/discovery-contract.mjs
+
       - name: Install TypeScript SDK dependencies
         working-directory: sdk/typescript
         run: npm ci

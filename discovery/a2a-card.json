@@ -1,23 +1,106 @@
 {
   "name": "InterAI Risk Oracle",
-  "version": "0.1.3-beta",
-  "description": "Agent-to-agent verification service for pre-execution risk decisions.",
-  "url": "https://ai-risk-oracle.fly.dev/a2a",
-  "a2a_v1": {
-    "status": "hosted synchronous profile",
-    "url": "https://ai-risk-oracle.fly.dev/a2a/v1",
-    "agent_card": "https://ai-risk-oracle.fly.dev/.well-known/agent-card.json",
-    "protocol_version": "1.0"
+  "description": "Pre-execution verification for proposed autonomous actions. InterAI returns a pre-execution decision, policy evidence, and trust receipt; it does not execute the external action.",
+  "supportedInterfaces": [
+    {
+      "url": "https://ai-risk-oracle.fly.dev/a2a/v1",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "provider": {
+    "url": "https://ai-risk-oracle.fly.dev",
+    "organization": "InterAI"
   },
+  "version": "0.1.3-beta",
+  "documentationUrl": "https://ai-risk-oracle.fly.dev/.well-known/openapi.json",
   "capabilities": {
     "streaming": false,
-    "pushNotifications": false
+    "pushNotifications": false,
+    "extendedAgentCard": false
   },
+  "securitySchemes": {
+    "bearerAuth": {
+      "httpAuthSecurityScheme": {
+        "description": "InterAI API key sent as Authorization: Bearer <api_key>. Obtain credentials through POST /onboard.",
+        "scheme": "Bearer",
+        "bearerFormat": "InterAI API key"
+      }
+    }
+  },
+  "securityRequirements": [
+    {
+      "schemes": {
+        "bearerAuth": {
+          "list": []
+        }
+      }
+    }
+  ],
+  "defaultInputModes": [
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
   "skills": [
     {
-      "id": "verify-before-execution",
-      "name": "Verify Before Execution",
-      "description": "Return a risk decision and optional trust receipt for a proposed agent action."
+      "id": "verify_autonomous_action",
+      "name": "Verify an autonomous action",
+      "description": "Evaluate one proposed action before execution and return the InterAI decision, policy evidence, economic usage, and trust receipt. This skill never executes the action.",
+      "tags": [
+        "pre-execution",
+        "risk",
+        "policy",
+        "trust"
+      ],
+      "examples": [
+        "Send a data part with operation verify and an InterAI autonomous_execution request."
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
+      "securityRequirements": [
+        {
+          "schemes": {
+            "bearerAuth": {
+              "list": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "verify_batch",
+      "name": "Verify a batch of actions",
+      "description": "Evaluate a bounded batch of proposed actions before execution and return one result and trust receipt per item. This skill never executes the actions.",
+      "tags": [
+        "pre-execution",
+        "batch",
+        "risk",
+        "trust"
+      ],
+      "examples": [
+        "Send a data part with operation verify_batch and an InterAI batch request."
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
+      "securityRequirements": [
+        {
+          "schemes": {
+            "bearerAuth": {
+              "list": []
+            }
+          }
+        }
+      ]
     }
   ]
 }
