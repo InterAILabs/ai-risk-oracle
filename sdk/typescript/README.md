@@ -59,11 +59,12 @@ const gate = await client.validateAndConsumeReceipt({
 if (!gate.ok) throw new Error(`Do not dispatch: ${gate.code}`)
 ```
 
+`getTrustReceipt()` requires the owning active API key and returns complete signed evidence. If you intentionally need the anonymous existence reference, use `getTrustReceiptReference()`, whose return type is the privacy-aware union `TrustReceiptLookup | TrustReceiptPublicSummary`. The public summary contains only `receipt_id` and `issued_at`; it is not execution evidence.
+
 `verify` generates an idempotency key when one is not provided. Supply a stable
 business-operation key when retries must resolve to the same billed result.
 
-For a portable signature check, fetch a lookup and forward its opaque signed
-payload without parsing it:
+For a portable signature check, fetch the owner-authenticated lookup and forward its opaque signed payload without parsing or reserializing it:
 
 ```ts
 const receipt = await client.getTrustReceipt(decision.trust_receipt_id!)
