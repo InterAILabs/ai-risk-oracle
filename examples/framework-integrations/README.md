@@ -1,11 +1,12 @@
 # Framework integration examples
 
-InterAI is not another agent framework. These examples show the smallest place to insert an independent pre-execution decision into three active agent ecosystems.
+InterAI is not another agent framework. These examples show the smallest place to insert an independent pre-execution decision into four active agent ecosystems.
 
 | Framework | Native hook | InterAI role |
 |---|---|---|
 | OpenAI Agents SDK | Tool input guardrail | Decide immediately before a custom function tool executes |
 | Mastra | `beforeToolCall` | Allow or block a parsed tool call before execution |
+| CrewAI | `PRE_TOOL_CALL` | Fail closed on non-ALLOW decisions and oracle failures before tool execution |
 | Google ADK | `before_tool_callback` | Return `None` to continue or a tool result to skip execution |
 
 The invariant is the same in every framework:
