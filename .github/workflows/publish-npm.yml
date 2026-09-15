@@ -9,7 +9,7 @@ on:
         type: string
   push:
     branches:
-      - "publish/sdk-*"
+      - "publish/npm-*"
 
 permissions:
   contents: read
@@ -53,5 +53,5 @@ jobs:
         run: test "$(node -p "require('./package.json').version")" = "${{ inputs.version }}"
       - name: Type-check package
         run: npm run typecheck
-      - name: Publish with provenance
-        run: npm publish --access public
+      - name: Publish beta with provenance
+        run: npm publish --access public --tag beta

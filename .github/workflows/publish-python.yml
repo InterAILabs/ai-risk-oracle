@@ -9,7 +9,7 @@ on:
         type: string
   push:
     branches:
-      - "publish/sdk-*"
+      - "publish/pypi-*"
 
 permissions:
   contents: read
