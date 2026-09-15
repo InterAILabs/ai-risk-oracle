@@ -57,7 +57,7 @@ def _allow_payload(request: dict[str, Any], *, expired: bool = False) -> dict[st
         "action_authority": "host_attested_canonical",
         "canonical_action": deepcopy(request["action"]),
         "evaluation_context": {},
-        "authoritative_context": deepcopy(request["execution_context"]),
+        "authoritative_context": {"host_attested": deepcopy(request["execution_context"])},
         "policy_authority": {},
     }
     digest = interai_hook._execution_intent_digest(intent)
@@ -65,7 +65,7 @@ def _allow_payload(request: dict[str, Any], *, expired: bool = False) -> dict[st
     expires_at = now - timedelta(seconds=1) if expired else now + timedelta(seconds=60)
     return {
         "request_contract": "autonomous_execution",
-        "decision_id": "decision-1",
+        "decision_id": "receipt-1",
         "recommended_action": "allow",
         "policy_result": "allow",
         "trust_receipt_id": "receipt-1",
@@ -73,7 +73,7 @@ def _allow_payload(request: dict[str, Any], *, expired: bool = False) -> dict[st
         "execution_intent": intent,
         "execution_authorization": {
             "schema": "interai-execution-authorization/v1",
-            "decision_id": "decision-1",
+            "decision_id": "receipt-1",
             "decision": "allow",
             "execution_intent_digest": digest,
             "issued_at": (now - timedelta(seconds=2)).isoformat(),

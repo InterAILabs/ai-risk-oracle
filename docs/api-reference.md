@@ -96,7 +96,7 @@ rule, a governance queue, or a human operator.
 
 ## GET /trust/receipts/{receiptId}
 
-Retrieves the canonical public trust receipt representation by receipt ID.
+Retrieves a minimal public reference, or the complete signed receipt for its authenticated owner.
 
 ## GET /.well-known/ai-service.json
 
@@ -111,3 +111,17 @@ hosted API also exposes discovery aliases such as `/.well-known/ai-risk-oracle`,
 - `403`: account or policy access denied.
 - `429`: rate limit exceeded.
 - `500`: service unavailable or internal error.
+
+## Receipt privacy (September 2026)
+
+`GET /trust/receipts/{receiptId}` without credentials returns only a
+`public_summary` containing receipt ID and issuance time. It is not signed
+evidence or an execution authorization. Supply an active Bearer key belonging
+to the receipt account for the complete receipt, original opaque
+`verification.signed_payload`, signature and authorization. Invalid keys return
+401; another account receives 404. Responses must not be cached.
+
+Accountless x402/payment-reference clients must preserve the complete evidence
+returned by their original verification; a public lookup cannot recover private
+contents. Demo links also show only the public reference. Do not put API keys
+in receipt URLs. Keep the signed payload bytes unchanged when verifying.

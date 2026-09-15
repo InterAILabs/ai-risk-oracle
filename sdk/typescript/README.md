@@ -50,14 +50,11 @@ const decision = await client.verify({
 For an `allow`, verify the DecisionReceipt with the service, rebuild the final host intent, then validate the exact binding before dispatch. `ExecutionAuthorization` is single-use and expires in 1–300 seconds (60 seconds default); persist atomic consumption in your own runtime when replay protection must survive processes.
 
 ```ts
-import { validateExecutionAuthorization } from "interai-risk-oracle"
-
 const lookup = await client.getTrustReceipt(decision.trust_receipt_id!)
-const signature = await client.verifyTrustReceiptSignature(lookup)
-const gate = await validateExecutionAuthorization({
-  authorization: decision.execution_authorization,
+const gate = await client.validateAndConsumeReceipt({
+  lookup,
   finalIntent: rebuildFinalIntentAtHostBoundary(),
-  receiptSignatureValid: signature.valid
+  replayStore // durable, atomic consumeOnce(key); errors must throw
 })
 if (!gate.ok) throw new Error(`Do not dispatch: ${gate.code}`)
 ```
@@ -79,3 +76,5 @@ Build and inspect the package locally:
 npm run build
 npm pack --dry-run
 ```
+
+See [the durable SQLite dispatch example](../../examples/execution-boundary/README.md) for restart-safe consumption and terminal executor binding. The low-level validator alone does not prevent replay.

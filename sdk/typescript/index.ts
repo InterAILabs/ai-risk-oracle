@@ -61,7 +61,12 @@ export type ExecutionReceipt = {
 
 export type DispatchValidation =
   | { ok: true; execution_intent_digest: string }
-  | { ok: false; code: "decision_not_authorizing" | "execution_intent_mismatch" | "decision_expired" | "receipt_signature_invalid" }
+  | { ok: false; code: "decision_not_authorizing" | "execution_intent_mismatch" | "decision_expired" | "receipt_signature_invalid" | "authorization_replayed" }
+
+/** Must atomically insert a unique key in durable host-owned storage. Errors must throw. */
+export interface ExecutionAuthorizationReplayStore {
+  consumeOnce(key: string): boolean | Promise<boolean>
+}
 
 function normalizeJson(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(normalizeJson)
@@ -96,11 +101,16 @@ export async function validateExecutionAuthorization(input: {
   now?: Date
 }): Promise<DispatchValidation> {
   if (!input.receiptSignatureValid) return { ok: false, code: "receipt_signature_invalid" }
-  if (!input.authorization || input.authorization.decision !== "allow") {
+  if (!input.authorization || input.authorization.decision !== "allow" ||
+      input.authorization.schema !== EXECUTION_AUTHORIZATION_SCHEMA ||
+      input.authorization.single_use !== true || !input.authorization.decision_id) {
     return { ok: false, code: "decision_not_authorizing" }
   }
   const expiresAt = new Date(input.authorization.expires_at)
-  if (Number.isNaN(expiresAt.getTime()) || expiresAt <= (input.now ?? new Date())) {
+  const issuedAt = new Date(input.authorization.issued_at)
+  const now = input.now ?? new Date()
+  const ttl = expiresAt.getTime() - issuedAt.getTime()
+  if (!Number.isFinite(ttl) || ttl < 1000 || ttl > 300_000 || issuedAt > now || expiresAt <= now) {
     return { ok: false, code: "decision_expired" }
   }
   const digest = await executionIntentDigest(input.finalIntent)
@@ -262,9 +272,38 @@ export class InterAIRiskOracleClient {
   }
 
   async getTrustReceipt(receiptId: string): Promise<TrustReceiptLookup> {
-    return this.jsonRequest(
+    const result = await this.jsonRequest(
       `/trust/receipts/${encodeURIComponent(receiptId)}`
-    ) as Promise<TrustReceiptLookup>
+    ) as TrustReceiptLookup
+    if (result.visibility === "public_summary") throw new Error("Complete receipt requires the owning account API key")
+    return result
+  }
+
+  /** Authenticate the exact receipt, validate its grant, then durably consume before dispatch. */
+  async validateAndConsumeReceipt(input: {
+    lookup: TrustReceiptLookup
+    finalIntent: CanonicalExecutionIntent
+    replayStore: ExecutionAuthorizationReplayStore
+  }): Promise<DispatchValidation> {
+    // Snapshot before the HTTP await so a caller cannot swap fields after verification.
+    const lookup = structuredClone(input.lookup)
+    const finalIntent = structuredClone(input.finalIntent)
+    const receipt = lookup.receipt
+    const authorization = receipt.execution_authorization as ExecutionAuthorization | undefined
+    if (receipt.receipt_schema_version !== "trust-receipt/v2" ||
+        receipt.request_contract !== "autonomous_execution" || receipt.final_decision !== "allow" ||
+        !authorization || authorization.decision_id !== receipt.receipt_id ||
+        authorization.execution_intent_digest !== receipt.execution_intent_digest) {
+      return { ok: false, code: "decision_not_authorizing" }
+    }
+    const signature = await this.verifyTrustReceiptSignature(lookup)
+    const validation = await validateExecutionAuthorization({ authorization, finalIntent, receiptSignatureValid: signature.valid })
+    if (!validation.ok) return validation
+    if (!await input.replayStore.consumeOnce(`${authorization.decision_id}:${authorization.execution_intent_digest}`)) {
+      return { ok: false, code: "authorization_replayed" }
+    }
+    // Consumption can involve I/O; reject expiration before handing control to the executor.
+    return validateExecutionAuthorization({ authorization, finalIntent, receiptSignatureValid: true })
   }
 
   async verifyTrustReceiptSignature(
@@ -279,6 +318,7 @@ export class InterAIRiskOracleClient {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         receipt_id: receipt.receipt_id,
+        receipt,
         signed_payload: verification.signed_payload,
         signature: verification.signature,
         signature_alg: verification.signature_alg
