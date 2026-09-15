@@ -5,7 +5,7 @@ import json
 import urllib.error
 from unittest.mock import patch
 
-from interai_risk_oracle import InterAIRiskOracleClient, InterAIError
+from interai_risk_oracle import InterAIRiskOracleClient, InterAIError, SDK_VERSION
 
 
 class FakeResponse:
@@ -53,6 +53,8 @@ def fake_urlopen(request: object, timeout: float, context: object) -> FakeRespon
     return FakeResponse({"ok": True})
 
 
+assert SDK_VERSION == "0.1.5-beta"
+
 client = InterAIRiskOracleClient(
     base_url="https://interai.invalid/",
     timeout_seconds=12.5,
@@ -66,7 +68,7 @@ with patch("urllib.request.urlopen", side_effect=fake_urlopen):
     me_request, me_timeout, _ = captured[-1]
     me_headers = {key.lower(): value for key, value in me_request.header_items()}
     assert me_headers["authorization"] == "Bearer builder-key"
-    assert me_headers["x-interai-client"] == "python-sdk/0.1.3-beta"
+    assert me_headers["x-interai-client"] == f"python-sdk/{SDK_VERSION}"
     assert me_timeout == 12.5
 
     client.create_topup("0.10")

@@ -1,5 +1,12 @@
 # Changelog
 
+## SDK packages 0.1.5-beta / 0.1.5b0
+
+- Fix SDK self-identification so `x-interai-client` reports the actual published SDK version.
+- Export and test a shared TypeScript `SDK_VERSION` constant to prevent package metadata and telemetry from drifting again.
+- Align the Python `SDK_VERSION`, package metadata, package README, and builder contract to the same release.
+- Preserve hosted runtime behavior, pricing, billing, policy semantics, and public API contracts unchanged.
+
 ## SDK packages 0.1.4-beta / 0.1.4b0
 
 - Add builder-safe onboarding helpers that retain the issued API key.
