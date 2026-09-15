@@ -63,17 +63,17 @@ Payments
 
 ## Links
 
-- Homepage: https://ai-risk-oracle.fly.dev
+- Homepage: https://api.interailabs.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
 - Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
-- Hosted service URL: https://ai-risk-oracle.fly.dev
-- Pricing URL: https://ai-risk-oracle.fly.dev/pricing
-- Onboard URL: https://ai-risk-oracle.fly.dev/onboard
-- OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- AI service descriptor URL: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Agent card URL: https://ai-risk-oracle.fly.dev/.well-known/agent.json
-- Discovery bundle URL: https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json
-- Autonomous adoption URL: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Hosted service URL: https://api.interailabs.dev
+- Pricing URL: https://api.interailabs.dev/pricing
+- Onboard URL: https://api.interailabs.dev/onboard
+- OpenAPI URL: https://api.interailabs.dev/.well-known/openapi.json
+- AI service descriptor URL: https://api.interailabs.dev/.well-known/ai-service.json
+- Agent card URL: https://api.interailabs.dev/.well-known/agent.json
+- Discovery bundle URL: https://api.interailabs.dev/.well-known/discovery-bundle.json
+- Autonomous adoption URL: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 
 ## Pricing/Self-Serve Path
 
@@ -93,13 +93,13 @@ Directory field suggestions:
 ## OpenAPI URL
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+https://api.interailabs.dev/.well-known/openapi.json
 ```
 
 ## Autonomous Adoption URL
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+https://api.interailabs.dev/.well-known/autonomous-adoption.json
 ```
 
 ## Release URL

@@ -86,7 +86,7 @@ function clientOptions(options: InterAIClientOptions = {}) {
     baseUrl:
       options.baseUrl ??
       process.env.INTERAI_BASE_URL ??
-      "https://ai-risk-oracle.fly.dev",
+      "https://api.interailabs.dev",
     agentId: options.agentId ?? "example_agent_middleware",
     environment: options.environment ?? "sandbox",
     operationId: options.operationId,

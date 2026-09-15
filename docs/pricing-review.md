@@ -3,7 +3,7 @@
 The hosted pricing endpoint is the canonical public source:
 
 ```text
-https://ai-risk-oracle.fly.dev/pricing
+https://api.interailabs.dev/pricing
 ```
 
 ## Current Beta Pricing

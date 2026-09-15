@@ -18,7 +18,7 @@ import {
 } from "interai-risk-oracle"
 import { z } from "zod"
 
-const INTERAI_BASE_URL = process.env.INTERAI_BASE_URL || "https://ai-risk-oracle.fly.dev"
+const INTERAI_BASE_URL = process.env.INTERAI_BASE_URL || "https://api.interailabs.dev"
 const INTERAI_API_KEY = process.env.INTERAI_API_KEY
 const WORKSPACE_ID = process.env.INTERAI_WORKSPACE_ID || "openai-agents-example"
 const REPLAY_DB = process.env.INTERAI_REPLAY_DB || "./interai-openai-agents-replay.sqlite"

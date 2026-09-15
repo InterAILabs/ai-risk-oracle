@@ -63,16 +63,16 @@ Machine Learning
 
 ## Links
 
-- Homepage: https://ai-risk-oracle.fly.dev
+- Homepage: https://api.interailabs.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
 - Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
-- Hosted service URL: https://ai-risk-oracle.fly.dev
-- Pricing URL: https://ai-risk-oracle.fly.dev/pricing
-- Onboard URL: https://ai-risk-oracle.fly.dev/onboard
-- OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- AI service descriptor URL: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Agent card URL: https://ai-risk-oracle.fly.dev/.well-known/agent.json
-- Autonomous adoption URL: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Hosted service URL: https://api.interailabs.dev
+- Pricing URL: https://api.interailabs.dev/pricing
+- Onboard URL: https://api.interailabs.dev/onboard
+- OpenAPI URL: https://api.interailabs.dev/.well-known/openapi.json
+- AI service descriptor URL: https://api.interailabs.dev/.well-known/ai-service.json
+- Agent card URL: https://api.interailabs.dev/.well-known/agent.json
+- Autonomous adoption URL: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 
 ## Pricing/Self-Serve Path
 
@@ -86,13 +86,13 @@ key support, and trial availability.
 ## OpenAPI URL
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+https://api.interailabs.dev/.well-known/openapi.json
 ```
 
 ## Autonomous Adoption URL
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+https://api.interailabs.dev/.well-known/autonomous-adoption.json
 ```
 
 ## Release URL
@@ -123,6 +123,6 @@ Do not describe the service as broad high-volume production infrastructure.
 2. Select OpenAPI format.
 3. Mark the definition as official.
 4. Use `InterAI Risk Oracle` as API name.
-5. Use `https://ai-risk-oracle.fly.dev/.well-known/openapi.json` as definition URL.
+5. Use `https://api.interailabs.dev/.well-known/openapi.json` as definition URL.
 6. Select `Developer Tools` unless a better category is available.
 7. Submit only after an InterAI Labs operator approves this external request.

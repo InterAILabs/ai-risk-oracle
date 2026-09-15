@@ -26,7 +26,7 @@ Deliverables:
 
 Goals:
 
-- decide whether to keep `ai-risk-oracle.fly.dev` through beta or move to an
+- decide whether to keep `api.interailabs.dev` through beta or move to an
   owned domain;
 - plan `oracle.interailabs.com` as the product domain;
 - reserve `api.interailabs.com` for future platform APIs;

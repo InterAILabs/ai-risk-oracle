@@ -5,7 +5,7 @@ service.
 
 ## Discovery
 
-- MCP endpoint: `POST https://ai-risk-oracle.fly.dev/mcp`
+- MCP endpoint: `POST https://api.interailabs.dev/mcp`
 - Service descriptor: `oracle.service_descriptor`
 - Agent card: `oracle.agent_card`
 - Discovery bundle: `oracle.discovery_bundle`

@@ -3,7 +3,7 @@
 The current hosted beta is available at:
 
 ```text
-https://ai-risk-oracle.fly.dev
+https://api.interailabs.dev
 ```
 
 This is acceptable for controlled technical beta, hosted metadata discovery, and
@@ -12,7 +12,7 @@ distribution because it improves trust, memorability, SEO, and registry review.
 
 ## Options
 
-### Continue with `ai-risk-oracle.fly.dev`
+### Continue with `api.interailabs.dev`
 
 Pros:
 
@@ -71,7 +71,7 @@ Recommended use:
 
 ## Recommendation
 
-Use `ai-risk-oracle.fly.dev` for the current controlled beta and first-wave
+Use `api.interailabs.dev` for the current controlled beta and first-wave
 distribution research. Plan `oracle.interailabs.com` as the next canonical
 product endpoint. Reserve `api.interailabs.com` for future platform-level APIs.
 
@@ -79,7 +79,7 @@ product endpoint. Reserve `api.interailabs.com` for future platform-level APIs.
 
 1. Confirm domain ownership and DNS access.
 2. Add a Fly custom domain and verify TLS.
-3. Keep `ai-risk-oracle.fly.dev` working for compatibility.
+3. Keep `api.interailabs.dev` working for compatibility.
 4. Update hosted metadata only after the custom domain is live.
 5. Update public docs and submission assets to the canonical domain.
 6. Add redirects or canonical links where supported.

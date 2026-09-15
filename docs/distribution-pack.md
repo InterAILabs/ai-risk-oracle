@@ -30,11 +30,11 @@ metadata.
 
 ## Canonical Links
 
-- Demo CTA: https://ai-risk-oracle.fly.dev/demo
-- OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- Pricing: https://ai-risk-oracle.fly.dev/pricing
-- Service discovery: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Discovery bundle: https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json
+- Demo CTA: https://api.interailabs.dev/demo
+- OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+- Pricing: https://api.interailabs.dev/pricing
+- Service discovery: https://api.interailabs.dev/.well-known/ai-service.json
+- Discovery bundle: https://api.interailabs.dev/.well-known/discovery-bundle.json
 - GitHub: https://github.com/InterAILabs/ai-risk-oracle
 - Release: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.1-beta
 
@@ -43,7 +43,7 @@ metadata.
 Create a limited demo-trial key:
 
 ```bash
-curl -sS -X POST https://ai-risk-oracle.fly.dev/onboard \
+curl -sS -X POST https://api.interailabs.dev/onboard \
   -H "Content-Type: application/json" \
   -d '{"scope":"demo_trial","name":"demo_trial_builder","api_key_name":"demo_trial_key"}'
 ```
@@ -51,7 +51,7 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/onboard \
 Run a safe read-only verification:
 
 ```bash
-curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
+curl -sS -X POST https://api.interailabs.dev/verify \
   -H "Authorization: Bearer DEMO_TRIAL_API_KEY" \
   -H "Content-Type: application/json" \
   -H "X-Idempotency-Key: demo-safe-1" \
@@ -61,7 +61,7 @@ curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
 View the returned trust receipt:
 
 ```bash
-curl -sS https://ai-risk-oracle.fly.dev/trust/receipts/RECEIPT_ID_FROM_VERIFY
+curl -sS https://api.interailabs.dev/trust/receipts/RECEIPT_ID_FROM_VERIFY
 ```
 
 ## Expected Demo Signals
@@ -124,7 +124,7 @@ route for review, block, and store evidence for audit.
 URL:
 
 ```text
-https://ai-risk-oracle.fly.dev/demo
+https://api.interailabs.dev/demo
 ```
 
 Category:
@@ -138,6 +138,6 @@ Notes:
 ```text
 Public beta. Demo trial is limited and read-only. No funds are moved, no topups
 are confirmed, no external tools are executed, and no arbitrary URLs are
-fetched. OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json.
-Pricing: https://ai-risk-oracle.fly.dev/pricing.
+fetched. OpenAPI: https://api.interailabs.dev/.well-known/openapi.json.
+Pricing: https://api.interailabs.dev/pricing.
 ```

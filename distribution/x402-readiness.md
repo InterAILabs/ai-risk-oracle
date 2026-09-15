@@ -5,9 +5,9 @@ negotiation for paid verification flows.
 
 ## Discovery
 
-- Pricing metadata: `GET https://ai-risk-oracle.fly.dev/pricing`
-- Verify endpoint: `POST https://ai-risk-oracle.fly.dev/verify`
-- Batch verify endpoint: `POST https://ai-risk-oracle.fly.dev/verify/batch`
+- Pricing metadata: `GET https://api.interailabs.dev/pricing`
+- Verify endpoint: `POST https://api.interailabs.dev/verify`
+- Batch verify endpoint: `POST https://api.interailabs.dev/verify/batch`
 
 ## Payment Metadata
 

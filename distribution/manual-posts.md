@@ -18,10 +18,10 @@ The simple path is now live:
 The demo does not move funds, confirm topups, execute external tools, fetch
 arbitrary URLs, or bypass payment for non-trial traffic.
 
-Try it here: https://ai-risk-oracle.fly.dev/demo
+Try it here: https://api.interailabs.dev/demo
 
-OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-Pricing: https://ai-risk-oracle.fly.dev/pricing
+OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+Pricing: https://api.interailabs.dev/pricing
 ```
 
 ## 2. Technical Post
@@ -40,17 +40,17 @@ trust receipt you can inspect.
 
 1. Create a demo trial key:
 
-curl -sS -X POST https://ai-risk-oracle.fly.dev/onboard \
+curl -sS -X POST https://api.interailabs.dev/onboard \
   -H "Content-Type: application/json" \
   -d '{"scope":"demo_trial","name":"demo_trial_builder","api_key_name":"demo_trial_key"}'
 
 2. Use the returned key to verify the safe read-only action shown on:
 
-https://ai-risk-oracle.fly.dev/demo
+https://api.interailabs.dev/demo
 
 3. Open the returned receipt:
 
-curl -sS https://ai-risk-oracle.fly.dev/trust/receipts/RECEIPT_ID_FROM_VERIFY
+curl -sS https://api.interailabs.dev/trust/receipts/RECEIPT_ID_FROM_VERIFY
 
 Expected safe path fields include recommended_action=allow,
 policy_result=allow, risk_level=low, and trust_receipt_id.
@@ -59,9 +59,9 @@ The demo does not move funds, confirm topups, execute external tools, fetch
 arbitrary URLs, or bypass payment for non-trial traffic. It is intentionally a
 small beta path for agent builders who want to test the verification contract.
 
-Demo: https://ai-risk-oracle.fly.dev/demo
-OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-Pricing: https://ai-risk-oracle.fly.dev/pricing
+Demo: https://api.interailabs.dev/demo
+OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+Pricing: https://api.interailabs.dev/pricing
 ```
 
 ## 3. Forum/HN Style
@@ -85,9 +85,9 @@ The demo is intentionally narrow. It does not move funds, confirm topups,
 execute external tools, fetch arbitrary URLs, or bypass payment for non-trial
 traffic.
 
-Demo: https://ai-risk-oracle.fly.dev/demo
-OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-Pricing: https://ai-risk-oracle.fly.dev/pricing
+Demo: https://api.interailabs.dev/demo
+OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+Pricing: https://api.interailabs.dev/pricing
 
 Useful feedback would be whether the verification contract is clear enough for
 agent builders to integrate before tool execution, and whether the receipt shape

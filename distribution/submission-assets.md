@@ -45,23 +45,23 @@ For directories that require an existing ecosystem category, use the nearest acc
 
 ## URLs
 
-- Homepage: https://ai-risk-oracle.fly.dev
+- Homepage: https://api.interailabs.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
 - Current public beta release: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
-- Hosted service URL: https://ai-risk-oracle.fly.dev
-- Pricing URL: https://ai-risk-oracle.fly.dev/pricing
-- Onboard URL: https://ai-risk-oracle.fly.dev/onboard
-- OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- AI service descriptor URL: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Agent card URL: https://ai-risk-oracle.fly.dev/.well-known/agent.json
-- Discovery bundle URL: https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json
-- Autonomous adoption URL: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Hosted service URL: https://api.interailabs.dev
+- Pricing URL: https://api.interailabs.dev/pricing
+- Onboard URL: https://api.interailabs.dev/onboard
+- OpenAPI URL: https://api.interailabs.dev/.well-known/openapi.json
+- AI service descriptor URL: https://api.interailabs.dev/.well-known/ai-service.json
+- Agent card URL: https://api.interailabs.dev/.well-known/agent.json
+- Discovery bundle URL: https://api.interailabs.dev/.well-known/discovery-bundle.json
+- Autonomous adoption URL: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 
 ## x402/Base USDC Support
 
 InterAI exposes x402/Base USDC support through hosted pricing metadata.
 
-Use https://ai-risk-oracle.fly.dev/pricing as the source of truth for current payment requirements, costs, chain metadata, prepaid API-key support, and trial availability.
+Use https://api.interailabs.dev/pricing as the source of truth for current payment requirements, costs, chain metadata, prepaid API-key support, and trial availability.
 
 Do not make billing the lead message unless the destination specifically concerns x402 or machine payments. The primary product value is the pre-execution decision boundary.
 

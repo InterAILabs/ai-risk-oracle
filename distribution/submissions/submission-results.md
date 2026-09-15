@@ -30,7 +30,7 @@ Content used:
 
 ```text
 Service Name: InterAI Risk Oracle
-URL: https://ai-risk-oracle.fly.dev
+URL: https://api.interailabs.dev
 Description: x402-compatible Autonomous Execution Gateway for pre-execution verification of autonomous agents. Agents can discover pricing, onboard with API key/trial or x402, call /verify before consequential actions, and store trust receipts.
 Contact Email: interailabs@gmail.com
 ```
@@ -79,11 +79,11 @@ Submitted by: InterAILabs
 State: open / pending review
 Format: openapi
 Official: true
-OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+OpenAPI URL: https://api.interailabs.dev/.well-known/openapi.json
 Name: InterAI Risk Oracle
 Category: tools
 Repo: https://github.com/InterAILabs/ai-risk-oracle
-Hosted service: https://ai-risk-oracle.fly.dev
+Hosted service: https://api.interailabs.dev
 Release: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.0-beta
 ```
 

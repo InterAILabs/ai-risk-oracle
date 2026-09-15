@@ -66,11 +66,11 @@
     }
   },
   "self_serve": {
-    "demo_endpoint": "https://ai-risk-oracle.fly.dev/demo",
-    "onboard_endpoint": "https://ai-risk-oracle.fly.dev/onboard",
-    "pricing_endpoint": "https://ai-risk-oracle.fly.dev/pricing",
-    "verify_endpoint": "https://ai-risk-oracle.fly.dev/verify",
-    "openapi_endpoint": "https://ai-risk-oracle.fly.dev/.well-known/openapi.json",
+    "demo_endpoint": "https://api.interailabs.dev/demo",
+    "onboard_endpoint": "https://api.interailabs.dev/onboard",
+    "pricing_endpoint": "https://api.interailabs.dev/pricing",
+    "verify_endpoint": "https://api.interailabs.dev/verify",
+    "openapi_endpoint": "https://api.interailabs.dev/.well-known/openapi.json",
     "supports_x402": true,
     "supports_prepaid_api_key": true,
     "trial_supported": true
@@ -89,7 +89,7 @@
   "evidence": {
     "trust_receipt_id": true,
     "signed_receipt": true,
-    "receipt_lookup_endpoint": "https://ai-risk-oracle.fly.dev/trust/receipts/{receiptId}",
+    "receipt_lookup_endpoint": "https://api.interailabs.dev/trust/receipts/{receiptId}",
     "receipt_lookup_privacy": {
       "anonymous": "receipt_id_and_issued_at_only",
       "owner_bearer": "complete_signed_evidence",

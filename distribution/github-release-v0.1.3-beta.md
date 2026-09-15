@@ -18,8 +18,8 @@ The release also prepares authenticated Coinbase CDP facilitator support for
 Base Mainnet. Production settlement requires operator-provided CDP credentials
 stored as runtime secrets; no wallet or private key is changed.
 
-Live pricing: https://ai-risk-oracle.fly.dev/pricing
+Live pricing: https://api.interailabs.dev/pricing
 
-MCP remote: https://ai-risk-oracle.fly.dev/mcp
+MCP remote: https://api.interailabs.dev/mcp
 
-OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+OpenAPI: https://api.interailabs.dev/.well-known/openapi.json

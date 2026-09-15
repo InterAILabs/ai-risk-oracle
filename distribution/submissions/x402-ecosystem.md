@@ -50,16 +50,16 @@ x402, Base USDC, autonomous agents, AI agents, agent payments, pre-execution ver
 
 ## Links
 
-- Homepage: https://ai-risk-oracle.fly.dev
+- Homepage: https://api.interailabs.dev
 - GitHub repo: https://github.com/InterAILabs/ai-risk-oracle
 - Release URL: https://github.com/InterAILabs/ai-risk-oracle/releases/tag/v0.1.3-beta
-- Hosted service URL: https://ai-risk-oracle.fly.dev
-- Pricing URL: https://ai-risk-oracle.fly.dev/pricing
-- Onboard URL: https://ai-risk-oracle.fly.dev/onboard
-- OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- AI service descriptor URL: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Discovery bundle URL: https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json
-- Autonomous adoption URL: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Hosted service URL: https://api.interailabs.dev
+- Pricing URL: https://api.interailabs.dev/pricing
+- Onboard URL: https://api.interailabs.dev/onboard
+- OpenAPI URL: https://api.interailabs.dev/.well-known/openapi.json
+- AI service descriptor URL: https://api.interailabs.dev/.well-known/ai-service.json
+- Discovery bundle URL: https://api.interailabs.dev/.well-known/discovery-bundle.json
+- Autonomous adoption URL: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 
 ## Pricing/Self-Serve Path
 
@@ -70,19 +70,19 @@ discover -> pricing -> onboard/API key/trial or x402 -> verify -> decision -> st
 Use the hosted pricing endpoint for current x402/Base USDC details:
 
 ```text
-https://ai-risk-oracle.fly.dev/pricing
+https://api.interailabs.dev/pricing
 ```
 
 ## OpenAPI URL
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+https://api.interailabs.dev/.well-known/openapi.json
 ```
 
 ## Autonomous Adoption URL
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+https://api.interailabs.dev/.well-known/autonomous-adoption.json
 ```
 
 ## Release URL
@@ -108,7 +108,7 @@ infrastructure reviewers, and autonomous workflow builders.
 
 1. For Arch Tools, submit one targeted review form using:
    - Service Name: `InterAI Risk Oracle`
-   - URL: `https://ai-risk-oracle.fly.dev`
+   - URL: `https://api.interailabs.dev`
    - Description: use the short or long description above.
    - Contact Email: use the operator-approved InterAI support contact.
 2. For `x402.solutions`, submit only after an operator approves the review and

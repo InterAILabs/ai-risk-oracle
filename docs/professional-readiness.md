@@ -5,7 +5,7 @@ This is an honest public readiness checklist for InterAI Risk Oracle. It does no
 ## Current Status
 
 - Product stage: controlled technical beta.
-- Hosted service: `https://ai-risk-oracle.fly.dev`
+- Hosted service: `https://api.interailabs.dev`
 - Primary thesis: Before an agent executes, InterAI verifies.
 - Primary positioning: independent pre-execution decision layer for consequential agent actions.
 - Primary contract: `autonomous_execution`.
@@ -61,7 +61,7 @@ Those systems answer questions such as who a principal is and whether it is allo
 
 ## Current Domain Recommendation
 
-Use `ai-risk-oracle.fly.dev` for the current controlled beta because hosted metadata, receipts, documentation, and smoke coverage already use that origin.
+Use `api.interailabs.dev` for the current controlled beta because hosted metadata, receipts, documentation, and smoke coverage already use that origin.
 
 Move to an owned domain only as a coordinated migration of API, discovery, registry, receipt, SDK, and documentation surfaces. Do not treat a domain change as a cosmetic DNS-only edit.
 

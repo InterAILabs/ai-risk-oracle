@@ -1,7 +1,7 @@
 {
   "service_name": "InterAI Risk Oracle",
   "version": "0.1.3-beta",
-  "base_url": "https://ai-risk-oracle.fly.dev",
+  "base_url": "https://api.interailabs.dev",
   "service_type": "pre_execution_decision_layer",
   "category": "pre_execution_decision_layer",
   "description": "Independent pre-execution decision layer for consequential autonomous-agent actions, returning allow, review_required, or block with durable trust receipts.",
@@ -25,36 +25,36 @@
   "authentication": {
     "type": "bearer",
     "header": "Authorization",
-    "obtained_via": "POST https://ai-risk-oracle.fly.dev/onboard"
+    "obtained_via": "POST https://api.interailabs.dev/onboard"
   },
   "pricing": {
     "model": "hosted_api_self_serve_metadata",
-    "pricing_url": "https://ai-risk-oracle.fly.dev/pricing",
-    "lab_url": "https://ai-risk-oracle.fly.dev/lab",
-    "demo_url": "https://ai-risk-oracle.fly.dev/demo",
-    "onboard_url": "https://ai-risk-oracle.fly.dev/onboard",
-    "verify_url": "https://ai-risk-oracle.fly.dev/verify",
+    "pricing_url": "https://api.interailabs.dev/pricing",
+    "lab_url": "https://api.interailabs.dev/lab",
+    "demo_url": "https://api.interailabs.dev/demo",
+    "onboard_url": "https://api.interailabs.dev/onboard",
+    "verify_url": "https://api.interailabs.dev/verify",
     "x402_supported": true,
     "prepaid_api_key_supported": true,
     "trial_supported": true,
     "details": "Agents and integrators can discover pricing, inspect the Action Boundary Lab, onboard through hosted self-serve metadata or x402, verify actions before execution, and store trust receipts without emailing for default access."
   },
   "endpoints": {
-    "pricing": "https://ai-risk-oracle.fly.dev/pricing",
-    "lab": "https://ai-risk-oracle.fly.dev/lab",
-    "demo": "https://ai-risk-oracle.fly.dev/demo",
-    "onboard": "https://ai-risk-oracle.fly.dev/onboard",
-    "verify": "https://ai-risk-oracle.fly.dev/verify",
-    "mcp": "https://ai-risk-oracle.fly.dev/mcp",
-    "a2a": "https://ai-risk-oracle.fly.dev/a2a",
-    "a2a_v1": "https://ai-risk-oracle.fly.dev/a2a/v1",
-    "a2a_v1_agent_card": "https://ai-risk-oracle.fly.dev/.well-known/agent-card.json",
+    "pricing": "https://api.interailabs.dev/pricing",
+    "lab": "https://api.interailabs.dev/lab",
+    "demo": "https://api.interailabs.dev/demo",
+    "onboard": "https://api.interailabs.dev/onboard",
+    "verify": "https://api.interailabs.dev/verify",
+    "mcp": "https://api.interailabs.dev/mcp",
+    "a2a": "https://api.interailabs.dev/a2a",
+    "a2a_v1": "https://api.interailabs.dev/a2a/v1",
+    "a2a_v1_agent_card": "https://api.interailabs.dev/.well-known/agent-card.json",
     "autonomous_adoption": "discovery/autonomous-adoption.json",
-    "hosted_autonomous_adoption": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json"
+    "hosted_autonomous_adoption": "https://api.interailabs.dev/.well-known/autonomous-adoption.json"
   },
   "autonomous_adoption": {
     "repo_path": "discovery/autonomous-adoption.json",
-    "url": "https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json",
+    "url": "https://api.interailabs.dev/.well-known/autonomous-adoption.json",
     "purpose": "Machine-readable guidance for agents and builders deciding when and how to use InterAI before execution"
   },
   "docs_url": "https://github.com/InterAILabs/ai-risk-oracle",

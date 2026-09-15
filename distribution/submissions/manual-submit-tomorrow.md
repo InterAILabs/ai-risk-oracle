@@ -30,7 +30,7 @@ Format: OpenAPI/Swagger
 Official: true
 API Name: InterAI Risk Oracle
 Category: tools
-OpenAPI URL: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+OpenAPI URL: https://api.interailabs.dev/.well-known/openapi.json
 ```
 
 Do not:
@@ -57,7 +57,7 @@ Fields:
 
 ```text
 Service Name: InterAI Risk Oracle
-URL: https://ai-risk-oracle.fly.dev
+URL: https://api.interailabs.dev
 Description: x402-compatible Autonomous Execution Gateway for pre-execution verification of autonomous agents. Agents can discover pricing, onboard with API key/trial or x402, call /verify before consequential actions, and store trust receipts.
 Contact Email: interailabs@gmail.com
 ```
@@ -84,12 +84,12 @@ Use:
 ```text
 Project Name: InterAI Risk Oracle
 Project Description: InterAI Risk Oracle is an x402-compatible Autonomous Execution Gateway for pre-execution verification of autonomous agents. Agents can discover pricing, onboard with API key/trial or x402, call /verify before consequential actions, and store trust receipts.
-Website URL: https://ai-risk-oracle.fly.dev
+Website URL: https://api.interailabs.dev
 Category: Other
 Team Size: Solo Developer or operator-approved team size
 Contact Name: InterAI Labs
 Contact Email: interailabs@gmail.com
-Additional Information: OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json; Pricing: https://ai-risk-oracle.fly.dev/pricing; Autonomous adoption: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+Additional Information: OpenAPI: https://api.interailabs.dev/.well-known/openapi.json; Pricing: https://api.interailabs.dev/pricing; Autonomous adoption: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 ```
 
 Do not submit unless the operator accepts:
@@ -110,7 +110,7 @@ Fields:
 
 ```text
 API name: InterAI Risk Oracle API
-Website URL: https://ai-risk-oracle.fly.dev
+Website URL: https://api.interailabs.dev
 Description: Pre-execution verification API for autonomous agents. InterAI returns score, risk_level, signals, recommended_action, policy_result, and trust receipt metadata before consequential action execution.
 Use cases:
 Verify an autonomous agent action before tool execution

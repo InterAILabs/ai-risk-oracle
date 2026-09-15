@@ -6,7 +6,7 @@
 
 I’m **Alejandro Bolognese**, building InterAI through **InterAI Labs** as ongoing work on agent infrastructure, execution control, trust boundaries, and production systems.
 
-**Live proof:** [Action Boundary Lab](https://ai-risk-oracle.fly.dev/lab) · [Controlled safe demo](https://ai-risk-oracle.fly.dev/demo) · [Architecture & authority boundary](docs/architecture.md) · [OpenAPI](https://ai-risk-oracle.fly.dev/.well-known/openapi.json)
+**Live proof:** [Action Boundary Lab](https://api.interailabs.dev/lab) · [Controlled safe demo](https://api.interailabs.dev/demo) · [Architecture & authority boundary](docs/architecture.md) · [OpenAPI](https://api.interailabs.dev/.well-known/openapi.json)
 
 InterAI sits between an autonomous agent and a consequential action. The agent proposes what it wants to do; InterAI evaluates the action in context, applies authoritative host/account constraints plus any request-scoped caller constraints, and returns a machine-readable authority decision:
 
@@ -180,19 +180,19 @@ InterAI does not execute the action. The surrounding execution layer must route 
 Action Boundary Lab — change the proposed action and inspect the real pre-execution decision boundary:
 
 ```text
-https://ai-risk-oracle.fly.dev/lab
+https://api.interailabs.dev/lab
 ```
 
 Controlled safe demo — one limited read-only sandbox verification with a real trust receipt:
 
 ```text
-https://ai-risk-oracle.fly.dev/demo
+https://api.interailabs.dev/demo
 ```
 
 Hosted verification:
 
 ```bash
-curl -sS -X POST https://ai-risk-oracle.fly.dev/verify \
+curl -sS -X POST https://api.interailabs.dev/verify \
   -H "Authorization: Bearer <interai_credential>" \
   -H "Content-Type: application/json" \
   -H "X-Idempotency-Key: vendor-payment-001" \
@@ -308,13 +308,13 @@ I’m building InterAI as part of broader work on agent infrastructure, executio
 
 ## Links
 
-- Hosted beta: https://ai-risk-oracle.fly.dev
-- Action Boundary Lab: https://ai-risk-oracle.fly.dev/lab
-- Controlled safe demo: https://ai-risk-oracle.fly.dev/demo
-- Pricing: https://ai-risk-oracle.fly.dev/pricing
-- Onboard: https://ai-risk-oracle.fly.dev/onboard
-- OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- MCP: https://ai-risk-oracle.fly.dev/mcp
+- Hosted beta: https://api.interailabs.dev
+- Action Boundary Lab: https://api.interailabs.dev/lab
+- Controlled safe demo: https://api.interailabs.dev/demo
+- Pricing: https://api.interailabs.dev/pricing
+- Onboard: https://api.interailabs.dev/onboard
+- OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+- MCP: https://api.interailabs.dev/mcp
 - npm: https://www.npmjs.com/package/interai-risk-oracle
 - PyPI: https://pypi.org/project/interai-risk-oracle/0.1.5b0/
 - Support / security / collaborations: interailabs@gmail.com

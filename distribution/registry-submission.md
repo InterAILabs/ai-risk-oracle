@@ -71,18 +71,18 @@ GitHub Actions Trusted Publishing with digital attestations. SDK package version
 
 ## Public URLs
 
-- Hosted service: https://ai-risk-oracle.fly.dev
+- Hosted service: https://api.interailabs.dev
 - Public repository: https://github.com/InterAILabs/ai-risk-oracle
-- Action Boundary Lab: https://ai-risk-oracle.fly.dev/lab
-- Controlled demo: https://ai-risk-oracle.fly.dev/demo
-- OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
-- Agent card: https://ai-risk-oracle.fly.dev/.well-known/agent-card.json
-- Legacy agent card: https://ai-risk-oracle.fly.dev/.well-known/agent.json
-- AI service descriptor: https://ai-risk-oracle.fly.dev/.well-known/ai-service.json
-- Discovery bundle: https://ai-risk-oracle.fly.dev/.well-known/discovery-bundle.json
-- Autonomous adoption descriptor: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
-- Pricing: https://ai-risk-oracle.fly.dev/pricing
-- Onboard: https://ai-risk-oracle.fly.dev/onboard
+- Action Boundary Lab: https://api.interailabs.dev/lab
+- Controlled demo: https://api.interailabs.dev/demo
+- OpenAPI: https://api.interailabs.dev/.well-known/openapi.json
+- Agent card: https://api.interailabs.dev/.well-known/agent-card.json
+- Legacy agent card: https://api.interailabs.dev/.well-known/agent.json
+- AI service descriptor: https://api.interailabs.dev/.well-known/ai-service.json
+- Discovery bundle: https://api.interailabs.dev/.well-known/discovery-bundle.json
+- Autonomous adoption descriptor: https://api.interailabs.dev/.well-known/autonomous-adoption.json
+- Pricing: https://api.interailabs.dev/pricing
+- Onboard: https://api.interailabs.dev/onboard
 
 ## Submission Notes
 

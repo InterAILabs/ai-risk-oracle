@@ -149,8 +149,8 @@ The autonomous contract should be evaluated as a pre-execution boundary, not as 
 
 Use hosted self-serve discovery first:
 
-- Pricing: https://ai-risk-oracle.fly.dev/pricing
-- Onboard: https://ai-risk-oracle.fly.dev/onboard
-- Adoption contract: https://ai-risk-oracle.fly.dev/.well-known/autonomous-adoption.json
+- Pricing: https://api.interailabs.dev/pricing
+- Onboard: https://api.interailabs.dev/onboard
+- Adoption contract: https://api.interailabs.dev/.well-known/autonomous-adoption.json
 
 For support, security, enterprise access, partnerships, or manual integration help, contact interailabs@gmail.com.

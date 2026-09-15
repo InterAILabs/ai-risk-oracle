@@ -3,17 +3,17 @@
   "description": "Pre-execution verification for proposed autonomous actions. InterAI returns a pre-execution decision, policy evidence, and trust receipt; it does not execute the external action.",
   "supportedInterfaces": [
     {
-      "url": "https://ai-risk-oracle.fly.dev/a2a/v1",
+      "url": "https://api.interailabs.dev/a2a/v1",
       "protocolBinding": "JSONRPC",
       "protocolVersion": "1.0"
     }
   ],
   "provider": {
-    "url": "https://ai-risk-oracle.fly.dev",
+    "url": "https://api.interailabs.dev",
     "organization": "InterAI"
   },
   "version": "0.1.3-beta",
-  "documentationUrl": "https://ai-risk-oracle.fly.dev/.well-known/openapi.json",
+  "documentationUrl": "https://api.interailabs.dev/.well-known/openapi.json",
   "capabilities": {
     "streaming": false,
     "pushNotifications": false,

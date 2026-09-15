@@ -16,7 +16,7 @@ This document states what is ready to use now and what still requires a current 
 | npm TypeScript SDK | Published | `interai-risk-oracle@0.1.3-beta` is present in npm; `latest` and `beta` currently point to `0.1.3-beta`. |
 | PyPI Python SDK | Published | `interai-risk-oracle 0.1.3b0` was published through GitHub Actions Trusted Publishing with digital attestations on 2026-09-07. |
 | Search/indexing/SEO | Ready for controlled work | GitHub docs and hosted metadata are public. Prefer targeted technical distribution and backlinks over broad claims. |
-| Owned-domain path | Deferred | InterAI currently uses `ai-risk-oracle.fly.dev`. An owned domain has not been adopted for this beta and should be handled as a separate infrastructure decision. |
+| Owned-domain path | Deferred | InterAI currently uses `api.interailabs.dev`. An owned domain has not been adopted for this beta and should be handled as a separate infrastructure decision. |
 
 ## Current Distribution Source Of Truth
 
@@ -46,7 +46,7 @@ Current identifier and hosted endpoint:
 
 ```text
 io.github.InterAILabs/ai-risk-oracle
-https://ai-risk-oracle.fly.dev/mcp
+https://api.interailabs.dev/mcp
 ```
 
 The endpoint has been observed healthy by external MCP monitoring. Registry/listing state,
@@ -58,10 +58,10 @@ verify them immediately before outreach or a placement claim.
 InterAI exposes:
 
 ```text
-https://ai-risk-oracle.fly.dev/.well-known/agent.json
-https://ai-risk-oracle.fly.dev/.well-known/agent-card.json
-https://ai-risk-oracle.fly.dev/a2a
-https://ai-risk-oracle.fly.dev/a2a/v1
+https://api.interailabs.dev/.well-known/agent.json
+https://api.interailabs.dev/.well-known/agent-card.json
+https://api.interailabs.dev/a2a
+https://api.interailabs.dev/a2a/v1
 ```
 
 Before submission, confirm the target directory is active, relevant, and supports the

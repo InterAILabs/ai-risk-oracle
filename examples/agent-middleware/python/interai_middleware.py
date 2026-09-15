@@ -10,7 +10,7 @@ ExecutionDecision = Dict[str, Any]
 
 
 def _base_url() -> str:
-    return os.environ.get("INTERAI_BASE_URL", "https://ai-risk-oracle.fly.dev").rstrip("/")
+    return os.environ.get("INTERAI_BASE_URL", "https://api.interailabs.dev").rstrip("/")
 
 
 def _api_key() -> str:

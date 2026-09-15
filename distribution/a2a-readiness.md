@@ -5,9 +5,9 @@ pre-execution verification.
 
 ## Discovery
 
-- Agent card: `GET https://ai-risk-oracle.fly.dev/.well-known/agent.json`
-- A2A endpoint: `POST https://ai-risk-oracle.fly.dev/a2a`
-- API contract: `GET https://ai-risk-oracle.fly.dev/.well-known/openapi.json`
+- Agent card: `GET https://api.interailabs.dev/.well-known/agent.json`
+- A2A endpoint: `POST https://api.interailabs.dev/a2a`
+- API contract: `GET https://api.interailabs.dev/.well-known/openapi.json`
 
 ## Decision Mapping
 

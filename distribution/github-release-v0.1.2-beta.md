@@ -17,8 +17,8 @@ Highlights:
 This remains a controlled technical beta. It does not guarantee factual truth
 or replace domain-specific/human controls for critical or irreversible actions.
 
-Live demo: https://ai-risk-oracle.fly.dev/demo
+Live demo: https://api.interailabs.dev/demo
 
-MCP remote: https://ai-risk-oracle.fly.dev/mcp
+MCP remote: https://api.interailabs.dev/mcp
 
-OpenAPI: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+OpenAPI: https://api.interailabs.dev/.well-known/openapi.json

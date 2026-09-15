@@ -17,7 +17,7 @@ InterAI does not execute the action. The surrounding execution layer must route 
 Open:
 
 ```text
-https://ai-risk-oracle.fly.dev/lab
+https://api.interailabs.dev/lab
 ```
 
 Use the Lab to change the proposed action and see how the decision boundary responds. The free path uses only the existing safe read-only sandbox fixture. Custom scenarios require your own InterAI API key and are evaluated through the real `/verify` path; the Lab never performs the payment, email, deletion, or other external side effect itself.
@@ -27,7 +27,7 @@ Use the Lab to change the proposed action and see how the decision boundary resp
 Open:
 
 ```text
-https://ai-risk-oracle.fly.dev/demo
+https://api.interailabs.dev/demo
 ```
 
 The live safe demo creates a scoped `demo_trial` key, runs a safe read-only sandbox verification through the existing `/verify` endpoint, and opens the public trust receipt.
@@ -223,10 +223,10 @@ What the execution layer should do next: abort the action, log the decision, and
 
 ## Next Step
 
-- Explore the boundary: https://ai-risk-oracle.fly.dev/lab
-- Run the controlled safe demo: https://ai-risk-oracle.fly.dev/demo
-- Review pricing: https://ai-risk-oracle.fly.dev/pricing
-- Integrate `/verify`: https://ai-risk-oracle.fly.dev/.well-known/openapi.json
+- Explore the boundary: https://api.interailabs.dev/lab
+- Run the controlled safe demo: https://api.interailabs.dev/demo
+- Review pricing: https://api.interailabs.dev/pricing
+- Integrate `/verify`: https://api.interailabs.dev/.well-known/openapi.json
 - Framework examples: ../examples/framework-integrations
 - Integration patterns: ./integration-patterns.md
 - Store returned trust receipt IDs for audit lookup.
