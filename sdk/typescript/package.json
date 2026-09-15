@@ -1,6 +1,6 @@
 {
   "name": "interai-risk-oracle",
-  "version": "0.1.3-beta",
+  "version": "0.1.4-beta",
   "description": "TypeScript client for InterAI's independent pre-execution decision layer for consequential agent actions.",
   "homepage": "https://ai-risk-oracle.fly.dev/",
   "repository": {
