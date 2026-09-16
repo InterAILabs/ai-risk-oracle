@@ -1,0 +1,43 @@
+{
+  "schema": "interai-toolkit-sources/v1",
+  "policy": "Standalone repositories are canonical. The toolkit directories in this hub are compatibility snapshots for hub tests and examples and must be synchronized deliberately.",
+  "tools": {
+    "exact-action-binding": {
+      "canonical_repository": "InterAILabs/exact-action-binding",
+      "canonical_commit": "92009b0627cfeffd9a10e2bc5fd411117d3635fe",
+      "source_blobs": {
+        "index.mjs": "866683a8a4e85e4ba3a4c777a6e837206c2b455d",
+        "index.test.mjs": "0d8f01a5be6e99b31bd4b760f73ced83f2ed28b1"
+      },
+      "hub_files": {
+        "exact-action-binding/index.mjs": "866683a8a4e85e4ba3a4c777a6e837206c2b455d",
+        "exact-action-binding/index.test.mjs": "0d8f01a5be6e99b31bd4b760f73ced83f2ed28b1"
+      }
+    },
+    "agent-action-gate": {
+      "canonical_repository": "InterAILabs/agent-action-gate",
+      "canonical_commit": "a423de7a06d0b2783c981c4d62d3c2605c00f204",
+      "source_blobs": {
+        "index.mjs": "88ef1331af1cf795f9939d1db8b71440a3a106ef",
+        "index.test.mjs": "a117eea5637040cd97e58da652af5c1a6ba86bec"
+      },
+      "hub_files": {
+        "action-gate/index.mjs": "0714a7718f7f8c13373ace58c15a642be0d9c5f8",
+        "action-gate/index.test.mjs": "a117eea5637040cd97e58da652af5c1a6ba86bec"
+      },
+      "compatibility_note": "The hub snapshot uses a relative import to toolkit/exact-action-binding so hub tests remain dependency-free. The standalone repository imports the canonical public exact-action-binding package identity instead."
+    },
+    "decision-receipts": {
+      "canonical_repository": "InterAILabs/decision-receipts",
+      "canonical_commit": "b15c81b377d6543ac3a153302988aa6ac9522d71",
+      "source_blobs": {
+        "index.mjs": "f4f8806ebb4c43486c3ca43be5bacf360deef91c",
+        "index.test.mjs": "782527518b9150a8c83c5662c44d9fafecc03977"
+      },
+      "hub_files": {
+        "decision-receipts/index.mjs": "f4f8806ebb4c43486c3ca43be5bacf360deef91c",
+        "decision-receipts/index.test.mjs": "782527518b9150a8c83c5662c44d9fafecc03977"
+      }
+    }
+  }
+}
