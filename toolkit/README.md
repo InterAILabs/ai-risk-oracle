@@ -14,7 +14,9 @@ The first three InterAI tool satellites are now published as focused repositorie
 - [Exact Action Binding](https://github.com/InterAILabs/exact-action-binding) — deterministic host-side action binding and mutation detection.
 - [Decision Receipts](https://github.com/InterAILabs/decision-receipts) — safe consumption and service verification of InterAI decision evidence.
 
-The standalone repositories are the canonical release/contribution surfaces for these tools. The copies under `toolkit/` remain compatibility mirrors used by this hub's examples and contract tests; changes to a tool should land in its satellite repository first and then be synchronized here deliberately.
+The standalone repositories are the canonical release/contribution surfaces for these tools. The copies under `toolkit/` are compatibility snapshots used by this hub's examples and contract tests; changes to a tool should land in its satellite repository first and then be synchronized here deliberately.
+
+Snapshot provenance is recorded in [`sources.json`](sources.json). CI runs [`check-sources.mjs`](check-sources.mjs) so a compatibility copy cannot be edited silently without updating the recorded source relationship. The check is local and deterministic; it does not add a network dependency to hub CI.
 
 ## Tools
 
@@ -23,6 +25,8 @@ The standalone repositories are the canonical release/contribution surfaces for 
 `action-gate/` wraps a proposed action, an external decision provider, and the side effect itself. Only an unambiguous `allow` reaches `execute`. `review_required`, `block`, timeout, provider failure, malformed/unknown decisions, contradictory authority fields, or action mutation all stop execution.
 
 The default authority reader implements InterAI's documented `recommended_action` + `policy_result` contract. The standalone Agent Action Gate composes with Exact Action Binding rather than carrying a second independent binding implementation.
+
+The hub compatibility snapshot intentionally uses a relative import to the local Exact Action Binding snapshot so hub tests remain dependency-free; the standalone repository uses the public Exact Action Binding repository identity.
 
 ### Exact Action Binding
 
@@ -41,6 +45,7 @@ Current InterAI HMAC receipts are service-verifiable by InterAI. This tool does 
 No package install is required:
 
 ```bash
+node toolkit/check-sources.mjs
 node --test toolkit/*/*.test.mjs
 ```
 
