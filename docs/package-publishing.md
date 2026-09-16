@@ -2,6 +2,8 @@
 
 Both registries use their official trusted-publishing path. Do not create or store long-lived npm or PyPI tokens in this repository.
 
+Publishing is dispatch-only from `main`. Do not create, move, or reuse `publish/*` branches to trigger a release. npm and PyPI versions are immutable, and both workflows reject an already-published version before the upload step.
+
 ## TypeScript SDK: npm
 
 The first publication must be made interactively because npm only allows a trusted publisher to be attached after the package exists.
@@ -13,9 +15,9 @@ The first publication must be made interactively because npm only allows a trust
    - repository: `ai-risk-oracle`
    - workflow: `publish-npm.yml`
    - environment: `npm`
-4. For later versions, dispatch **Publish TypeScript SDK to npm** and enter the exact version from `sdk/typescript/package.json`.
+4. For later versions, dispatch **Publish TypeScript SDK to npm** from `main` and enter the exact version from `sdk/typescript/package.json`.
 
-The workflow validates the requested version, type-checks the package, and publishes it with provenance.
+The workflow validates the requested version, checks that it is not already present in npm, type-checks the package, and publishes it with provenance.
 
 ## Python SDK: PyPI
 
@@ -28,6 +30,6 @@ PyPI supports a pending trusted publisher, so the GitHub workflow can create the
    - workflow: `publish-python.yml`
    - environment: `pypi`
 2. In GitHub, create the `pypi` environment if it does not already exist.
-3. Dispatch **Publish Python SDK to PyPI** and enter the exact version from `python/pyproject.toml`.
+3. Dispatch **Publish Python SDK to PyPI** from `main` and enter the exact version from `python/pyproject.toml`.
 
-The workflow validates the requested version, builds both source and wheel distributions, and publishes with an OIDC identity and attestations.
+The workflow validates the requested version, checks that it is not already present in PyPI, builds both source and wheel distributions, and publishes with an OIDC identity and attestations.
