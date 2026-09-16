@@ -28,6 +28,7 @@ The following remain private unless a later explicit publication decision says o
 - billing, settlement and top-up internals beyond public API contracts;
 - receipt-signing secrets, key material and private signing implementation;
 - admin/control-room internals and private operational telemetry;
+- operator campaign plans, submission trackers, adoption-monitor configuration and internal distribution state;
 - private deployment configuration, credentials, secrets and incident tooling;
 - research/shadow internals that are not yet a supported public contract.
 
