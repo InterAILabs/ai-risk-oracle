@@ -42,18 +42,34 @@ A decision provider must return an object equivalent to:
 }
 ```
 
-Only `allow` is authorizing. `review_required`, `block`, timeout, transport failure, malformed response, unknown issuer, expired decision, stale policy, replay, digest mismatch, action mutation, or deterministic wallet denial all stop the path before delegated signing.
+Only `allow` is authorizing. `review_required`, `block`, timeout, transport failure, malformed response, unknown issuer, expired decision, expired action, stale policy, replay, digest mismatch, action mutation, or deterministic wallet denial all stop the path before delegated signing.
+
+## Provider authentication boundary
+
+The `issuer` field in this example is only an identity label for a **trusted local/mock decision provider**. String equality does not authenticate a remote response.
+
+A future remote provider must expose authenticated provenance that the host can verify before accepting the decision, for example a signed DecisionReceipt or equivalent authenticated response bound to a trusted verification key and the exact execution intent. The host must fail closed when provenance cannot be authenticated.
+
+This mock does not attempt to define that remote cryptographic protocol.
 
 ## Terminal revalidation
 
-After a valid contextual `allow`, and immediately before signing, the host re-reads:
+After a valid contextual `allow`, and immediately before signing, the host re-reads and revalidates:
 
 - the final exact delegated action;
 - wallet nonce and action identity;
 - wallet policy version and policy hash;
-- all deterministic BoundedAgentWallet constraints relevant to the action.
+- all deterministic `BoundedAgentWallet` constraints relevant to the action;
+- the decision expiry after the terminal wallet check;
+- the action expiry after the terminal wallet check.
 
-If anything changed, the prior decision is not reused. A new exact proposal requires a new decision.
+If anything changed or expired, the prior decision is not reused. A new exact proposal requires a new decision.
+
+## Atomic single-use boundary
+
+The decision ID is consumed only after all terminal checks pass, and that consume operation must be atomic.
+
+The included mock uses a process-local lock-backed consumer so concurrent calls cannot both consume the same decision ID. This is sufficient only for the isolated example. A real multi-worker integration must use a durable shared atomic store that survives worker boundaries and process restarts.
 
 ## Authority rule
 
@@ -65,6 +81,8 @@ existing wallet hard denial AND contextual ALLOW -> deny
 REVIEW_REQUIRED -> no signing now
 BLOCK -> no signing
 provider uncertainty/failure -> no signing
+expired decision/action -> no signing
+replayed/already-consumed decision -> no signing
 ```
 
 An InterAI `allow` can never create target, amount, verifier, action, nonce, or policy authority that the wallet did not already grant.
