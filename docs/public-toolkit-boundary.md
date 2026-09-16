@@ -52,23 +52,27 @@ Before moving a helper into the public/open-source surface, verify all of the fo
 6. Receipt helpers preserve the current service-verifiable scope and do not imply independent verification.
 7. Publishing it does not expose scoring weights, private policy floors, trust intelligence, billing internals or signing internals.
 
-## Standalone repository policy
+## Published standalone repositories
 
-A focused standalone repository is a distribution surface, not a second implementation of Risk Oracle. We may create one proactively when the tool already has a stable public contract and a dedicated repository materially improves discovery, explanation, contribution or installation.
+The initial satellites are live:
 
-The initial standalone identities are:
-
-- `InterAILabs/agent-action-gate`
 - `InterAILabs/exact-action-binding`
+- `InterAILabs/agent-action-gate`
 - `InterAILabs/decision-receipts`
 
-A satellite repository must:
+Each repository launched with runnable source, synthetic tests, CI, Apache-2.0 licensing, a security/reporting pointer, and an explicit relationship to Risk Oracle.
+
+The standalone repositories are the canonical release and contribution surfaces for their tools. The corresponding directories under `ai-risk-oracle/toolkit/` remain compatibility mirrors for this hub's examples and contract tests. Tool changes should land in the satellite first and be synchronized back into the hub deliberately rather than edited as two unrelated implementations.
+
+Agent Action Gate composes with the public Exact Action Binding repository; this explicit public dependency is preferred over copying the binding implementation.
+
+A satellite repository must continue to:
 
 - contain only code that passes the publication gate above;
 - identify Risk Oracle as a related hosted decision service without claiming that the tool itself is the private engine;
 - remain usable from public code/contracts only;
-- have its own focused README, tests, CI and open-source license;
+- keep focused README, tests, CI and open-source licensing current;
 - avoid duplicating private logic or operational state;
-- keep a clear canonical-source/release relationship with the public Risk Oracle hub.
+- preserve a clear canonical-source/release relationship with the Risk Oracle hub.
 
 Repository count is not itself an adoption metric. The purpose of the satellites is to expose concrete problems developers already search for through several small entry points into one coherent authority ecosystem.
