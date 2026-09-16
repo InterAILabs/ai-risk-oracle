@@ -1,6 +1,8 @@
-# Action Gate
+# Agent Action Gate
 
 A tiny fail-closed execution wrapper for consequential agent actions.
+
+Standalone repository identity: `InterAILabs/agent-action-gate`.
 
 ```js
 import { runActionGate } from "./index.mjs";
@@ -43,6 +45,12 @@ Execution requires the complete current InterAI authority contract: both `recomm
 
 The decision provider receives a detached, deeply frozen snapshot plus a public action binding and `AbortSignal`. The wrapper re-checks the original action immediately before execution to catch mutation after the decision.
 
+Action Gate composes with the open-source Exact Action Binding helper. That dependency is host-side integration code; neither tool contains Risk Oracle's private decision logic.
+
 The example maps the generic host action into the public `interai-canonical-action/v1` request shape before calling `/verify`; the toolkit's local binding remains deliberately separate from the hosted canonical execution-intent protocol.
 
 For framework-native interception, use the maintained adapters under `examples/framework-integrations/`.
+
+## License
+
+Apache-2.0. See `../LICENSE` and `../NOTICE` while this source lives in the Risk Oracle toolkit.

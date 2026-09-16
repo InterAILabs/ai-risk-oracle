@@ -6,9 +6,20 @@ This repository contains public documentation, schemas, discovery metadata, SDK
 client code, public toolkit integration primitives, and integration examples for
 the hosted InterAI Risk Oracle service.
 
-SDK client code, public toolkit integration primitives, and integration examples
-may be used, copied, modified, and distributed for the purpose of integrating
-with the hosted InterAI Risk Oracle API, provided that this notice is retained.
+SEPARATE TOOLKIT LICENSE
+
+The contents of `toolkit/` are licensed separately under the Apache License,
+Version 2.0, as provided in `toolkit/LICENSE` and `toolkit/NOTICE`. That separate
+license is intentionally limited to the files under `toolkit/` and does not
+license the InterAI Risk Oracle hosted service, private core, trademarks, service
+or product identity, private decision logic, policy implementation, scoring or
+trust intelligence, billing/storage internals, signing internals, or production
+operations.
+
+For repository contents outside `toolkit/`, SDK client code and integration
+examples may be used, copied, modified, and distributed for the purpose of
+integrating with the hosted InterAI Risk Oracle API, provided that this notice is
+retained.
 
 Documentation, schemas, discovery metadata, trademarks, service names, product
 names, hosted service internals, verification logic, scoring logic, billing
@@ -16,4 +27,5 @@ infrastructure, receipt-signing internals, and trust intelligence remain
 proprietary unless a separate written license says otherwise.
 
 This repository is provided "as is", without warranties or conditions of any
-kind. This notice is not legal advice. Review with counsel before public launch.
+kind. This notice is not legal advice. Review with counsel before material
+commercial reliance or broader licensing changes.
