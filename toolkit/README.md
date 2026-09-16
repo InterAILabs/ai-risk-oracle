@@ -6,13 +6,23 @@ These tools are intentionally **not** the InterAI decision engine. They contain 
 
 The code under `toolkit/` is licensed under Apache-2.0. See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
 
+## Live standalone repositories
+
+The first three InterAI tool satellites are now published as focused repositories:
+
+- [Agent Action Gate](https://github.com/InterAILabs/agent-action-gate) — fail-closed execution boundary for consequential AI-agent actions.
+- [Exact Action Binding](https://github.com/InterAILabs/exact-action-binding) — deterministic host-side action binding and mutation detection.
+- [Decision Receipts](https://github.com/InterAILabs/decision-receipts) — safe consumption and service verification of InterAI decision evidence.
+
+The standalone repositories are the canonical release/contribution surfaces for these tools. The copies under `toolkit/` remain compatibility mirrors used by this hub's examples and contract tests; changes to a tool should land in its satellite repository first and then be synchronized here deliberately.
+
 ## Tools
 
-### Action Gate
+### Agent Action Gate
 
 `action-gate/` wraps a proposed action, an external decision provider, and the side effect itself. Only an unambiguous `allow` reaches `execute`. `review_required`, `block`, timeout, provider failure, malformed/unknown decisions, contradictory authority fields, or action mutation all stop execution.
 
-The default authority reader implements InterAI's documented `recommended_action` + `policy_result` contract. Action Gate composes with Exact Action Binding for host-side mutation detection.
+The default authority reader implements InterAI's documented `recommended_action` + `policy_result` contract. The standalone Agent Action Gate composes with Exact Action Binding rather than carrying a second independent binding implementation.
 
 ### Exact Action Binding
 
@@ -26,13 +36,15 @@ Use it to prove that the action about to execute is the same action that was bou
 
 Current InterAI HMAC receipts are service-verifiable by InterAI. This tool does not claim independent offline public-key verification.
 
-## Run the tests
+## Run the hub compatibility tests
 
 No package install is required:
 
 ```bash
 node --test toolkit/*/*.test.mjs
 ```
+
+Each satellite repository also has its own CI and standalone tests.
 
 ## Framework and protocol adapters
 
@@ -44,21 +56,11 @@ Use these tools directly, or start from the maintained integration examples:
 - Google ADK: `examples/framework-integrations/google-adk/`
 - Agent Bounties mock adapter: `examples/protocol-integrations/agent-bounties/`
 
-## Standalone repository model
-
-InterAI uses a hub-and-satellites model:
+## Hub-and-satellites model
 
 - `InterAILabs/ai-risk-oracle` remains the public product, contract, SDK and integration hub for Risk Oracle.
-- selected stable tools may also live in focused standalone repositories for independent discovery, contribution and release identity;
+- the three standalone repositories above own their focused tool identity and release/contribution surface;
 - standalone tools depend only on public code/contracts and never import the private core;
 - the hosted decision engine remains behind `https://api.interailabs.dev`.
-
-The first standalone repository identities are:
-
-- `InterAILabs/agent-action-gate`
-- `InterAILabs/exact-action-binding`
-- `InterAILabs/decision-receipts`
-
-Until a standalone repository is published, the corresponding directory here remains the canonical source. Once a satellite repository exists, its README must identify its relationship to Risk Oracle and this hub explicitly; no private-core implementation is copied into it.
 
 See `docs/public-toolkit-boundary.md` for the public/private publication boundary.
