@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 
 from adapter import (
+    AtomicDecisionConsumer,
     AuthorizationDenied,
     DecisionBinding,
     DelegatedAction,
@@ -50,12 +53,23 @@ def allow_response(binding: DecisionBinding, **overrides):
 
 
 class AdapterTests(unittest.TestCase):
-    def gate(self, *, action=None, policy=None, provider=None, enabled=True, policy_allows=None):
+    def gate(
+        self,
+        *,
+        action=None,
+        policy=None,
+        provider=None,
+        enabled=True,
+        policy_allows=None,
+        consumer=None,
+        now=None,
+    ):
         action = action or base_action()
         policy = policy or base_policy()
-        consumed = set()
+        consumer = consumer or AtomicDecisionConsumer()
         provider = provider or (lambda binding: allow_response(binding))
         policy_allows = policy_allows or (lambda _action, _policy: True)
+        now = now or (lambda: NOW)
         return authorize_before_delegated_signing(
             enabled=enabled,
             read_action=lambda: action,
@@ -63,8 +77,8 @@ class AdapterTests(unittest.TestCase):
             deterministic_policy_allows=policy_allows,
             decision_provider=provider,
             known_issuer="interai:test",
-            consumed_decision_ids=consumed,
-            now=lambda: NOW,
+            consume_decision_id=consumer.consume,
+            now=now,
         )
 
     def assert_denied(self, reason, fn):
@@ -109,23 +123,14 @@ class AdapterTests(unittest.TestCase):
             lambda: self.gate(provider=lambda b: allow_response(b, expires_at=(NOW - timedelta(seconds=1)).isoformat())),
         )
 
+    def test_expired_action_fails_closed(self):
+        action = replace(base_action(), expiry=int(NOW.timestamp()))
+        self.assert_denied("expired_action", lambda: self.gate(action=action))
+
     def test_replay_fails_closed(self):
-        action = base_action()
-        policy = base_policy()
-        consumed = {"decision-001"}
-        self.assert_denied(
-            "replayed_decision",
-            lambda: authorize_before_delegated_signing(
-                enabled=True,
-                read_action=lambda: action,
-                read_wallet_policy=lambda: policy,
-                deterministic_policy_allows=lambda _a, _p: True,
-                decision_provider=lambda b: allow_response(b),
-                known_issuer="interai:test",
-                consumed_decision_ids=consumed,
-                now=lambda: NOW,
-            ),
-        )
+        consumer = AtomicDecisionConsumer()
+        self.gate(consumer=consumer)
+        self.assert_denied("replayed_decision", lambda: self.gate(consumer=consumer))
 
     def test_action_mutation_after_allow_fails_closed(self):
         original = base_action()
@@ -140,7 +145,7 @@ class AdapterTests(unittest.TestCase):
                 deterministic_policy_allows=lambda _a, _p: True,
                 decision_provider=lambda b: allow_response(b),
                 known_issuer="interai:test",
-                consumed_decision_ids=set(),
+                consume_decision_id=AtomicDecisionConsumer().consume,
                 now=lambda: NOW,
             ),
         )
@@ -158,7 +163,7 @@ class AdapterTests(unittest.TestCase):
                 deterministic_policy_allows=lambda _a, _p: True,
                 decision_provider=lambda b: allow_response(b),
                 known_issuer="interai:test",
-                consumed_decision_ids=set(),
+                consume_decision_id=AtomicDecisionConsumer().consume,
                 now=lambda: NOW,
             ),
         )
@@ -172,6 +177,65 @@ class AdapterTests(unittest.TestCase):
             "wallet_hard_denial",
             lambda: self.gate(policy_allows=lambda _a, _p: next(checks)),
         )
+
+    def test_decision_expiring_during_final_wallet_check_fails_closed(self):
+        clock = {"value": NOW}
+        checks = {"count": 0}
+
+        def policy_allows(_action, _policy):
+            checks["count"] += 1
+            if checks["count"] == 2:
+                clock["value"] = NOW + timedelta(seconds=61)
+            return True
+
+        self.assert_denied(
+            "expired_or_invalid_decision",
+            lambda: self.gate(policy_allows=policy_allows, now=lambda: clock["value"]),
+        )
+
+    def test_action_expiring_during_final_wallet_check_fails_closed(self):
+        action = replace(base_action(), expiry=int((NOW + timedelta(seconds=30)).timestamp()))
+        clock = {"value": NOW}
+        checks = {"count": 0}
+
+        def policy_allows(_action, _policy):
+            checks["count"] += 1
+            if checks["count"] == 2:
+                clock["value"] = NOW + timedelta(seconds=31)
+            return True
+
+        self.assert_denied(
+            "expired_action",
+            lambda: self.gate(action=action, policy_allows=policy_allows, now=lambda: clock["value"]),
+        )
+
+    def test_concurrent_replay_allows_exactly_one_call(self):
+        consumer = AtomicDecisionConsumer()
+        barrier = threading.Barrier(2)
+        counts: dict[int, int] = {}
+        counts_lock = threading.Lock()
+
+        def policy_allows(_action, _policy):
+            ident = threading.get_ident()
+            with counts_lock:
+                counts[ident] = counts.get(ident, 0) + 1
+                call_number = counts[ident]
+            if call_number == 2:
+                barrier.wait(timeout=2)
+            return True
+
+        def attempt():
+            try:
+                result = self.gate(consumer=consumer, policy_allows=policy_allows)
+                return result["status"]
+            except AuthorizationDenied as exc:
+                return str(exc)
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            outcomes = list(executor.map(lambda _i: attempt(), range(2)))
+
+        self.assertEqual(outcomes.count("allow"), 1)
+        self.assertEqual(outcomes.count("replayed_decision"), 1)
 
 
 if __name__ == "__main__":
