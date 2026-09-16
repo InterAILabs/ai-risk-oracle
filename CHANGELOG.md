@@ -1,5 +1,14 @@
 # Changelog
 
+## Service and discovery metadata 0.1.3-beta.1
+
+- Move all active public discovery surfaces to the canonical `https://api.interailabs.dev` identity and MCP remote `https://api.interailabs.dev/mcp`.
+- Republish MCP Registry metadata as `0.1.3-beta.1` so downstream registries can replace the immutable older metadata snapshot.
+- Align static MCP, A2A, OpenAPI, service discovery, and citation metadata on `0.1.3-beta.1` with no decision-engine, API-shape, pricing, billing, policy-authority, or execution-semantics change.
+- Add GitHub Actions OIDC publishing for future MCP Registry metadata releases without a dedicated registry secret.
+- Keep public uptime checks bound only to the canonical InterAI API domain.
+- SDK package releases remain `0.1.7-beta` for TypeScript and `0.1.7b0` for Python.
+
 ## SDK packages 0.1.7-beta / 0.1.7b0
 
 - Expose the controlled `demo_trial` onboarding scope in the package-facing TypeScript and Python clients so a new builder can reach a first hosted verification without funding an account first.

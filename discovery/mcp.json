@@ -1,6 +1,6 @@
 {
   "name": "interai-risk-oracle",
-  "version": "0.1.3-beta",
+  "version": "0.1.3-beta.1",
   "description": "Hosted MCP interface for pre-execution decisions on consequential agent actions. Use InterAI before a tool call, payment, external message, production mutation, approval, signature, or other action that should not execute solely because an agent is technically able to perform it.",
   "endpoint": "https://api.interailabs.dev/mcp",
   "transport": "streamable-http-json-rpc",

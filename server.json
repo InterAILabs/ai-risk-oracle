@@ -2,13 +2,13 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.InterAILabs/ai-risk-oracle",
   "title": "InterAI Risk Oracle",
-  "description": "Independent pre-execution decision layer for consequential agent actions, with allow/review/block decisions and durable trust receipts.",
+  "description": "Pre-execution policy gate for consequential agent actions with durable trust receipts.",
   "repository": {
     "url": "https://github.com/InterAILabs/ai-risk-oracle",
     "source": "github",
     "id": "1255624406"
   },
-  "version": "0.1.3-beta",
+  "version": "0.1.3-beta.1",
   "remotes": [
     {
       "type": "streamable-http",

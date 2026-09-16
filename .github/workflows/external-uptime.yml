@@ -61,11 +61,3 @@ jobs:
 
           check_endpoint "https://api.interailabs.dev/health" "ok"
           check_endpoint "https://api.interailabs.dev/ready" "ready"
-
-      - name: Diagnose technical origin only after canonical failure
-        if: failure()
-        shell: bash
-        run: |
-          echo "Canonical public API check failed. Fly is diagnostic fallback only; a healthy origin does not make the canonical check pass."
-          curl --silent --show-error --location --connect-timeout 5 --max-time 10 \
-            https://ai-risk-oracle.fly.dev/health || true
