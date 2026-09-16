@@ -39,7 +39,7 @@ const result = await runActionGate({
 });
 ```
 
-Only an unambiguous `allow` can call `execute`. Review/block decisions return without executing. Timeout, provider exceptions, malformed responses, unknown decisions, contradictory authority fields, or action mutation throw `GateClosedError` and leave execution closed.
+Execution requires the complete current InterAI authority contract: both `recommended_action` and `policy_result` must be present, valid, and equal to `allow`. Review/block decisions return without executing. Missing or contradictory authority fields, timeout, provider exceptions, malformed responses, unknown decisions, or action mutation throw `GateClosedError` and leave execution closed.
 
 The decision provider receives a detached, deeply frozen snapshot plus a public action binding and `AbortSignal`. The wrapper re-checks the original action immediately before execution to catch mutation after the decision.
 
