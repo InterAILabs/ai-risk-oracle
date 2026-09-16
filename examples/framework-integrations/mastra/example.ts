@@ -75,10 +75,11 @@ export const paymentAgent = new Agent({
   hooks: {
     beforeToolCall: ({ toolName, input }) => {
       if (toolName !== "releasePayment") return
-      const bound = bindings.uniqueFor(input as PaymentArgs)
+      const args = paymentArgs.parse(input)
+      const bound = bindings.uniqueFor(args)
       if (!bound || bound.decision === "block") {
         // Skips the tool; this required tool-shaped output is only a model-facing denial.
-        return { proceed: false as const, output: { status: "interai_blocked", vendorId: input.vendorId, amountUsd: input.amountUsd } }
+        return { proceed: false as const, output: { status: "interai_blocked", vendorId: args.vendorId, amountUsd: args.amountUsd } }
       }
     },
   },

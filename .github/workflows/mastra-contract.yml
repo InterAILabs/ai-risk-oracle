@@ -1,0 +1,40 @@
+name: Mastra compatibility contract
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "examples/framework-integrations/mastra/**"
+      - ".github/workflows/mastra-contract.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "examples/framework-integrations/mastra/**"
+      - ".github/workflows/mastra-contract.yml"
+  schedule:
+    - cron: "20 9 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  mastra-contract:
+    name: Mastra 1.66.0 exact-call contract
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/framework-integrations/mastra
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install pinned dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Type-check integration against Mastra 1.66.0
+        run: npm run typecheck
+      - name: Run exact-call concurrency repro
+        run: npm test
