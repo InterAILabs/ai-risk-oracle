@@ -28,6 +28,9 @@ jobs:
       - name: OpenAI Agents integration contract
         run: node tests/openai-agents-integration-contract.mjs
 
+      - name: Public toolkit contracts
+        run: node --test toolkit/*/*.test.mjs
+
       - name: Install TypeScript SDK dependencies
         working-directory: sdk/typescript
         run: npm ci
