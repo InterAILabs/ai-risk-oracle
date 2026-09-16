@@ -1,10 +1,10 @@
-# Public Toolkit Boundary
+# Public Open-Source Tool Boundary
 
-This document defines what belongs in the public InterAI repository as the toolkit grows.
+This document defines what may be published as reusable InterAI tooling without exposing the private Risk Oracle decision engine.
 
 ## Public by design
 
-The public repository may contain:
+The public surface may contain:
 
 - API clients and SDKs that call the hosted service;
 - external request/response schemas and discovery metadata;
@@ -16,6 +16,8 @@ The public repository may contain:
 - documentation required to integrate safely with the hosted service.
 
 Public code must be independently understandable from public contracts. It must not require importing files from the private core.
+
+The reusable code under `toolkit/` is separately licensed under Apache-2.0. The rest of this repository remains governed by the root `LICENSE` unless another path contains an explicit separate license.
 
 ## Private by design
 
@@ -34,29 +36,39 @@ The following remain private unless a later explicit publication decision says o
 
 ## One-way dependency rule
 
-Public integration code may depend only on public HTTP contracts, public schemas, public packages, and standard/runtime libraries.
+Public integration code may depend only on public HTTP contracts, public schemas, public open-source packages, and standard/runtime libraries.
 
-The private core may implement those public contracts, but no public tool should require copying or importing private engine logic. A useful public primitive should remain useful even when the hosted engine evolves behind the stable contract.
+The private core may implement those public contracts, but no public tool may require copying or importing private engine logic. A useful public tool should remain usable even when hosted engine internals evolve behind a stable contract.
 
 ## Publication gate
 
-Before moving a private helper into the public surface, verify all of the following:
+Before moving a helper into the public/open-source surface, verify all of the following:
 
 1. It is integration/enforcement logic, not proprietary decision logic.
-2. It contains no production data, addresses, credentials, secrets or internal endpoints.
+2. It contains no production data, credentials, secrets, private addresses or internal endpoints.
 3. Its tests use synthetic fixtures only.
 4. Its claims match the currently deployed/publicly documented contract.
 5. Failure semantics are explicit; consequential execution fails closed where the helper owns the boundary.
 6. Receipt helpers preserve the current service-verifiable scope and do not imply independent verification.
 7. Publishing it does not expose scoring weights, private policy floors, trust intelligence, billing internals or signing internals.
 
-## When to split into another repository
+## Standalone repository policy
 
-Keep primitives together under `toolkit/` while they are early and share the InterAI release narrative. Consider a separate package/repository only when at least one of these becomes true:
+A focused standalone repository is a distribution surface, not a second implementation of Risk Oracle. We may create one proactively when the tool already has a stable public contract and a dedicated repository materially improves discovery, explanation, contribution or installation.
 
-- multiple external integrations depend on the primitive without needing the rest of Risk Oracle;
-- the primitive needs its own release cadence or compatibility matrix;
-- external contributors need a focused contribution surface;
-- independent installation materially lowers adoption friction.
+The initial standalone identities are:
 
-Repository count is not an adoption metric. The goal is more useful entry points into one coherent authority system, not more empty repositories.
+- `InterAILabs/agent-action-gate`
+- `InterAILabs/exact-action-binding`
+- `InterAILabs/decision-receipts`
+
+A satellite repository must:
+
+- contain only code that passes the publication gate above;
+- identify Risk Oracle as a related hosted decision service without claiming that the tool itself is the private engine;
+- remain usable from public code/contracts only;
+- have its own focused README, tests, CI and open-source license;
+- avoid duplicating private logic or operational state;
+- keep a clear canonical-source/release relationship with the public Risk Oracle hub.
+
+Repository count is not itself an adoption metric. The purpose of the satellites is to expose concrete problems developers already search for through several small entry points into one coherent authority ecosystem.
