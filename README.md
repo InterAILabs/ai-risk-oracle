@@ -216,6 +216,24 @@ A receipt proves what the signed receipt payload authenticates at that point in 
 
 See [docs/trust-receipts.md](docs/trust-receipts.md).
 
+## Public Toolkit
+
+The public repo now also contains small framework-neutral primitives under [`toolkit/`](toolkit/README.md). They are intentionally separate from the proprietary decision engine and can be inspected or embedded at the host execution boundary:
+
+- [`Action Gate`](toolkit/action-gate/) — fail closed on provider uncertainty and execute only an unambiguous `allow`.
+- [`Exact Action Binding`](toolkit/exact-action-binding/) — deterministic host-side mutation detection for JSON-compatible proposed actions.
+- [`Decision Receipt Helpers`](toolkit/decision-receipts/) — consume owner-authenticated signed evidence, assert an exact execution-intent digest, and use InterAI's service-verification endpoint without reserializing the opaque signed payload.
+
+Run the standalone public contracts with no package install:
+
+```bash
+node --test toolkit/*/*.test.mjs
+```
+
+These helpers expose integration/enforcement logic only. Production verification, scoring, native decision policy, billing/storage, signing internals, trust intelligence and operational systems remain private. See [the public toolkit boundary](docs/public-toolkit-boundary.md).
+
+The toolkit incubates in this repository first. A primitive should become an independent package/repository only after real external usage creates separate release, contribution or installation pressure; repository count itself is not an adoption goal.
+
 ## Integration Surfaces
 
 InterAI is available as a hosted service and can be discovered or called through several public interfaces:
@@ -240,6 +258,7 @@ pip install interai-risk-oracle==0.1.7b0
 
 Useful starting points:
 
+- [Public toolkit](toolkit/README.md)
 - [Architecture & authority boundary](docs/architecture.md)
 - [External evidence boundary](docs/external-evidence.md)
 - [Framework integration examples](examples/framework-integrations)
@@ -296,9 +315,9 @@ The hosted beta also retains score/risk compatibility fields used by the current
 
 ## Repository Boundary
 
-This public repository contains integration materials: SDK sources, schemas, examples, OpenAPI/discovery metadata, and documentation for the hosted service.
+This public repository contains integration materials: SDK sources, schemas, examples, OpenAPI/discovery metadata, public toolkit primitives, and documentation for the hosted service.
 
-The production verification engine, billing infrastructure, trust logic, scoring internals, and hosted service implementation remain proprietary.
+The production verification engine, billing infrastructure, trust logic, scoring internals, native decision implementation, signing internals, and hosted service implementation remain proprietary.
 
 ## Engineering
 
