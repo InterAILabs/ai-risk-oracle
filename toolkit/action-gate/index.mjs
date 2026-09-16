@@ -1,6 +1,5 @@
 import { assertActionMatches, createActionBinding, snapshotJson } from "../exact-action-binding/index.mjs";
 
-const AUTHORITY_FIELDS = ["recommended_action", "policy_result", "final_decision", "decision"];
 const KNOWN_DECISIONS = new Set(["allow", "review_required", "block"]);
 
 export class GateClosedError extends Error {
@@ -11,33 +10,34 @@ export class GateClosedError extends Error {
   }
 }
 
+function readRequiredDecisionField(response, field) {
+  if (!(field in response)) {
+    throw new GateClosedError("missing_decision", `Required authority field ${field} is missing`);
+  }
+  if (typeof response[field] !== "string") {
+    throw new GateClosedError("invalid_decision_response", `${field} must be a string`);
+  }
+
+  const normalized = response[field].toLowerCase();
+  if (!KNOWN_DECISIONS.has(normalized)) {
+    throw new GateClosedError("unknown_decision", `Unknown authority decision in ${field}`);
+  }
+  return normalized;
+}
+
 export function readAuthorityDecision(response) {
-  if (!response || typeof response !== "object") {
+  if (!response || typeof response !== "object" || Array.isArray(response)) {
     throw new GateClosedError("invalid_decision_response", "Decision provider returned a non-object response");
   }
 
-  const values = [];
-  for (const field of AUTHORITY_FIELDS) {
-    if (response[field] == null) continue;
-    if (typeof response[field] !== "string") {
-      throw new GateClosedError("invalid_decision_response", `${field} must be a string`);
-    }
-    const normalized = response[field].toLowerCase();
-    if (!KNOWN_DECISIONS.has(normalized)) {
-      throw new GateClosedError("unknown_decision", `Unknown authority decision in ${field}`);
-    }
-    values.push(normalized);
+  const recommendedAction = readRequiredDecisionField(response, "recommended_action");
+  const policyResult = readRequiredDecisionField(response, "policy_result");
+
+  if (recommendedAction !== policyResult) {
+    throw new GateClosedError("conflicting_decisions", "recommended_action and policy_result disagree");
   }
 
-  if (values.length === 0) {
-    throw new GateClosedError("missing_decision", "No authority decision field was present");
-  }
-
-  if (new Set(values).size !== 1) {
-    throw new GateClosedError("conflicting_decisions", "Authority decision fields disagree");
-  }
-
-  return values[0];
+  return recommendedAction;
 }
 
 async function callWithTimeout(decide, actionSnapshot, binding, timeoutMs) {

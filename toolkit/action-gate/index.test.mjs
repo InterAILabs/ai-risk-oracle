@@ -71,11 +71,29 @@ test("provider timeout fails closed", async () => {
   assert.equal(executed, 0);
 });
 
-test("unknown or conflicting authority fields fail closed", () => {
+test("unknown authority values fail closed", () => {
   assert.throws(
-    () => readAuthorityDecision({ recommended_action: "maybe" }),
+    () => readAuthorityDecision({ recommended_action: "maybe", policy_result: "maybe" }),
     (error) => error.code === "unknown_decision",
   );
+});
+
+test("missing canonical authority fields fail closed", () => {
+  assert.throws(
+    () => readAuthorityDecision({ recommended_action: "allow" }),
+    (error) => error.code === "missing_decision",
+  );
+  assert.throws(
+    () => readAuthorityDecision({ policy_result: "allow" }),
+    (error) => error.code === "missing_decision",
+  );
+  assert.throws(
+    () => readAuthorityDecision({ final_decision: "allow", decision: "allow" }),
+    (error) => error.code === "missing_decision",
+  );
+});
+
+test("conflicting canonical authority fields fail closed", () => {
   assert.throws(
     () => readAuthorityDecision({ recommended_action: "allow", policy_result: "block" }),
     (error) => error.code === "conflicting_decisions",
