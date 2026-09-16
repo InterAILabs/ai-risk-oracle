@@ -31,7 +31,13 @@ InterAI / deterministic mock decision provider
               v
 terminal re-read + deterministic wallet policy revalidation
               |
-              +-- changed/stale/replayed/hard deny -> stop
+              v
+recheck decision + action expiry
+              |
+              v
+atomic single-use decision consume
+              |
+              +-- changed/stale/expired/replayed/hard deny -> stop
               |
               v
         delegated signing may proceed
@@ -43,13 +49,14 @@ This draft does **not**:
 - introduce an on-chain InterAI hook;
 - alter owner-approved caps, verifier constraints, targets, delegate authority, nonce rules, or signing authority;
 - contain production wallet addresses, private keys, signing material, or live transaction data;
-- claim that a DecisionReceipt proves execution.
+- claim that a DecisionReceipt proves execution;
+- claim that matching an `issuer` string authenticates a remote decision provider.
 
 ## Files
 
-- `INTERFACE.md` — exact host/decision binding contract and authority rule.
-- `adapter.py` — dependency-free deterministic mock adapter.
-- `test_adapter.py` — focused fail-closed test suite.
+- `INTERFACE.md` — exact host/decision binding, provider-authentication boundary, atomic consume requirement, and authority rule.
+- `adapter.py` — dependency-free deterministic mock adapter with process-local atomic single-use consumption.
+- `test_adapter.py` — focused fail-closed and concurrency test suite.
 - `fixtures.json` — synthetic fixture values only.
 
 ## What is bound
@@ -71,7 +78,7 @@ The adapter computes a deterministic SHA-256 `execution_intent_digest` over the 
 
 ## Fail-closed semantics
 
-Only a valid `allow` from the configured issuer can reach the terminal revalidation step.
+Only a valid `allow` from the configured trusted mock issuer can reach the terminal revalidation step.
 
 The adapter stops before signing on:
 
@@ -82,7 +89,8 @@ The adapter stops before signing on:
 - malformed response;
 - unknown issuer;
 - expired/invalid decision lifetime;
-- replayed decision id;
+- expired action;
+- replayed/already-consumed decision id;
 - action/digest mismatch;
 - action mutation after evaluation;
 - stale/replaced wallet policy;
@@ -90,9 +98,23 @@ The adapter stops before signing on:
 
 `review_required` never falls through to execution. An `allow` never overrides a deterministic denial.
 
+## Final handoff and replay safety
+
+The adapter re-checks both decision expiry and action expiry **after** the terminal deterministic wallet-policy validation and immediately before the single-use decision consume.
+
+The consume operation is atomic in this mock: `AtomicDecisionConsumer` uses a process-local lock so two concurrent calls using the same decision ID cannot both return `allow`.
+
+A production integration cannot rely on an in-memory lock/set across multiple workers or restarts. It needs a durable shared atomic consume primitive.
+
+## Provider authentication
+
+`issuer == "interai:test"` is intentionally sufficient only for this trusted local/mock fixture. An issuer string by itself is not authenticated provenance.
+
+A future remote InterAI response must be authenticated before the host treats it as authorizing—for example via a signed DecisionReceipt or equivalent authenticated response bound to a trusted verification key and the exact execution intent. Failure to authenticate provenance must fail closed.
+
 ## Deterministic wallet revalidation
 
-The example accepts a host-owned `deterministic_policy_allows(action, policy)` callback. That callback represents the existing Agent Bounties / BoundedAgentWallet checks; InterAI does not replace them.
+The example accepts a host-owned `deterministic_policy_allows(action, policy)` callback. That callback represents the existing Agent Bounties / `BoundedAgentWallet` checks; InterAI does not replace them.
 
 The callback is run before the contextual decision and again at the terminal boundary. The adapter also re-reads the exact action and policy snapshot immediately before signing. Any mutation or policy rotation invalidates the earlier decision.
 
@@ -107,26 +129,23 @@ cd examples/protocol-integrations/agent-bounties
 python -m unittest -v
 ```
 
-The suite currently covers 15 cases:
+The suite currently covers 19 cases, including:
 
-1. baseline disabled;
-2. valid allow;
-3. block;
-4. review required;
-5. timeout;
-6. malformed response;
-7. unknown issuer;
-8. stale policy version;
-9. exact action binding mismatch;
-10. expired decision;
-11. replay;
-12. action mutation after allow;
-13. policy change after allow;
-14. contextual allow cannot override a wallet hard denial;
-15. terminal deterministic revalidation can veto an earlier allow.
+- baseline disabled and valid allow;
+- block and review required;
+- timeout and malformed response;
+- unknown issuer;
+- stale policy and exact action binding mismatch;
+- expired decision and expired action;
+- sequential replay;
+- action and policy mutation after allow;
+- wallet hard denial and terminal deterministic veto;
+- decision expiry during the final wallet check;
+- action expiry during the final wallet check;
+- concurrent replay where exactly one call succeeds.
 
 All addresses and values in the tests are synthetic.
 
 ## Adoption status
 
-This is a compatibility proof for maintainer evaluation, not an approved Agent Bounties integration and not a funded implementation. No change to the Agent Bounties repository or deployed wallets is proposed by this draft.
+This is a compatibility proof under maintainer review, not an approved Agent Bounties integration and not a funded implementation. No change to the Agent Bounties repository or deployed wallets is proposed by this draft.
