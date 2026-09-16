@@ -1,6 +1,8 @@
-# Decision Receipt Helpers
+# Decision Receipts
 
 Helpers for consuming InterAI's public receipt boundary without overstating what a receipt proves.
+
+Standalone repository identity: `InterAILabs/decision-receipts`.
 
 ```js
 import {
@@ -21,3 +23,9 @@ Important rules enforced by the helper:
 - an expected `execution_intent_digest` must match exactly.
 
 Current InterAI receipt signatures are HMAC-SHA256 and **service-verifiable by InterAI**. This module does not provide or claim independent offline public-key verification.
+
+This tool consumes documented public receipt data and verification endpoints. It does not contain signing keys, signing implementation, account data, private policy logic or Risk Oracle decision-engine internals.
+
+## License
+
+Apache-2.0. See `../LICENSE` and `../NOTICE` while this source lives in the Risk Oracle toolkit.
