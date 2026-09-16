@@ -1,0 +1,8 @@
+InterAI Open Source Tools
+Copyright 2026 InterAILabs
+
+This distribution contains public integration and execution-boundary tooling developed by InterAILabs.
+
+The Apache License 2.0 applies to the contents of toolkit/ as described in toolkit/LICENSE. The InterAI, InterAI Labs, and InterAI Risk Oracle names and product identity are not licensed except for reasonable attribution and description of origin.
+
+The hosted InterAI Risk Oracle service, private decision engine, policy implementation, scoring/trust intelligence, billing/storage internals, receipt-signing internals, production operations, and other private-core implementation are not included in this distribution and are not licensed by toolkit/LICENSE.
