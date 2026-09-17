@@ -24,7 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
 
-      - name: Create ephemeral InterAI trial for no-payment smoke
+      - name: Create restricted InterAI demo credential
         if: github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
@@ -35,9 +35,32 @@ jobs:
           echo "::add-mask::$api_key"
           echo "ORACLE_API_KEY=$api_key" >> "$GITHUB_ENV"
 
-      - name: Run live-service smoke with external payment disabled
+      - name: Verify live x402 discovery and fail-closed demo scope
         if: github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
         env:
           ORACLE_BASE_URL: https://api.interailabs.dev
           LIVE_X402: "false"
-        run: npm start
+        run: |
+          set +e
+          npm start > smoke.log 2>&1
+          status=$?
+          set -e
+          cat smoke.log
+
+          if [ "$status" -eq 0 ]; then
+            echo "::error::Restricted demo credential unexpectedly authorized the x402 economic action."
+            exit 1
+          fi
+
+          if ! grep -q 'demo_scope_not_allowed' smoke.log; then
+            echo "::error::Expected InterAI to reject the x402 economic action with demo_scope_not_allowed."
+            exit 1
+          fi
+
+          if ! grep -q 'x402 payment requirement discovered' smoke.log; then
+            echo "::error::The live x402 payment requirement was not discovered before policy enforcement."
+            exit 1
+          fi
+
+          echo "Live x402 discovery succeeded and the restricted InterAI credential failed closed as expected."
