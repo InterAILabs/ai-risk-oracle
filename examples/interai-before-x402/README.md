@@ -14,6 +14,8 @@ The flow is:
 
 The sample resource is Agent402 web search (`GET https://agent402.tools/api/search`), currently priced at $0.02 per call and payable in USDC over x402. The example specifically selects exact USDC on Base mainnet and enforces a local hard cap of $0.05.
 
+By default, the proof calls the canonical InterAI endpoint at `https://api.interailabs.dev`. Set `ORACLE_BASE_URL` only when deliberately testing another deployment.
+
 ## Safety properties
 
 The payment is **disabled by default**. Without `LIVE_X402=true`, the script performs discovery and asks InterAI for a decision, but it will not create or submit a payment.

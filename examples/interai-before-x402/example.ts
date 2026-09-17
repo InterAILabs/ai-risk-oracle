@@ -3,7 +3,7 @@ import { ExactEvmScheme } from "@x402/evm"
 import { wrapFetchWithPaymentFromConfig } from "@x402/fetch"
 import { privateKeyToAccount } from "viem/accounts"
 
-const ORACLE_BASE_URL = process.env.ORACLE_BASE_URL || "https://ai-risk-oracle.fly.dev"
+const ORACLE_BASE_URL = process.env.ORACLE_BASE_URL || "https://api.interailabs.dev"
 const ORACLE_API_KEY = process.env.ORACLE_API_KEY || ""
 const LIVE_X402 = process.env.LIVE_X402 === "true"
 const EVM_PRIVATE_KEY = process.env.EVM_PRIVATE_KEY || ""
