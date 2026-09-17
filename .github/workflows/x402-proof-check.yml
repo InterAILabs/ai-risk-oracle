@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  typecheck:
+  proof-check:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,3 +23,21 @@ jobs:
       - run: npm install --package-lock-only
       - run: npm ci
       - run: npm run typecheck
+
+      - name: Create ephemeral InterAI trial for no-payment smoke
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          response=$(curl -fsS -X POST https://api.interailabs.dev/onboard \
+            -H 'content-type: application/json' \
+            --data "{\"scope\":\"demo_trial\",\"name\":\"x402-pr-${GITHUB_RUN_ID}\",\"api_key_name\":\"x402-proof-check\"}")
+          api_key=$(node -e 'const fs=require("fs"); const v=JSON.parse(fs.readFileSync(0,"utf8")); if(typeof v.api_key!=="string" || !v.api_key) process.exit(1); process.stdout.write(v.api_key)' <<<"$response")
+          echo "::add-mask::$api_key"
+          echo "ORACLE_API_KEY=$api_key" >> "$GITHUB_ENV"
+
+      - name: Run live-service smoke with external payment disabled
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          ORACLE_BASE_URL: https://api.interailabs.dev
+          LIVE_X402: "false"
+        run: npm start
