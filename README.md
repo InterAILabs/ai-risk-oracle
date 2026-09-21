@@ -272,6 +272,7 @@ Useful starting points:
 - [TypeScript middleware example](examples/agent-middleware/typescript)
 - [Python middleware example](examples/agent-middleware/python)
 - [Agent before payment](examples/agent-before-payment)
+- [InterAI before x402 payment](examples/interai-before-x402)
 - [Agent before tool execution](examples/agent-before-tool-execution)
 
 ## Current Product Scope
