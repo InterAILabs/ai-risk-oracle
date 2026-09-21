@@ -161,7 +161,6 @@ async function askInterAI(input: PaymentBinding) {
         counterparty_id: input.payTo
       },
       policy: {
-        max_risk_level: "medium",
         require_trust_receipt: true,
         amount_usd_limit: MAX_PAYMENT_USDC,
         allowed_action_types: ["x402_payment"],
