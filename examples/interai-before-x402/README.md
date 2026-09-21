@@ -84,6 +84,25 @@ A fresh operation ID is generated automatically for each run when `INTERAI_OPERA
 
 On successful dispatch the script reports whether the paid resource returned x402 settlement evidence and prints the InterAI `trust_receipt_id` plus `execution_intent_digest` for correlation.
 
+## Live validation
+
+A controlled live economic proof was completed on 2026-09-21 using this integration path:
+
+- InterAI returned `allow`;
+- effective policy returned `allow`;
+- a signed DecisionReceipt and single-use `ExecutionAuthorization` were issued;
+- the authorized x402 request settled `0.020000 USDC` on Base;
+- the paid request returned HTTP `200`;
+- `PAYMENT-RESPONSE` reported `success: true`;
+- settlement evidence was correlated with the InterAI trust receipt ID and execution-intent digest;
+- the authorization was consumed exactly once.
+
+Confirmed Base transaction:
+
+`0xdcf1b9b9c2a14ecc9e74b417f23ae6ae6492f5b22a32cb10270fc74055a951ad`
+
+This validation is evidence for this controlled reference flow; it is not a claim of unrestricted production readiness.
+
 ## Decision invariant
 
 The payment path requires a complete executable authority result:
