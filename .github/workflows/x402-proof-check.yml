@@ -1,0 +1,66 @@
+name: X402 proof check
+
+on:
+  pull_request:
+    paths:
+      - "examples/interai-before-x402/**"
+      - ".github/workflows/x402-proof-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  proof-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/interai-before-x402
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --package-lock-only
+      - run: npm ci
+      - run: npm run typecheck
+
+      - name: Create restricted InterAI demo credential
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          response=$(curl -fsS -X POST https://api.interailabs.dev/onboard \
+            -H 'content-type: application/json' \
+            --data "{\"scope\":\"demo_trial\",\"name\":\"x402-pr-${GITHUB_RUN_ID}\",\"api_key_name\":\"x402-proof-check\"}")
+          api_key=$(node -e 'const fs=require("fs"); const v=JSON.parse(fs.readFileSync(0,"utf8")); if(typeof v.api_key!=="string" || !v.api_key) process.exit(1); process.stdout.write(v.api_key)' <<<"$response")
+          echo "::add-mask::$api_key"
+          echo "ORACLE_API_KEY=$api_key" >> "$GITHUB_ENV"
+
+      - name: Verify live x402 discovery and fail-closed demo scope
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          ORACLE_BASE_URL: https://api.interailabs.dev
+          LIVE_X402: "false"
+        run: |
+          set +e
+          npm start > smoke.log 2>&1
+          status=$?
+          set -e
+          cat smoke.log
+
+          if [ "$status" -eq 0 ]; then
+            echo "::error::Restricted demo credential unexpectedly authorized the x402 economic action."
+            exit 1
+          fi
+
+          if ! grep -q 'demo_scope_not_allowed' smoke.log; then
+            echo "::error::Expected InterAI to reject the x402 economic action with demo_scope_not_allowed."
+            exit 1
+          fi
+
+          if ! grep -q 'x402 payment requirement discovered' smoke.log; then
+            echo "::error::The live x402 payment requirement was not discovered before policy enforcement."
+            exit 1
+          fi
+
+          echo "Live x402 discovery succeeded and the restricted InterAI credential failed closed as expected."
