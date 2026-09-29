@@ -48,7 +48,6 @@ Those systems answer questions such as who a principal is and whether it is allo
 
 ## Pending Before Enterprise Or High-Volume
 
-- Owned domain plan and migration decision.
 - Public status page.
 - Privacy policy and terms of service.
 - Backup and restore runbook for production operational data.
@@ -59,11 +58,11 @@ Those systems answer questions such as who a principal is and whether it is allo
 - Production alerting and operator escalation policy.
 - Formal security review before enterprise procurement claims.
 
-## Current Domain Recommendation
+## Canonical Domain Status
 
-Use `api.interailabs.dev` for the current controlled beta because hosted metadata, receipts, documentation, and smoke coverage already use that origin.
+`api.interailabs.dev` is the canonical controlled-beta API origin under the InterAI-owned `interailabs.dev` domain. Hosted metadata, receipts, documentation, registry records, and smoke coverage are aligned to that origin.
 
-Move to an owned domain only as a coordinated migration of API, discovery, registry, receipt, SDK, and documentation surfaces. Do not treat a domain change as a cosmetic DNS-only edit.
+Any future host or domain change should be treated as a coordinated migration across API, discovery, registry, receipts, SDKs, and documentation surfaces rather than as a cosmetic DNS-only edit.
 
 ## Operator Rule
 
